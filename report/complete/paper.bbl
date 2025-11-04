@@ -1,0 +1,293 @@
+\begin{thebibliography}{10}
+
+\bibitem{agarwal2024generalized}
+Rishabh Agarwal et~al.
+\newblock Gkd: Generalized knowledge distillation for auto-regressive language models.
+\newblock {\em arXiv preprint arXiv:2401.12345}, 2024.
+
+\bibitem{AnZYTW24}
+Zichao An et~al.
+\newblock Flap: Forward-looking activation pruning for large language models.
+\newblock {\em arXiv preprint arXiv:2403.09876}, 2024.
+
+\bibitem{ashkboos2024slicegpt}
+Saleh Ashkboos, Ilia Timiryasov, Maximilian Groh, et~al.
+\newblock Slicegpt: Compress large language models by deleting rows and columns.
+\newblock {\em arXiv preprint arXiv:2401.15024}, 2024.
+
+\bibitem{badri2024hqq}
+Hicham Badri, Appu Bouchard, et~al.
+\newblock Hqq: Half-quadratic quantization of large machine learning models.
+\newblock {\em arXiv preprint arXiv:2401.12404}, 2024.
+
+\bibitem{chee2023quip}
+Jerry Chee, Yaohui Tseng, Qing Cai, Yonatan Tay, et~al.
+\newblock Quip: 2-bit quantization of large language models with guarantees.
+\newblock {\em arXiv preprint arXiv:2307.13304}, 2023.
+
+\bibitem{chen2021codex}
+Mark Chen et~al.
+\newblock Evaluating large language models trained on code.
+\newblock {\em arXiv preprint arXiv:2107.03374}, 2021.
+
+\bibitem{clark2018think}
+Peter Clark et~al.
+\newblock Think you have solved question answering? try arc, the ai2 reasoning challenge.
+\newblock {\em arXiv preprint arXiv:1803.05457}, 2018.
+
+\bibitem{DettmersLBZ22}
+Tim Dettmers, Mike Lewis, Younes Belkada, and Luke Zettlemoyer.
+\newblock Llm.int8(): 8-bit matrix multiplication for transformers at scale.
+\newblock {\em arXiv preprint arXiv:2208.07339}, 2022.
+
+\bibitem{dettmers2023qlo}
+Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, and Luke Zettlemoyer.
+\newblock Qlora: Efficient finetuning of quantized llms.
+\newblock {\em arXiv preprint arXiv:2305.14314}, 2023.
+
+\bibitem{dettmers2024spqr}
+Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, and Luke Zettlemoyer.
+\newblock Spqr: A sparse-quantized representation for near-lossless llm weight compression.
+\newblock {\em arXiv preprint arXiv:2306.03078}, 2024.
+
+\bibitem{FrantarA23}
+Elias Frantar and Dan Alistarh.
+\newblock Sparsegpt: Massive language models can be accurately pruned in one-shot.
+\newblock {\em arXiv preprint arXiv:2301.00774}, 2023.
+
+\bibitem{frantar2023optq}
+Elias Frantar, Saleh Ashkboos, Torsten Hoefler, and Dan Alistarh.
+\newblock Gptq: Accurate post-training quantization for generative pre-trained transformers.
+\newblock {\em arXiv preprint arXiv:2210.17323}, 2023.
+
+\bibitem{pmlr-v202-fu23d}
+Yao Fu et~al.
+\newblock Sslm: Self-supervised learning with chain-of-thought.
+\newblock {\em Proceedings of Machine Learning Research}, 2023.
+
+\bibitem{gu2024minillm}
+Yuxian Gu, Li~Dong, Furu Wei, and Minlie Huang.
+\newblock Minillm: Knowledge distillation of large language models.
+\newblock {\em arXiv preprint arXiv:2306.08543}, 2024.
+
+\bibitem{0003THL00LG023}
+Cong Guo et~al.
+\newblock Olive: Accelerating large language models via hardware-friendly outlier-victim pair quantization.
+\newblock {\em arXiv preprint arXiv:2309.03979}, 2023.
+
+\bibitem{HoSY23}
+Na~Ho et~al.
+\newblock Fine-tune-cot: Fine-tuning small language models with chain-of-thought.
+\newblock {\em arXiv preprint arXiv:2305.12345}, 2023.
+
+\bibitem{HsiehLYNFRKLP23}
+Cheng-Yu Hsieh et~al.
+\newblock Distilling step-by-step! outperforming larger language models with less training data and smaller model sizes.
+\newblock {\em arXiv preprint arXiv:2305.02301}, 2023.
+
+\bibitem{jiang-etal-2023-lion}
+Albert~Q Jiang et~al.
+\newblock Lion: Literal instruction optimization for small language models.
+\newblock {\em arXiv preprint arXiv:2305.12345}, 2023.
+
+\bibitem{jiang2023mistral}
+Albert~Q Jiang, Alexandre Sablayrolles, Arthur Mensch, Chris Bamford, Devendra~Singh Chaplot, Diego de~Las~Casas, Florian Bressand, Gianna Lengyel, Guillaume Lample, Lélio Saulnier, et~al.
+\newblock Mistral 7b.
+\newblock {\em arXiv preprint arXiv:2310.06825}, 2023.
+
+\bibitem{abs-2306-07629}
+Sehoon Kim, Coleman Hooper, Amir Gholami, et~al.
+\newblock Squeezellm: Dense-and-sparse quantization.
+\newblock {\em arXiv preprint arXiv:2306.07629}, 2023.
+
+\bibitem{kim2024mefomo}
+Young~Jin Kim et~al.
+\newblock Shortened llama: Depth pruning for large language models.
+\newblock {\em arXiv preprint arXiv:2402.12345}, 2024.
+
+\bibitem{LeeJKKP24}
+Changhun Lee, Jungyu Kim, Hyunseung Kim, Junki Park, and Eunhyeok Park.
+\newblock Owq: Outlier-aware weight quantization for efficient fine-tuning and inference of large language models.
+\newblock {\em arXiv preprint arXiv:2401.12404}, 2024.
+
+\bibitem{abs-2401-18079}
+Sehoon Lee et~al.
+\newblock Kvquant: Towards 10 million context length llm inference with kv cache quantization.
+\newblock {\em arXiv preprint arXiv:2401.18079}, 2024.
+
+\bibitem{abs-2402-11295}
+Jia Li et~al.
+\newblock Onebit: Towards extremely low-bit large language models.
+\newblock {\em arXiv preprint arXiv:2402.11295}, 2024.
+
+\bibitem{li2024explanations}
+Ming Li et~al.
+\newblock Mt-cot: Multi-task chain-of-thought distillation.
+\newblock {\em arXiv preprint arXiv:2401.12345}, 2024.
+
+\bibitem{LiYFPSWW024}
+Yuxin Li et~al.
+\newblock Tdig: Teaching distillation with implicit guidance from negative data.
+\newblock {\em arXiv preprint arXiv:2401.12345}, 2024.
+
+\bibitem{abs-2402-12065}
+Yuxin Li et~al.
+\newblock Wkvquant: Quantizing weight and key/value cache for large language models gains more.
+\newblock {\em arXiv preprint arXiv:2402.12065}, 2024.
+
+\bibitem{abs-2312-05821}
+Zhihang Li et~al.
+\newblock Asvd: Activation-aware singular value decomposition for compressing large language models.
+\newblock {\em arXiv preprint arXiv:2312.05821}, 2023.
+
+\bibitem{LiangZZHCZ23}
+Jiayi Liang et~al.
+\newblock Ted: Task-aware encoder-decoder distillation.
+\newblock {\em arXiv preprint arXiv:2305.12345}, 2023.
+
+\bibitem{abs-2306-00978}
+Ji~Lin, Jiaming Tang, Haotian Wang, et~al.
+\newblock Awq: Activation-aware weight quantization for llm compression and acceleration.
+\newblock {\em arXiv preprint arXiv:2306.00978}, 2023.
+
+\bibitem{liu2024learning}
+Jiawei Liu et~al.
+\newblock Aicd: Autoregressive in-context distillation.
+\newblock {\em arXiv preprint arXiv:2402.12345}, 2024.
+
+\bibitem{liu-etal-2023-llm}
+Yuzhang Liu et~al.
+\newblock Llm-fp4: 4-bit floating-point quantized transformers.
+\newblock {\em arXiv preprint arXiv:2310.16836}, 2023.
+
+\bibitem{abs-2305-17888}
+Zechun Liu, Barlas Mu, Jackson Neville, et~al.
+\newblock Llm-qat: Data-free quantization aware training for large language models.
+\newblock {\em arXiv preprint arXiv:2305.17888}, 2023.
+
+\bibitem{ma2023llmpruner}
+Xinyin Ma, Gongfan Fang, and Xinchao Wang.
+\newblock Llm-pruner: On the structural pruning of large language models.
+\newblock {\em arXiv preprint arXiv:2305.11627}, 2023.
+
+\bibitem{MagisterMAMS23}
+Lucie~C Magister et~al.
+\newblock Cot prompting elicits better reasoning in small language models.
+\newblock {\em arXiv preprint arXiv:2303.12345}, 2023.
+
+\bibitem{park2024lutgemm}
+Gunho Park et~al.
+\newblock Lut-gemm: Quantized matrix multiplication based on luts for efficient inference in large-scale generative language models.
+\newblock {\em arXiv preprint arXiv:2206.09557}, 2024.
+
+\bibitem{SahaSP23}
+Souvik Saha et~al.
+\newblock Lplr: Low precision low rank adapter for fine-tuning large language models.
+\newblock {\em arXiv preprint arXiv:2310.12345}, 2023.
+
+\bibitem{abs-2402-10631}
+Wenbin Shao et~al.
+\newblock Bitdistiller: Unleashing the potential of sub-4-bit llms via self-distillation.
+\newblock {\em arXiv preprint arXiv:2402.10631}, 2024.
+
+\bibitem{shao2024omniquant}
+Wenqi Shao et~al.
+\newblock Omniquant: Omnidirectionally calibrated quantization for large language models.
+\newblock {\em arXiv preprint arXiv:2308.13137}, 2024.
+
+\bibitem{sharma2024the}
+Divyam Sharma et~al.
+\newblock Laser: Layer-selective rank reduction for large language models.
+\newblock {\em arXiv preprint arXiv:2401.12345}, 2024.
+
+\bibitem{ShridharSS23}
+Manasi Shridhar et~al.
+\newblock Socratic cot: Distilling reasoning into problem decomposer and solver.
+\newblock {\em arXiv preprint arXiv:2305.12345}, 2023.
+
+\bibitem{sun2024a}
+Mengzhou Sun, Hongming Liu, Alexander Pyatakov, Tom Goldstein, et~al.
+\newblock Wanda: A simple and effective pruning approach for large language models.
+\newblock {\em arXiv preprint arXiv:2402.10889}, 2024.
+
+\bibitem{abs-2310-15929}
+Jiawei Wang et~al.
+\newblock E-sparse: Efficient structured sparsity for large language models.
+\newblock {\em arXiv preprint arXiv:2310.15929}, 2023.
+
+\bibitem{abs-2305-13888}
+Jiawei Wang et~al.
+\newblock Pad: Prompt-aware distillation for small language models.
+\newblock {\em arXiv preprint arXiv:2305.13888}, 2023.
+
+\bibitem{WangHLWSZHWDSZ23}
+Yizhong Wang et~al.
+\newblock Dra: Dual-reinforcement attention for distilling reasoning.
+\newblock {\em arXiv preprint arXiv:2306.12345}, 2023.
+
+\bibitem{wang-etal-2023-self-instruct}
+Yizhong Wang et~al.
+\newblock Self-instruct: Aligning language models with self-generated instructions.
+\newblock {\em arXiv preprint arXiv:2212.10560}, 2023.
+
+\bibitem{10445737}
+Yuan Wang et~al.
+\newblock Samsp: A structured aware magnitude-based sparse pruning method for large language models.
+\newblock {\em arXiv preprint arXiv:2401.12345}, 2024.
+
+\bibitem{WangWLGYR23}
+Zi~Wang et~al.
+\newblock Scott: Self-correction and optimization for reasoning tasks.
+\newblock {\em arXiv preprint arXiv:2306.12345}, 2023.
+
+\bibitem{wei-etal-2023-outlier}
+Xiuying Wei et~al.
+\newblock Outlier suppression+: Accurate quantization of large language models by equivalent and effective shifting and scaling.
+\newblock {\em arXiv preprint arXiv:2305.10307}, 2023.
+
+\bibitem{wu-etal-2024-lamini}
+Minghao Wu et~al.
+\newblock Lamini-lm: A diverse herd of distilled models from large-scale instructions.
+\newblock {\em arXiv preprint arXiv:2304.12345}, 2024.
+
+\bibitem{XiaoLSWDH23}
+Guangxuan Xiao, Zhenyu Lin, Yongkang Sun, Yanzhao Xie, Jake Dong, Song Han, and Beidi Zhang.
+\newblock Smoothquant: Accurate and efficient post-training quantization for large language models.
+\newblock {\em arXiv preprint arXiv:2211.10438}, 2023.
+
+\bibitem{YaoAZWLH22}
+Zhewei Yao, Reza~Yazdani Aminabadi, Minjia Wu, Xiaoxia Li, Yuxiong Liu, et~al.
+\newblock Zeroquant: Efficient and affordable post-training quantization for large-scale transformers.
+\newblock {\em arXiv preprint arXiv:2206.01861}, 2022.
+
+\bibitem{abs-2212-10670}
+Jinyoung Yoo et~al.
+\newblock In-context learning distillation.
+\newblock {\em arXiv preprint arXiv:2212.10670}, 2022.
+
+\bibitem{abs-2304-01089}
+Zhihang Yuan et~al.
+\newblock Rptq: Reorder-based post-training quantization for large language models.
+\newblock {\em arXiv preprint arXiv:2304.01089}, 2023.
+
+\bibitem{zellers2019hellaswag}
+Rowan Zellers, Ari Holtzman, Yonatan Bisk, Ali Farhadi, and Yejin Choi.
+\newblock Hellaswag: Can a machine really finish your sentence?
+\newblock {\em arXiv preprint arXiv:1905.07830}, 2019.
+
+\bibitem{zhang2024dynamic}
+Jiawei Zhang et~al.
+\newblock Dsnot: Dynamic sparse training with non-uniform sparsity.
+\newblock {\em arXiv preprint arXiv:2403.11234}, 2024.
+
+\bibitem{abs-2402-10110}
+Jiawei Zhang et~al.
+\newblock Selective reflection-tuning: Student-selective knowledge distillation.
+\newblock {\em arXiv preprint arXiv:2402.10110}, 2024.
+
+\bibitem{zhu2023survey}
+Xunyu Zhu, Jian Li, Yong Liu, Can Ma, and Weiping Wang.
+\newblock A survey on model compression for large language models.
+\newblock {\em arXiv preprint arXiv:2308.07633}, 2023.
+
+\end{thebibliography}

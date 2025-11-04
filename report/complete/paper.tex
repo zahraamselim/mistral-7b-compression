@@ -1,0 +1,1899 @@
+\documentclass[11pt,a4paper,onecolumn]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{setspace}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs, multirow, makecell, threeparttable}
+\usepackage{algorithm, algorithmic}
+\usepackage{float}
+\usepackage{caption, subcaption}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{pdflscape}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage[scaled=0.9]{beramono}
+
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, backgrounds, fit}
+
+\hypersetup{
+    colorlinks = true,
+    linkcolor = black,
+    urlcolor = blue,
+    citecolor = black
+}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\footnotesize,
+  numbers=left,
+  numberstyle=\tiny\color{gray!70},
+  stepnumber=1,
+  numbersep=8pt,
+  frame=lines,
+  rulecolor=\color{black!40},
+  backgroundcolor=\color{white},
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  showstringspaces=false,
+  tabsize=2,
+  breaklines=true,
+  captionpos=b,
+  aboveskip=8pt,
+  belowskip=8pt
+}
+
+\title{\Large\bfseries
+Compression Techniques for Mistral-7B:\\
+A Comprehensive Evaluation of Efficiency and Performance
+}
+
+\author{
+  Zahraa Selim \quad
+  Menna Hamed \quad
+  Wesam Ahmed \quad
+  Sohyla Said \quad
+  Sara Basheer \\[1.5ex]
+  \normalsize\textit{Under the supervision of} \\[.5ex]
+  Prof. Rami Zewail \\[1.5ex]
+  \normalsize Department of Computer Science and Engineering,\\
+  Egypt-Japan University of Science and Technology (E-JUST)
+}
+
+\date{}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+\maketitle
+\onehalfspacing
+
+\begin{abstract}
+\noindent
+[ abstract ]
+\end{abstract}
+
+\noindent\textbf{Keywords:} [ keywords ]
+
+\noindent\textbf{Code:} [ https://github.com/zahraamselim/mistral-7b-compression ]
+
+\section{Introduction}
+[ introduction ]
+
+
+\newpage
+\section{Related Work}
+Model compression for large language models (LLMs) has emerged as a critical research area to address the substantial computational and memory requirements that hinder practical deployment. As LLMs scale to billions of parameters—such as GPT-175B requiring a minimum of 350GB of memory in FP16 format—the need for efficient compression techniques becomes increasingly urgent. Core compression paradigms include \textbf{quantization}, \textbf{pruning}, \textbf{knowledge distillation}, \textbf{low-rank factorization}, and \textbf{weight sharing}, each offering distinct trade-offs between model size, inference speed, and performance preservation \cite{zhu2023survey}.
+
+\subsection{Quantization}
+Quantization reduces the numerical precision of model parameters and activations, typically converting from 32-bit floating-point (FP32) or 16-bit floating-point (FP16) representations to lower-bit integer formats such as INT8 or INT4. This technique yields faster inference through reduced memory bandwidth requirements and smaller memory footprints, often with minimal accuracy degradation \cite{zhu2023survey}. Two fundamental strategies exist: \textit{quantization-aware training (QAT)} and \textit{post-training quantization (PTQ)}.
+
+\paragraph{Quantization-Aware Training (QAT)}
+QAT incorporates quantization simulation during training, enabling models to adapt to reduced precision. \textbf{LLM-QAT} \cite{abs-2305-17888} implements standard QAT through knowledge distillation from full-precision models. \textbf{BitDistiller} \cite{abs-2402-10631} advances QAT for sub-4-bit precisions through asymmetric quantization and adaptive clipping. \textbf{OneBit} \cite{abs-2402-11295} pushes boundaries with 1-bit parameter representation. However, QAT's limitation is substantial retraining cost, leading researchers to integrate Parameter-Efficient Fine-Tuning techniques like LoRA.
+
+\paragraph{Post-Training Quantization (PTQ)}
+PTQ applies quantization after training without retraining costs, making it attractive for resource-constrained practitioners. PTQ methods are categorized by their quantization targets:
+
+\subparagraph{Weight-Only Quantization}
+This approach compresses only model weights while maintaining full-precision activations. \textbf{LUT-GEMM} \cite{park2024lutgemm} uses binary-coding quantization for accelerated matrix multiplications. \textbf{GPTQ} \cite{frantar2023optq} proposes layer-wise quantization using inverse Hessian information for 3/4-bit quantization. \textbf{QuIP} \cite{chee2023quip} achieves 2-bit quantization through LDL decomposition of the Hessian matrix.
+
+Several methods preserve sensitive weights: \textbf{AWQ} \cite{abs-2306-00978} stores the top 1\% most impactful weights in high-precision with per-channel scaling. \textbf{OWQ} \cite{LeeJKKP24} preserves weights sensitive to activation outliers. \textbf{SpQR} \cite{dettmers2024spqr} uses L2 error as a sensitivity metric. \textbf{SqueezeLLM} \cite{abs-2306-07629} introduces sensitivity-based weight clustering using k-means, achieving over 2x speedup.
+
+\subparagraph{Weight-Activation Quantization}
+This extends quantization to both weights and activations for true end-to-end low-precision inference. A key challenge is handling activation outliers. \textbf{ZeroQuant} \cite{YaoAZWLH22} pioneered this approach with group-wise weight quantization and token-wise activation quantization for INT8. \textbf{LLM.int8()} \cite{DettmersLBZ22} addresses outliers by storing outlier features in high-precision with vector-wise quantization for remaining features. \textbf{SmoothQuant} \cite{XiaoLSWDH23} uses per-channel scaling to smooth activation outliers. \textbf{RPTQ} \cite{abs-2304-01089} applies channel reordering to cluster activations. \textbf{OliVe} \cite{0003THL00LG023} proposes outlier-victim pair quantization. \textbf{OS+} \cite{wei-etal-2023-outlier} uses channel-wise shifting and scaling to handle outlier asymmetry. \textbf{LLM-FP4} \cite{liu-etal-2023-llm} explores floating-point formats (FP8/FP4) as alternatives. \textbf{OmniQuant} \cite{shao2024omniquant} shifts quantization challenges from activations to weights through clipping threshold optimization.
+
+\subparagraph{KV Cache Quantization}
+This targets key-value cache in attention mechanisms, which consumes substantial memory during autoregressive decoding. \textbf{KVQuant} \cite{abs-2401-18079} proposes Per-Channel Key Quantization, PreRoPE Key Quantization, and Non-Uniform KV cache quantization for 10M context length inference. \textbf{WKVQuant} \cite{abs-2402-12065} integrates past-only quantization with two-dimensional quantization and cross-block reconstruction regularization.
+
+\subsection{Pruning}
+Pruning reduces model size by removing redundant parameters, exploiting over-parameterization in large networks. Research shows up to 90\% of weights can be removed with minimal accuracy loss \cite{zhu2023survey}. Methods are categorized as unstructured, structured, or semi-structured.
+
+\paragraph{Unstructured Pruning}
+This removes individual weights without patterns, achieving high sparsity (50-99\%) but requiring specialized hardware support. \textbf{SparseGPT} \cite{FrantarA23} introduces one-shot pruning as sparse regression, achieving over 50\% sparsity on OPT-175B and BLOOM-176B without retraining. \textbf{Wanda} \cite{sun2024a} prunes weights with smallest magnitudes multiplied by input activation norms, eliminating retraining needs. \textbf{SAMSP} \cite{10445737} uses Hessian-based sensitivity metrics for dynamic sparsity allocation. \textbf{DSnoT} \cite{zhang2024dynamic} minimizes reconstruction error through iterative weight pruning-and-growing.
+
+\paragraph{Structured Pruning}
+This removes entire components (neurons, heads, layers) while preserving network structure, enabling hardware-agnostic acceleration. We categorize methods by pruning metrics:
+
+\textit{Loss-based:} \textbf{LLM-Pruner} \cite{ma2023llmpruner} uses gradient information to identify dependent structures and select pruning groups (width reduction). \textbf{Shortened LLaMA} \cite{kim2024mefomo} performs one-shot depth pruning of Transformer blocks based on loss and second-order derivatives. Both use LoRA for rapid performance recovery.
+
+\textit{Magnitude-based:} \textbf{FLAP} \cite{AnZYTW24} uses structured fluctuation metrics to identify prunable weight columns with adaptive structure search and baseline bias compensation. \textbf{SliceGPT} \cite{ashkboos2024slicegpt} leverages computational invariance and PCA to eliminate insignificant matrix columns/rows.
+
+\textit{Regularization-based:} \textbf{Sheared LLaMA} uses Lagrange multipliers to impose constraints on pruned model shape, formulating pruning as constrained optimization with dynamic batch loading for efficient data utilization.
+
+\paragraph{Semi-Structured Pruning}
+This achieves fine-grained pruning with structural regularization through N:M sparsity patterns (N non-zero elements per M contiguous elements). \textbf{E-Sparse} \cite{abs-2310-15929} uses information entropy as an importance metric with global and local shuffling to optimize information distribution. SparseGPT and Wanda can be adapted to N:M patterns through block-wise weight partitioning.
+
+\subsection{Knowledge Distillation}
+Knowledge Distillation transfers knowledge from large teacher models to smaller student models. Methods are categorized as Black-box KD (only teacher outputs accessible) or White-box KD (teacher parameters/distributions available).
+
+\paragraph{Black-box KD}
+This prompts teacher LLMs to generate distillation datasets for student fine-tuning. Three primary approaches exist:
+
+\textit{Chain-of-Thought Distillation:} \textbf{MT-COT} \cite{li2024explanations} uses multi-task learning with LLM-generated explanations. \textbf{SCOTT} \cite{WangWLGYR23} employs zero-shot CoT for diverse rationale generation. Decomposition-based methods distill problem decomposer and subproblem solver models. \textbf{PaD} uses Program-of-Thought rationales for mathematical reasoning. Interactive paradigms enable student feedback and self-reflection.
+
+\textit{In-Context Learning Distillation:} \textbf{AICD} \cite{liu2024learning} performs meta-teacher forcing on in-context CoTs, jointly optimizing likelihood of all in-context CoTs. Meta In-context Tuning combines ICL objectives with language modeling objectives.
+
+\textit{Instruction Following Distillation:} \textbf{Lion} \cite{jiang-etal-2023-lion} generates "hard" instructions for selective difficulty-based learning. \textbf{LaMini-LM} \cite{wu-etal-2024-lamini} develops 2.58M instructions for diverse model fine-tuning. \textbf{SELF-INSTRUCT} \cite{wang-etal-2023-self-instruct} uses student LMs as teachers to generate their own training data.
+
+\paragraph{White-box KD}
+This enables deeper understanding of teacher structure and representations. \textbf{MiniLLM} \cite{gu2024minillm} introduces reverse Kullback-Leibler divergence for generative LLM distillation. \textbf{GKD} \cite{agarwal2024generalized} trains students using self-generated outputs with teacher feedback. \textbf{TED} \cite{LiangZZHCZ23} proposes task-aware layer-wise distillation with task-aware filters for hidden representation alignment.
+
+\subsection{Low-Rank Factorization}
+This decomposes weight matrices $\mathbf{W} \in \mathbb{R}^{m \times n}$ into smaller components $\mathbf{W} \approx \mathbf{U}\mathbf{V}$, where $\mathbf{U} \in \mathbb{R}^{m \times k}$ and $\mathbf{V} \in \mathbb{R}^{k \times n}$ with $k \ll \min(m, n)$, reducing parameters from $m \times n$ to $(m + n) \times k$. \textbf{LPLR} \cite{SahaSP23} combines randomized low-rank factorization with low-precision quantization using random sketching. \textbf{ASVD} \cite{abs-2312-05821} scales weight matrices based on activation distributions and assigns adaptive layer-wise compression ratios by analyzing singular value distributions. \textbf{LASER} \cite{sharma2024the} selectively reduces rank of higher-order weight components, improving handling of rare training data and resistance to question paraphrasing.
+
+\subsection{Weight Sharing}
+This enforces parameter reuse across layers, reducing redundancy while maintaining capacity. \textbf{Basis Sharing} represents weight matrices as linear combinations of shared basis vectors with layer-specific coefficients, examining cross-layer basis sharing by compression error and grouping layers strategically. This approach surpasses SVD-based methods by up to 25\% perplexity reduction and 4\% accuracy improvement at 20-50\% compression ratios without fine-tuning.
+
+
+\newpage
+\section{Experimental Setup}
+
+\subsection{Overview}
+This study conducts a comprehensive comparative evaluation of multiple compression techniques applied to the Mistral-7B model. Our experimental protocol follows a two-phase approach: (1) compress the base model and evaluate compression impact, and (2) fine-tune the compressed models on downstream tasks and re-evaluate to measure performance recovery. All experiments are conducted under resource-constrained environments to reflect realistic deployment scenarios.
+
+\subsection{Environment and Resources}
+All experiments were conducted on cloud-based platforms with the following specifications:
+\begin{itemize}
+    \item \textbf{Platforms:} Kaggle and Google Colab free-tier instances
+    \item \textbf{Hardware:} NVIDIA Tesla T4 GPU (16GB VRAM)
+    \item \textbf{Software:} PyTorch 2.x, Transformers 4.x, bitsandbytes, AutoGPTQ, AutoAWQ
+    \item \textbf{Base Model:} Mistral-7B (FP16 baseline, 13.49 GB model size)
+\end{itemize}
+
+These resource constraints (limited VRAM and compute) reflect the target deployment scenario for compressed models and ensure our findings are applicable to practical edge and consumer-grade hardware settings.
+
+\newpage
+\subsection{Compression Techniques}
+
+\subsubsection{Quantization Methods}
+We evaluate four state-of-the-art post-training quantization techniques:
+
+\begin{itemize}
+    \item \textbf{NF4 (4-bit NormalFloat):} Uses an information-theoretically optimal data type for normally distributed weights, implemented via bitsandbytes with double quantization enabled.
+    
+    \textbf{Parameters:}
+    \begin{itemize}
+        \item Quantization type: NF4 (NormalFloat4)
+        \item Double quantization: Enabled
+        \item Compute dtype: float16
+        \item Group size: Per-tensor (default)
+    \end{itemize}
+    
+    \textbf{Implementation:}
+\begin{lstlisting}[language=Python, caption={NF4 Quantization with BitsAndBytes}]
+from transformers import BitsAndBytesConfig, AutoModelForCausalLM
+import torch
+
+nf4_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_compute_dtype=torch.float16
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "mistralai/Mistral-7B-Instruct-v0.1",
+    quantization_config=nf4_config,
+    device_map="auto"
+)
+\end{lstlisting}
+
+\vspace{0.5em}
+
+    \item \textbf{GPTQ:} Layer-wise quantization that minimizes reconstruction error using Hessian information, applied at 4-bit precision with group size of 128. We use TheBloke's pre-quantized model to avoid the computationally expensive quantization process.
+    
+    \textbf{Parameters:}
+    \begin{itemize}
+        \item Bits: 4
+        \item Group size: 128
+        \item Dataset: C4 (used during quantization)
+        \item Activation order: Optimized via Hessian
+    \end{itemize}
+    
+    \textbf{Implementation:}
+\begin{lstlisting}[language=Python, caption={GPTQ Quantization (Pre-quantized Model)}]
+from auto_gptq import AutoGPTQForCausalLM
+
+model = AutoGPTQForCausalLM.from_quantized(
+    "TheBloke/Mistral-7B-Instruct-v0.1-GPTQ",
+    device="cuda:0",
+    use_safetensors=True
+)
+\end{lstlisting}
+
+\vspace{0.5em}
+
+    \item \textbf{AWQ (Activation-aware Weight Quantization):} Protects salient weights based on activation magnitudes, using 4-bit quantization with per-channel scaling. Similar to GPTQ, we use a pre-quantized model.
+    
+    \textbf{Parameters:}
+    \begin{itemize}
+        \item Bits: 4
+        \item Group size: 128
+        \item Zero point: True
+        \item Version: GEMM (optimized matrix multiplication)
+    \end{itemize}
+    
+    \textbf{Implementation:}
+\begin{lstlisting}[language=Python, caption={AWQ Quantization (Pre-quantized Model)}]
+from awq import AutoAWQForCausalLM
+
+model = AutoAWQForCausalLM.from_quantized(
+    "TheBloke/Mistral-7B-Instruct-v0.1-AWQ",
+    fuse_layers=True,
+    safetensors=True
+)
+\end{lstlisting}
+
+\vspace{0.5em}
+
+    \item \textbf{HQQ (Half-Quadratic Quantization):} Fast quantization method optimizing a custom loss function, configured for 4-bit weights with optimized zero-point placement. This method quantizes the model on-the-fly during loading.
+    
+    \textbf{Parameters:}
+    \begin{itemize}
+        \item Bits: 4
+        \item Group size: 64
+        \item Axis: 1 (row-wise quantization)
+        \item Compute dtype: float16
+    \end{itemize}
+    
+    \textbf{Implementation:}
+\begin{lstlisting}[language=Python, caption={HQQ Quantization (On-the-fly)}]
+from hqq.models.hf.base import AutoHQQHFModel
+from hqq.core.quantize import BaseQuantizeConfig
+
+quant_config = BaseQuantizeConfig(
+    nbits=4,
+    group_size=64,
+    axis=1
+)
+
+model = AutoHQQHFModel.from_pretrained(
+    "mistralai/Mistral-7B-Instruct-v0.1",
+    torch_dtype=torch.float16
+)
+
+model.quantize_model(
+    quant_config=quant_config,
+    device='cuda'
+)
+\end{lstlisting}
+
+\end{itemize}
+
+\vspace{1em}
+\noindent All quantization methods target 4-bit precision to achieve similar compression ratios (approximately 3.6x) for fair comparison. NF4 and HQQ quantize on-the-fly during model loading, while GPTQ and AWQ use pre-quantized checkpoints from TheBloke's repository for efficiency.
+
+% \newpage
+% \subsubsection{Pruning Methods}
+
+% We evaluate two distinct pruning approaches: unstructured pruning via SparseGPT and structured pruning through layer and attention head removal.
+
+% \begin{itemize}
+%     \item \textbf{SparseGPT:} One-shot unstructured pruning method that formulates pruning as a sparse regression problem, achieving high sparsity while maintaining model accuracy through layer-wise reconstruction. We target 50\% sparsity across all weight matrices using the Hessian-based approach.
+    
+%     \textbf{Parameters:}
+%     \begin{itemize}
+%         \item Sparsity level: 50\% (uniform across layers)
+%         \item Pruning type: Unstructured (individual weight removal)
+%         \item Calibration dataset: C4 (128 samples)
+%         \item Reconstruction: Layer-wise with Hessian approximation
+%     \end{itemize}
+    
+%     \textbf{Implementation:}
+% \begin{lstlisting}[language=Python, caption={SparseGPT Unstructured Pruning}]
+% from transformers import AutoModelForCausalLM, AutoTokenizer
+% from sparsegpt import SparseGPT
+% import torch
+
+% # Load base model
+% model = AutoModelForCausalLM.from_pretrained(
+%     "mistralai/Mistral-7B-Instruct-v0.1",
+%     device_map="auto",
+%     torch_dtype=torch.float16
+% )
+
+% # Load calibration data from C4
+% from datasets import load_dataset
+% data = load_dataset("allenai/c4", "en", split="train")
+% calibration_samples = [data[i]['text'] for i in range(128)]
+
+% for name, module in model.named_modules():
+%     if isinstance(module, torch.nn.Linear):
+%         # Initialize SparseGPT for this layer
+%         pruner = SparseGPT(module)
+        
+%         # Compute Hessian from calibration data
+%         for sample in calibration_samples:
+%             inputs = tokenizer(sample, return_tensors="pt")
+%             pruner.add_batch(inputs)
+        
+%         # Prune to 50% sparsity
+%         pruner.prune(sparsity=0.5, prunen=0, prunem=0)
+        
+%         # Apply mask to weights
+%         module.weight.data *= pruner.mask
+% \end{lstlisting}
+
+% \vspace{0.5em}
+
+%     \item \textbf{Structured Pruning (Layer + Head Removal):} A two-stage structured pruning approach applied to the 4-bit quantized model, removing entire transformer layers and attention heads to achieve hardware-agnostic speedups without requiring sparse computation support.
+    
+%     \textbf{Stage 1 - Layer Pruning Parameters:}
+%     \begin{itemize}
+%         \item Original layers: 32
+%         \item Target layers: 20 (37.5\% reduction)
+%         \item Early layers kept: 8 (first 40\%)
+%         \item Late layers kept: 12 (last 60\%)
+%         \item Strategy: Preserve syntactic (early) and semantic (late) layers
+%     \end{itemize}
+    
+%     \textbf{Stage 2 - Attention Head Pruning Parameters:}
+%     \begin{itemize}
+%         \item Reduction: 25\% of key-value heads per layer
+%         \item Minimum heads: 1 per layer
+%         \item Architecture: Exploits Grouped Query Attention (GQA)
+%     \end{itemize}
+    
+%     \textbf{Implementation:}
+% \begin{lstlisting}[language=Python, caption={Structured Pruning: Layer and Head Removal}]
+% import torch.nn as nn
+
+% # Stage 1: Layer Pruning - Keep 20 out of 32 layers
+% total_layers = len(model.model.layers)
+% keep_first = int(20 * 0.4)  # Keep 8 early layers (syntax)
+% keep_last = 20 - keep_first  # Keep 12 late layers (semantics)
+
+% # Select layers to preserve
+% indices = (list(range(keep_first)) + 
+%            list(range(total_layers - keep_last, total_layers)))
+
+% # Create new layer list
+% new_layers = nn.ModuleList([model.model.layers[i] for i in indices])
+% model.model.layers = new_layers
+
+% # Update model configuration
+% model.config.num_hidden_layers = len(new_layers)
+
+% print(f"Pruned from {total_layers} to {len(new_layers)} layers")
+
+% # Stage 2: Attention Head Pruning - Reduce KV heads by 25%
+% for layer_idx, layer in enumerate(model.model.layers):
+%     attn = layer.self_attn
+    
+%     if hasattr(attn, 'num_key_value_heads'):
+%         original_heads = attn.num_key_value_heads
+%         new_heads = max(1, int(original_heads * 0.75))
+        
+%         if new_heads < original_heads:
+%             # Reduce head count
+%             attn.num_key_value_heads = new_heads
+            
+%             # Adjust head dimension
+%             head_dim = attn.head_dim
+%             new_kv_size = new_heads * head_dim
+            
+%             # Prune key and value projections
+%             attn.k_proj.weight = nn.Parameter(
+%                 attn.k_proj.weight[:new_kv_size, :]
+%             )
+%             attn.v_proj.weight = nn.Parameter(
+%                 attn.v_proj.weight[:new_kv_size, :]
+%             )
+            
+%             print(f"Layer {layer_idx}: {original_heads} -> "
+%                   f"{new_heads} KV heads")
+
+% # Save pruned model
+% model.save_pretrained("mistral-7b-pruned")
+% \end{lstlisting}
+
+% \end{itemize}
+
+% \vspace{1em}
+% \noindent Both pruning methods target different compression objectives: SparseGPT achieves fine-grained unstructured sparsity (50\%) suitable for specialized hardware, while structured pruning removes 37.5\% of layers and 25\% of attention heads for general-purpose acceleration.
+
+% \newpage
+% \subsubsection{Knowledge Distillation}
+
+% We implement knowledge distillation to compress Mistral-7B by training it to mimic the behavior of a larger teacher model. This approach uses parameter-efficient fine-tuning (LoRA) to reduce training costs while preserving knowledge transfer quality.
+
+% \textbf{Teacher-Student Configuration:}
+% \begin{itemize}
+%     \item \textbf{Teacher Model:} Qwen3-Next-80B-A3B-Instruct (80B parameters)
+%     \item \textbf{Student Model:} Mistral-7B-v0.1 (7B parameters)
+%     \item \textbf{Distillation Method:} Soft label learning with KL divergence loss
+%     \item \textbf{Training Paradigm:} LoRA-based supervised fine-tuning
+% \end{itemize}
+
+% \textbf{LoRA Configuration:}
+% \begin{itemize}
+%     \item Rank (r): 64
+%     \item Alpha: 16 (scaling factor)
+%     \item Target modules: q\_proj, v\_proj (query and value projections)
+%     \item Dropout: 0.1
+%     \item Trainable parameters: ~100M (1.4\% of total)
+%     \item Task type: Causal language modeling
+% \end{itemize}
+
+% \textbf{Training Configuration:}
+% \begin{itemize}
+%     \item Dataset: WikiText-2 train split (500 samples)
+%     \item Learning rate: 2e-4
+%     \item Batch size: 4 with gradient accumulation
+%     \item Epochs: 3
+%     \item Optimizer: AdamW (8-bit)
+%     \item Temperature: 2.0 (for softening teacher outputs)
+%     \item Loss: $\alpha \cdot \mathcal{L}_{\text{KL}} + (1-\alpha) \cdot \mathcal{L}_{\text{CE}}$ where $\alpha = 0.5$
+% \end{itemize}
+
+% \textbf{Implementation:}
+% \begin{lstlisting}[language=Python, caption={Knowledge Distillation with LoRA}]
+% from transformers import AutoModelForCausalLM, AutoTokenizer
+% from peft import LoraConfig, get_peft_model, TaskType
+% import torch
+% import torch.nn.functional as F
+
+% # Load teacher model (80B)
+% teacher = AutoModelForCausalLM.from_pretrained(
+%     "Qwen/Qwen3-Next-80B-A3B-Instruct",
+%     device_map="auto",
+%     torch_dtype=torch.float16,
+%     load_in_8bit=True  # Use 8-bit for memory efficiency
+% )
+% teacher.eval()
+
+% # Load student model (7B)
+% student = AutoModelForCausalLM.from_pretrained(
+%     "mistralai/Mistral-7B-v0.1",
+%     device_map="auto",
+%     torch_dtype=torch.float16
+% )
+
+% # Configure LoRA for efficient training
+% lora_config = LoraConfig(
+%     r=64,                              # Rank of low-rank matrices
+%     lora_alpha=16,                     # Scaling factor
+%     target_modules=["q_proj", "v_proj"], # Target attention layers
+%     lora_dropout=0.1,
+%     bias="none",
+%     task_type=TaskType.CAUSAL_LM
+% )
+
+% # Apply LoRA to student
+% student = get_peft_model(student, lora_config)
+% student.print_trainable_parameters()
+% # Output: trainable params: 100M || all params: 7.1B || 
+% #         trainable%: 1.4%
+
+% # Load training data
+% from datasets import load_dataset
+% data = load_dataset("wikitext", "wikitext-2-raw-v1", split="train")
+% train_samples = data.select(range(500))
+
+% # Knowledge distillation training loop
+% from transformers import TrainingArguments, Trainer
+
+% class DistillationTrainer(Trainer):
+%     def __init__(self, teacher, temperature=2.0, alpha=0.5, *args, **kwargs):
+%         super().__init__(*args, **kwargs)
+%         self.teacher = teacher
+%         self.temperature = temperature
+%         self.alpha = alpha
+    
+%     def compute_loss(self, model, inputs, return_outputs=False):
+%         # Student forward pass
+%         student_outputs = model(**inputs)
+%         student_logits = student_outputs.logits
+        
+%         # Teacher forward pass (no gradient)
+%         with torch.no_grad():
+%             teacher_outputs = self.teacher(**inputs)
+%             teacher_logits = teacher_outputs.logits
+        
+%         # Distillation loss (KL divergence)
+%         loss_kd = F.kl_div(
+%             F.log_softmax(student_logits / self.temperature, dim=-1),
+%             F.softmax(teacher_logits / self.temperature, dim=-1),
+%             reduction='batchmean'
+%         ) * (self.temperature ** 2)
+        
+%         # Hard label loss (cross-entropy)
+%         loss_ce = F.cross_entropy(
+%             student_logits.view(-1, student_logits.size(-1)),
+%             inputs['labels'].view(-1)
+%         )
+        
+%         # Combined loss
+%         loss = self.alpha * loss_kd + (1 - self.alpha) * loss_ce
+        
+%         return (loss, student_outputs) if return_outputs else loss
+
+% # Training arguments
+% training_args = TrainingArguments(
+%     output_dir="./mistral-7b-distilled",
+%     per_device_train_batch_size=4,
+%     gradient_accumulation_steps=4,
+%     learning_rate=2e-4,
+%     num_train_epochs=3,
+%     warmup_steps=100,
+%     logging_steps=10,
+%     save_strategy="epoch",
+%     fp16=True,
+%     optim="adamw_8bit"
+% )
+
+% # Initialize distillation trainer
+% trainer = DistillationTrainer(
+%     teacher=teacher,
+%     temperature=2.0,
+%     alpha=0.5,
+%     model=student,
+%     args=training_args,
+%     train_dataset=train_samples
+% )
+
+% # Train student model
+% trainer.train()
+
+% # Save distilled model
+% student.save_pretrained("mistral-7b-distilled-lora")
+% \end{lstlisting}
+
+% \vspace{0.5em}
+% \noindent The distillation process enables the 7B student model to learn the teacher's output distributions with minimal computational overhead by training only 1.4\% of parameters via LoRA. This approach is particularly effective when combined with quantization, as the distilled model can be subsequently compressed to 4-bit precision with reduced performance degradation.
+
+\newpage
+\subsection{Fine-tuning Strategy}
+
+\subsubsection{Overview}
+Following compression, we apply targeted fine-tuning to recover performance degradation and adapt models to downstream tasks. Our fine-tuning strategy focuses on six key capability domains, selected to comprehensively evaluate the impact of quantization across diverse reasoning patterns and knowledge types.
+
+\subsubsection{Fine-tuning Domains and Datasets}
+
+We organize fine-tuning and evaluation around six capability categories, each testing different aspects of model knowledge and reasoning under compression:
+
+\paragraph{Mathematical Reasoning}
+\textbf{Domains:} Mathematics, physics, formal logic \\
+\textbf{What It Tests:} Symbolic manipulation and logical reasoning under quantization. This category evaluates whether compressed models retain the ability to perform multi-step arithmetic, algebraic manipulation, and formal reasoning chains. \\
+\textbf{Datasets:}
+\begin{itemize}
+    \item \textbf{GSM8K:} Grade-school math word problems requiring multi-step reasoning (8-shot evaluation, exact match metric)
+    \item \textbf{MATH:} Competition-level mathematics across algebra, geometry, number theory, and calculus (4-shot evaluation with majority voting)
+\end{itemize}
+
+\paragraph{Code Generation}
+\textbf{Domains:} Python programming, algorithms, debugging \\
+\textbf{What It Tests:} Syntax precision combined with algorithmic reasoning. Quantization can particularly impact code generation due to the need for exact token sequences and structured output. \\
+\textbf{Datasets:}
+\begin{itemize}
+    \item \textbf{HumanEval:} 164 hand-written Python programming problems with unit test evaluation (0-shot, pass@1 metric)
+    \item \textbf{MBPP (Mostly Basic Python Problems):} 974 entry-level Python tasks with train/test splits (3-shot, pass@1 metric)
+    \item \textbf{CodeAlpaca:} 20,000 instruction-tuning examples for code generation tasks, used for fine-tuning
+\end{itemize}
+
+\paragraph{World Knowledge}
+\textbf{Domains:} Science, history, geography, general knowledge \\
+\textbf{What It Tests:} Factual recall and conceptual understanding. This category assesses whether quantization affects the model's ability to retain and retrieve stored knowledge about the world. \\
+\textbf{Datasets:}
+\begin{itemize}
+    \item \textbf{MMLU (Massive Multitask Language Understanding):} 57 academic subjects spanning STEM, humanities, and social sciences (5-shot, accuracy metric)
+    \item \textbf{TriviaQA:} Large-scale reading comprehension dataset with 95,000 question-answer pairs (5-shot, exact match metric)
+\end{itemize}
+
+\paragraph{Domain Expertise}
+\textbf{Domains:} Medicine, law, finance, specialized technical fields \\
+\textbf{What It Tests:} Specialized terminology and domain-specific reasoning patterns. Professional domains require both technical vocabulary preservation and complex reasoning chains. \\
+\textbf{Datasets:}
+\begin{itemize}
+    \item \textbf{MedQA:} Medical exam questions in USMLE style, testing clinical reasoning and medical knowledge
+    \item \textbf{LegalBench:} Suite of legal reasoning tasks including contract interpretation, precedent analysis, and statutory reasoning
+    \item \textbf{ArXiv Custom:} Custom-built evaluation sets from scientific papers in the target domain
+\end{itemize}
+
+\paragraph{Language Understanding and Summarization}
+\textbf{Domains:} Reading comprehension, text summarization \\
+\textbf{What It Tests:} Coherence and compression ability. This evaluates whether compressed models can maintain fluency and capture key information when generating or condensing text. \\
+\textbf{Datasets:}
+\begin{itemize}
+    \item \textbf{CNN/DailyMail:} News article summarization benchmark with 300,000+ article-summary pairs
+    \item \textbf{BoolQ:} Yes/no question answering requiring reading comprehension (0-shot, accuracy metric)
+    \item \textbf{QuAC:} Conversational question answering with context (0-shot, F1 metric)
+\end{itemize}
+
+\paragraph{Instruction Following}
+\textbf{Domains:} Format control, role-play, task specification adherence \\
+\textbf{What It Tests:} Model steerability post-quantization. Instruction following is critical for real-world deployment, where models must precisely follow user directives and formatting requirements. \\
+\textbf{Datasets:}
+\begin{itemize}
+    \item \textbf{Alpaca:} 52,000 instruction-following examples covering diverse task types and formats
+    \item \textbf{BBH (Big Bench Hard):} 23 challenging tasks from BigBench (3-shot, accuracy metric)
+    \item \textbf{AGI Eval:} Human-level exam questions testing general intelligence (3-5 shot, accuracy metric)
+\end{itemize}
+
+\subsubsection{Fine-tuning Methodology}
+
+\textbf{Training Configuration:}
+We employ parameter-efficient fine-tuning techniques to avoid catastrophic forgetting and reduce computational requirements:
+
+\begin{table}[H]
+\centering
+\caption{Fine-tuning hyperparameters}
+\label{tab:finetuning_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
+\hline
+Method & LoRA & Low-Rank Adaptation \\
+LoRA rank & 8 & Rank of adaptation matrices \\
+LoRA alpha & 16 & Scaling factor \\
+Target modules & q\_proj, v\_proj & Attention projection layers \\
+Learning rate & 3e-4 & Peak learning rate \\
+Batch size & 8 & Per-device batch size \\
+Gradient accumulation & 4 & Effective batch size: 32 \\
+Epochs & 3 & Training epochs per domain \\
+Warmup ratio & 0.1 & Learning rate warmup \\
+LR scheduler & cosine & Cosine annealing schedule \\
+Weight decay & 0.01 & L2 regularization \\
+Max sequence length & 2048 & Context window \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Domain-Specific Fine-tuning:}
+For each capability domain, we fine-tune the compressed model on the corresponding training datasets and evaluate on held-out test sets. This allows us to measure:
+\begin{itemize}
+    \item \textbf{Performance Recovery:} How much of the quantization-induced degradation is recovered through fine-tuning
+    \item \textbf{Domain Adaptability:} Whether compressed models can still effectively adapt to specialized tasks
+    \item \textbf{Training Stability:} If quantization affects gradient flow and optimization dynamics
+\end{itemize}
+
+\textbf{Evaluation Protocol:}
+\begin{enumerate}
+    \item \textbf{Baseline:} Evaluate compressed model before fine-tuning
+    \item \textbf{Fine-tune:} Train on domain-specific datasets for 3 epochs
+    \item \textbf{Evaluate:} Test on held-out evaluation sets using standard benchmarks
+    \item \textbf{Compare:} Measure performance delta vs. FP16 baseline and pre-fine-tuning compressed model
+\end{enumerate}
+
+\subsubsection{Rationale for Domain Selection}
+
+The six capability domains are selected to provide comprehensive coverage of model capabilities:
+
+\begin{itemize}
+    \item \textbf{Mathematical Reasoning} tests formal symbolic manipulation, which is highly sensitive to quantization due to the precision required in arithmetic operations
+    
+    \item \textbf{Code Generation} evaluates structured output generation and syntax precision, where small errors can break functionality
+    
+    \item \textbf{World Knowledge} assesses factual retention in model weights, directly testing whether quantization causes knowledge loss
+    
+    \item \textbf{Domain Expertise} examines specialized knowledge preservation in professional contexts with technical vocabulary
+    
+    \item \textbf{Language Understanding} measures fluency and coherence, which can degrade with aggressive compression
+    
+    \item \textbf{Instruction Following} evaluates controllability and steerability, critical for practical deployment
+\end{itemize}
+
+Together, these domains span the spectrum from precise symbolic reasoning (math, code) to open-ended generation (language, summarization), from general knowledge (world facts) to specialized expertise (medical, legal), and from zero-shot evaluation (code, comprehension) to few-shot adaptation (MMLU, GSM8K).
+
+\subsection{RAG Pipeline Configuration}
+
+\subsubsection{Pipeline Architecture}
+Our RAG (Retrieval-Augmented Generation) pipeline implements a modular architecture consisting of five core components that work in sequence to enable context-aware question answering:
+
+\begin{enumerate}
+    \item \textbf{Document Processing:} Extract and clean text from source documents (PDF, TXT, Markdown)
+    \item \textbf{Text Chunking:} Split documents into semantically coherent segments
+    \item \textbf{Embedding:} Convert text chunks into dense vector representations
+    \item \textbf{Vector Indexing:} Store and index embeddings for efficient similarity search
+    \item \textbf{Retrieval \& Generation:} Query the index and generate contextualized answers
+\end{enumerate}
+
+The pipeline is implemented as a reusable framework that can be applied to any of our compressed models, enabling direct comparison of RAG performance across quantization methods.
+
+\subsubsection{Document Processing}
+
+\textbf{Text Extraction:}
+\begin{itemize}
+    \item \textbf{PDF Processing:} PyPDF2-based extraction with page-level granularity
+    \item \textbf{Text Normalization:} Whitespace normalization, OCR error correction, quote standardization
+    \item \textbf{Cleaning Operations:}
+    \begin{itemize}
+        \item Remove page numbers and headers
+        \item Strip citation references ([1], (Author, 2020))
+        \item Remove URLs and excessive whitespace
+        \item Fix common ligature errors (fi, fl)
+    \end{itemize}
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Document processing parameters}
+\label{tab:doc_processing_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+remove\_headers & true & Strip page headers and numbers \\
+remove\_citations & true & Remove citation markers \\
+extract\_sections & false & Parse document sections \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Text Chunking Strategy}
+
+We employ a \textbf{semantic chunking} strategy that respects natural document boundaries while maintaining optimal chunk sizes for embedding and retrieval. This approach outperforms fixed-size chunking by preserving contextual coherence.
+
+\textbf{Chunking Algorithm:}
+\begin{itemize}
+    \item \textbf{Strategy:} Semantic (paragraph-aware)
+    \item \textbf{Primary Delimiter:} Double newlines (paragraph boundaries)
+    \item \textbf{Fallback:} Sentence-level tokenization using NLTK punkt tokenizer
+    \item \textbf{Overlap Mechanism:} Sliding window with configurable overlap to maintain context continuity across chunk boundaries
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Text chunking parameters}
+\label{tab:chunking_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+strategy & semantic & Chunking strategy (semantic, sentence, fixed) \\
+chunk\_size & 512 & Target chunk size in tokens \\
+chunk\_overlap & 50 & Overlap between consecutive chunks \\
+min\_chunk\_size & 100 & Minimum viable chunk size \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Chunk Metadata:}
+Each chunk includes metadata for traceability and filtering:
+\begin{itemize}
+    \item \textbf{chunk\_id:} Unique identifier (chunk\_0, chunk\_1, ...)
+    \item \textbf{page\_number:} Source page in original document
+    \item \textbf{start\_char / end\_char:} Character offsets in source
+    \item \textbf{tokens:} Word count for the chunk
+    \item \textbf{section:} Optional section header (if extracted)
+\end{itemize}
+
+\subsubsection{Embedding Model}
+
+We use \textbf{sentence-transformers/all-MiniLM-L6-v2} as our embedding model, balancing quality and efficiency for retrieval tasks.
+
+\textbf{Model Characteristics:}
+\begin{itemize}
+    \item \textbf{Architecture:} Distilled from Microsoft MiniLM
+    \item \textbf{Embedding Dimension:} 384
+    \item \textbf{Max Sequence Length:} 256 tokens
+    \item \textbf{Training:} Fine-tuned on 1B+ sentence pairs
+    \item \textbf{Performance:} SBERT benchmark score: 68.06 (semantic similarity)
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Embedding model parameters}
+\label{tab:embedding_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+model\_name & all-MiniLM-L6-v2 & SentenceTransformer model identifier \\
+batch\_size & 32 & Batch size for embedding generation \\
+normalize & true & L2 normalization of embeddings \\
+device & cuda & Compute device (cuda, mps, cpu) \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Implementation:}
+\begin{lstlisting}[language=Python, caption={Embedding Generation}]
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer(
+    'sentence-transformers/all-MiniLM-L6-v2',
+    device='cuda'
+)
+
+embeddings = model.encode(
+    texts,
+    batch_size=32,
+    show_progress_bar=True,
+    normalize_embeddings=True,
+    convert_to_numpy=True
+)
+\end{lstlisting}
+
+\subsubsection{Vector Store and Indexing}
+
+We use \textbf{ChromaDB} as our vector database, providing efficient similarity search with multiple distance metrics.
+
+\textbf{Vector Store Configuration:}
+\begin{itemize}
+    \item \textbf{Database:} ChromaDB (persistent or in-memory)
+    \item \textbf{Index Type:} HNSW (Hierarchical Navigable Small World)
+    \item \textbf{Distance Metric:} Cosine similarity (default)
+    \item \textbf{Storage:} Optional persistent storage for index reuse
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Vector store parameters}
+\label{tab:vector_store_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+collection\_name & rag\_documents & Index collection identifier \\
+persist\_directory & null & Directory for persistent storage (null=in-memory) \\
+distance\_metric & cosine & Distance function (cosine, l2, ip) \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Distance-to-Similarity Conversion:}
+ChromaDB returns distances that must be converted to similarity scores [0, 1]:
+\begin{itemize}
+    \item \textbf{Cosine:} $\text{similarity} = 1 - \frac{d^2}{2}$ where $d$ is L2 distance of normalized vectors
+    \item \textbf{L2:} $\text{similarity} = \frac{1}{1 + d}$ (exponential decay)
+    \item \textbf{Inner Product:} $\text{similarity} = \frac{d + 2}{2}$ (normalized to [0, 1])
+\end{itemize}
+
+\subsubsection{Retrieval Strategy}
+
+Our retrieval system implements advanced techniques beyond simple nearest-neighbor search:
+
+\textbf{Base Retrieval:}
+\begin{itemize}
+    \item \textbf{Top-K Selection:} Retrieve top-3 most similar chunks by default
+    \item \textbf{Similarity Threshold:} Configurable minimum similarity score (default: 0.0)
+    \item \textbf{Metadata Filtering:} Optional filtering by page number, section, etc.
+\end{itemize}
+
+\textbf{Re-ranking (Optional):}
+Hybrid retrieval combining semantic and lexical matching:
+\begin{itemize}
+    \item \textbf{Semantic Score:} Original embedding similarity (70\% weight)
+    \item \textbf{Lexical Score:} Token overlap between query and chunk (30\% weight)
+    \item \textbf{Formula:} $\text{rerank\_score} = 0.7 \times \text{cosine\_sim} + 0.3 \times \text{token\_overlap}$
+\end{itemize}
+
+\textbf{Diversity Mechanism (Optional):}
+Maximal Marginal Relevance (MMR) to reduce redundancy:
+\begin{itemize}
+    \item \textbf{Objective:} Balance relevance and diversity in retrieved chunks
+    \item \textbf{Formula:} $\text{MMR} = \lambda \times \text{Sim}(q, c) - (1-\lambda) \times \max[\text{Sim}(c, S)]$
+    \item where $q$ is query, $c$ is candidate chunk, $S$ is selected chunks, $\lambda$ is diversity parameter
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Retrieval parameters}
+\label{tab:retrieval_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+top\_k & 3 & Number of chunks to retrieve \\
+similarity\_threshold & 0.0 & Minimum similarity score \\
+rerank & false & Enable hybrid re-ranking \\
+diversity\_penalty & 0.0 & MMR diversity parameter [0, 1] \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Answer Generation}
+
+The generation component uses the compressed LLM with retrieved context to produce grounded answers.
+
+\textbf{Prompt Engineering:}
+We design prompts to encourage faithful, concise answers based on retrieved context:
+
+\begin{lstlisting}[language=Python, caption={RAG Generation Prompt Template}]
+prompt = f"""Use the following context to answer the question. 
+Provide a clear, direct answer based on the information given.
+
+Context:
+{retrieved_context}
+
+Question: {user_query}
+
+Answer:"""
+\end{lstlisting}
+
+\textbf{Generation Parameters:}
+Carefully tuned to balance faithfulness and naturalness:
+\begin{itemize}
+    \item \textbf{Max New Tokens:} 128 (concise answers)
+    \item \textbf{Temperature:} 0.3 (low for factual accuracy)
+    \item \textbf{Top-p:} 0.9 (nucleus sampling)
+    \item \textbf{Repetition Penalty:} 1.15 (prevent loops)
+    \item \textbf{Sampling:} Enabled (allows natural phrasing)
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Answer generation parameters}
+\label{tab:generation_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+max\_new\_tokens & 128 & Maximum answer length \\
+temperature & 0.3 & Sampling temperature \\
+top\_p & 0.9 & Nucleus sampling threshold \\
+do\_sample & true & Enable sampling vs greedy \\
+repetition\_penalty & 1.15 & Penalty for repeated tokens \\
+use\_chat\_template & true & Use model's chat template if available \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Answer Validation:}
+Post-processing to ensure quality:
+\begin{itemize}
+    \item \textbf{Truncation:} Limit to 4 sentences maximum
+    \item \textbf{Context Truncation:} Cap context at 2000 characters to prevent overwhelming
+    \item \textbf{Retry Mechanism:} If answer appears problematic (too short, repetitive, verbatim copying), retry with simplified prompt and lower temperature (0.2)
+    \item \textbf{Fallback:} Return "The information is not provided in the given context" for empty/invalid responses
+\end{itemize}
+
+\subsubsection{RAG Evaluation Dataset}
+
+We create a custom technical QA dataset from documentation corpora to evaluate RAG performance:
+
+\textbf{Dataset Characteristics:}
+\begin{itemize}
+    \item \textbf{Domain:} Technical documentation (ML frameworks, APIs)
+    \item \textbf{Size:} 10-50 question-answer pairs per evaluation
+    \item \textbf{Question Types:}
+    \begin{itemize}
+        \item Factual: "What is the default learning rate?"
+        \item Procedural: "How do you initialize a model?"
+        \item Comparative: "What's the difference between X and Y?"
+    \end{itemize}
+    \item \textbf{Answer Format:} Short-form answers (1-3 sentences)
+    \item \textbf{Ground Truth:} Human-verified reference answers
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{RAG evaluation dataset parameters}
+\label{tab:rag_eval_dataset_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+num\_questions & 10 & Number of QA pairs to evaluate \\
+dataset\_path & null & Path to custom QA JSON file \\
+compare\_no\_rag & true & Evaluate without retrieval baseline \\
+save\_detailed\_responses & false & Save individual responses to file \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Evaluation Protocol:}
+\begin{enumerate}
+    \item Index source documents using the RAG pipeline
+    \item For each test question:
+    \begin{itemize}
+        \item Retrieve top-K relevant chunks
+        \item Generate answer with context (RAG)
+        \item Generate answer without context (no-RAG baseline)
+    \end{itemize}
+    \item Compute metrics comparing predictions to reference answers
+    \item Aggregate results across all questions
+\end{enumerate}
+
+\subsubsection{Pipeline Integration with Compressed Models}
+
+The RAG pipeline is model-agnostic and interfaces with any compressed model through a unified ModelInterface:
+
+\begin{lstlisting}[language=Python, caption={RAG Pipeline Initialization}]
+from rag import RAGPipeline
+
+# Load compressed model
+model_interface = load_compressed_model("NF4")  
+
+# Initialize RAG pipeline
+rag_config = {
+    "chunking": {"strategy": "semantic", "chunk_size": 512},
+    "embedding": {"model_name": "all-MiniLM-L6-v2"},
+    "retrieval": {"top_k": 3, "rerank": False},
+    "generation": {"temperature": 0.3, "max_new_tokens": 128}
+}
+
+pipeline = RAGPipeline(rag_config)
+pipeline.setup(model_interface)
+
+# Index documents
+pipeline.index_documents("technical_docs.pdf")
+
+# Evaluate
+results = pipeline.evaluate(test_questions, compare_no_rag=True)
+\end{lstlisting}
+
+This design enables fair comparison of RAG performance across all compression methods, as all components except the generation model remain constant.
+
+\newpage
+\subsection{Evaluation Metrics and Benchmarks}
+
+Our evaluation framework assesses compressed models across three dimensions: computational efficiency, task performance, and retrieval-augmented generation capabilities.
+
+\subsubsection{Efficiency Metrics}
+We measure computational efficiency through the following metrics:
+
+\textbf{Latency Measurements:}
+\begin{itemize}
+    \item \textbf{Average Latency:} Mean time per generated token (ms) measured across multiple inference runs with warmup iterations to ensure stable GPU states
+    \item \textbf{Time to First Token (TTFT):} Initial response latency measuring the time from prompt submission to first token generation, critical for interactive applications
+    \item \textbf{Prefill vs. Decode Latency:} Separate measurement of prompt processing time (prefill) and autoregressive generation time (decode) to identify optimization bottlenecks
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Latency measurement parameters}
+\label{tab:latency_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+num\_warmup & 3 & Warmup iterations before measurement \\
+num\_runs & 10 & Number of measurement iterations \\
+max\_new\_tokens & 128 & Maximum tokens to generate per prompt \\
+prompts & 8 prompts & List of test prompts for benchmarking \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Throughput and Memory:}
+\begin{itemize}
+    \item \textbf{Throughput:} Sustained generation rate measured in tokens per second, averaged over extended generation sequences
+    \item \textbf{Peak Memory:} Maximum GPU memory allocated during inference (MB), captured using CUDA memory profiling
+    \item \textbf{Model Size:} Disk storage requirements (GB) including all parameters and buffers
+    \item \textbf{Memory Efficiency:} Ratio of model size to peak memory usage, indicating memory overhead beyond model parameters (e.g., activations, KV cache)
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Throughput and memory measurement parameters}
+\label{tab:throughput_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+num\_runs & 10 & Number of measurement iterations \\
+max\_new\_tokens & 128 & Tokens to generate per run \\
+batch\_size & 1 & Batch size for evaluation \\
+measure\_batch\_throughput & false & Test multiple batch sizes \\
+batch\_sizes & [1, 2, 4, 8] & Batch sizes to test (if enabled) \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Computational Efficiency:}
+\begin{itemize}
+    \item \textbf{Model FLOPs Utilization (MFU):} Percentage of theoretical peak hardware FLOPs achieved during inference, calculated as $\text{MFU} = \frac{\text{Achieved FLOPs/s}}{\text{Peak Hardware FLOPs/s}} \times 100\%$, where achieved FLOPs is the product of FLOPs per token and throughput
+    \item \textbf{Energy Consumption:} Estimated energy per token (mJ) based on device Thermal Design Power (TDP) and measured latency, using the formula $E = (P_{\text{TDP}} - P_{\text{idle}}) \times t$, where $P_{\text{idle}}$ is assumed to be 30\% of TDP
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Computational efficiency parameters}
+\label{tab:compute_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+device\_tdp\_watts & Auto-detected & Device thermal design power \\
+idle\_power\_ratio & 0.3 & Fraction of TDP at idle (30\%) \\
+peak\_tflops & Auto-detected & Hardware peak TFLOPs (FP16) \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Performance Benchmarks}
+We evaluate model quality using established language modeling benchmarks, organized by capability:
+
+\textbf{Language Modeling:}
+\begin{itemize}
+    \item \textbf{Perplexity:} Measured on WikiText-2 test set using sliding window evaluation with stride 512 to assess next-token prediction quality. Lower perplexity indicates better language understanding.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Perplexity evaluation parameters}
+\label{tab:perplexity_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+dataset & wikitext & HuggingFace dataset name \\
+dataset\_config & wikitext-2-raw-v1 & Dataset configuration \\
+split & test & Dataset split to evaluate \\
+num\_samples & 100 & Number of samples to process \\
+max\_length & 512 & Maximum sequence length \\
+stride & 512 & Sliding window stride (null=no sliding) \\
+batch\_size & 1 & Batch size for processing \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Selected Core Tasks:}
+
+All core tasks use the Language Model Evaluation Harness \cite{eval-harness} with consistent hyperparameters for reproducibility. We report accuracy (or pass@1 for code tasks) normalized to [0,1].
+
+\begin{table}[H]
+\centering
+\caption{Core task benchmark parameters}
+\label{tab:core_tasks_params}
+\small
+\begin{tabular}{lllp{4.5cm}}
+\hline
+\textbf{Task} & \textbf{Few-Shot} & \textbf{Metric} & \textbf{Description} \\
+\hline
+HellaSwag & 0 & acc\_norm & Commonsense reasoning via sentence completion in everyday scenarios \\
+\hline
+ARC-Easy & 0 & acc\_norm & Grade-school level science question answering \\
+\hline
+ARC-Challenge & 0 & acc\_norm & Challenge-level scientific reasoning questions \\
+\hline
+GSM8K & 8 & exact\_match & Grade-school math word problems with step-by-step reasoning \\
+\hline
+MMLU & 5 & acc & Multi-domain knowledge across 57 academic subjects \\
+\hline
+HumanEval & 0 & pass@1 & Python code generation evaluated on test case pass rate \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{LM-Eval harness global parameters}
+\label{tab:lm_eval_global_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+batch\_size & 1 & Global batch size for all tasks \\
+limit & null & Limit samples per task (null=all) \\
+random\_seed & 1234 & Random seed for reproducibility \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Original Mistral-7B Benchmarks:}
+
+\begin{table}[H]
+\centering
+\caption{Mistral-7B complete benchmark suite}
+\label{tab:mistral_full_suite}
+\footnotesize
+\begin{tabular}{llll}
+\hline
+\textbf{Category} & \textbf{Tasks} & \textbf{Few-Shot} & \textbf{Metric} \\
+\hline
+\multirow{8}{*}{\begin{tabular}[c]{@{}l@{}}Commonsense\\Reasoning\end{tabular}} 
+& HellaSwag & 0 & acc\_norm \\
+& Winogrande & 0 & acc \\
+& PIQA & 0 & acc\_norm \\
+& SIQA & 0 & acc \\
+& OpenbookQA & 0 & acc\_norm \\
+& ARC-Easy & 0 & acc\_norm \\
+& ARC-Challenge & 0 & acc\_norm \\
+& CommonsenseQA & 0 & acc \\
+\hline
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}World\\Knowledge\end{tabular}}
+& NaturalQuestions & 5 & exact\_match \\
+& TriviaQA & 5 & exact\_match \\
+\hline
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}Reading\\Comprehension\end{tabular}}
+& BoolQ & 0 & acc \\
+& QuAC & 0 & f1 \\
+\hline
+\multirow{2}{*}{Math}
+& GSM8K & 8 (maj@8) & exact\_match \\
+& MATH & 4 (maj@4) & exact\_match \\
+\hline
+\multirow{2}{*}{Code}
+& HumanEval & 0 & pass@1 \\
+& MBPP & 3 & pass@1 \\
+\hline
+\multirow{3}{*}{\begin{tabular}[c]{@{}l@{}}Aggregate\\Benchmarks\end{tabular}}
+& MMLU & 5 (57 tasks) & acc \\
+& BBH & 3 (23 tasks) & acc \\
+& AGI Eval & 3-5 & acc \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{RAG Evaluation}
+
+For retrieval-augmented generation, we evaluate both retrieval quality and answer generation using a custom question-answering dataset.
+
+\textbf{Retrieval Quality Metrics:}
+
+\begin{table}[H]
+\centering
+\caption{Retrieval quality metrics and parameters}
+\label{tab:retrieval_metrics_params}
+\small
+\begin{tabular}{lp{8cm}}
+\hline
+\textbf{Metric} & \textbf{Description} \\
+\hline
+Context Sufficiency & Fraction of queries where retrieved contexts contain sufficient information (80\% token overlap threshold) \\
+Context Precision & Relevance of retrieved chunks measured by query-context token overlap \\
+Context Coverage & Fraction of answer tokens present in retrieved contexts \\
+Retrieval Consistency & Standard deviation of retrieval scores, indicating stability \\
+Precision@K & Fraction of top-K retrieved items that are relevant \\
+Recall@K & Fraction of relevant items in top-K retrieved \\
+F1@K & Harmonic mean of Precision@K and Recall@K \\
+MRR & Mean reciprocal rank of first relevant item \\
+MAP & Mean average precision across all queries \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Retrieval evaluation parameters}
+\label{tab:retrieval_eval_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+top\_k & 3 & Number of chunks to retrieve \\
+k\_values & [1, 3, 5, 10] & K values for precision@k, recall@k \\
+similarity\_threshold & 0.3 & Minimum similarity score threshold \\
+relevance\_token\_threshold & 0.3 & Token overlap threshold for relevance \\
+sufficiency\_token\_threshold & 0.8 & Token overlap threshold for sufficiency \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Answer Generation Metrics:}
+
+\begin{table}[H]
+\centering
+\caption{Answer generation metrics and parameters}
+\label{tab:answer_metrics_params}
+\small
+\begin{tabular}{lp{8cm}}
+\hline
+\textbf{Metric} & \textbf{Description} \\
+\hline
+Exact Match (EM) & Binary correctness: perfect normalized string match \\
+F1 Score & Token-level precision-recall harmonic mean \\
+Answer Relevance & Query-answer token overlap (measures if answer addresses question) \\
+Faithfulness & Token containment: fraction of answer tokens in retrieved context \\
+ROUGE-1/2/L & N-gram overlap (unigram, bigram) and longest common subsequence \\
+BERTScore & Semantic similarity using contextual BERT embeddings (F1) \\
+BLEU & Translation-style matching with smoothing \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Answer generation parameters}
+\label{tab:answer_gen_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+max\_new\_tokens & 128 & Maximum tokens in generated answer \\
+temperature & 0.3 & Sampling temperature (lower=deterministic) \\
+top\_p & 0.9 & Nucleus sampling threshold \\
+repetition\_penalty & 1.15 & Penalty for repeated tokens \\
+normalize\_whitespace & true & Normalize whitespace in comparisons \\
+case\_sensitive & false & Case-sensitive matching \\
+remove\_punctuation & false & Remove punctuation before comparison \\
+rouge\_use\_stemmer & true & Use Porter stemmer for ROUGE \\
+bertscore\_lang & en & Language for BERTScore \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{RAG Efficiency:}
+
+\begin{table}[H]
+\centering
+\caption{RAG efficiency metrics}
+\label{tab:rag_efficiency_metrics}
+\small
+\begin{tabular}{lp{9cm}}
+\hline
+\textbf{Metric} & \textbf{Description} \\
+\hline
+Retrieval Time & Average time to retrieve top-k contexts (ms) \\
+RAG Generation Time & Time to generate answers with retrieved context (ms) \\
+No-RAG Generation Time & Baseline generation time without context (ms) \\
+RAG Throughput & Generation speed with context (tokens/sec) \\
+No-RAG Throughput & Generation speed without context (tokens/sec) \\
+Generation Speedup & Ratio of no-RAG to RAG generation time \\
+F1 Improvement & Delta between RAG and no-RAG F1 scores \\
+EM Improvement & Delta between RAG and no-RAG exact match scores \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{RAG evaluation dataset parameters}
+\label{tab:rag_dataset_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+num\_questions & 10 & Number of QA pairs to evaluate \\
+dataset\_path & null & Path to custom QA dataset (JSON) \\
+compare\_no\_rag & true & Compare with no-RAG baseline \\
+save\_detailed\_responses & false & Save individual Q\&A responses \\
+\hline
+\end{tabular}
+\end{table}
+
+All RAG metrics are averaged over the evaluation dataset sampled from a technical documentation corpus, with retrieval configured to return top-3 chunks per query by default.
+
+
+\newpage
+\section{Results}
+
+\subsection{Overview}
+We present a comprehensive comparison of compression techniques across three dimensions: efficiency gains, performance preservation, and RAG capabilities. Our analysis focuses on understanding the trade-offs between model size reduction, inference speed, and task performance for each compression method.
+
+\subsection{Compression Efficiency Analysis}
+
+\subsubsection{Quantization Methods}
+
+\begin{table}[H]
+\centering
+\caption{Efficiency comparison of quantization methods on Tesla T4 GPU}
+\label{tab:quant_efficiency}
+\small
+\begin{tabular}{lccccccccc}
+\hline
+\textbf{Method} & \textbf{Size} & \textbf{Memory} & \textbf{Latency} & \textbf{TTFT} & \textbf{Throughput} & \textbf{MFU} & \textbf{Energy} & \textbf{Prefill} & \textbf{Decode} \\
+ & \textbf{(GB)} & \textbf{(MB)} & \textbf{(ms/tok)} & \textbf{(ms)} & \textbf{(tok/s)} & \textbf{(\%)} & \textbf{(mJ/tok)} & \textbf{(ms)} & \textbf{(ms/tok)} \\
+\hline
+FP16 & 13.49 & 7013.03 & 62.97 & 68.84 & 15.84 & 2.36 & 3085.58 & 69.85 & 61.36 \\
+NF4 & 3.74 & 1859.11 & 81.12 & 177.16 & 12.30 & 1.83 & 3974.65 & 187.97 & 79.09 \\
+GPTQ & 3.87 & 4415.90 & 1136.80 & 1113.00 & 0.88 & 0.13 & 55703.12 & 1110.89 & 1117.76 \\
+AWQ & 3.87 & 1869.04 & 78.68 & 79.25 & 12.79 & 1.91 & 3855.44 & 92.76 & 77.22 \\
+HQQ & 3.74 & 4721.1 & 661.65 & 664.73 & 1.51 & 0.23 & 32420.79 & 663.17 & 649.84 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Memory and compression details for quantization methods}
+\label{tab:quant_memory}
+\small
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Method} & \textbf{Total} & \textbf{Bits per} & \textbf{Memory} & \textbf{KV Cache} & \textbf{Compression} & \textbf{Memory} \\
+ & \textbf{Params} & \textbf{Param} & \textbf{Efficiency} & \textbf{(MB)} & \textbf{Ratio} & \textbf{Reduction} \\
+\hline
+FP16 & 7.24B & 16.0 & 1.97 & 1024.0 & 1.00x & 1.00x \\
+NF4 & 7.24B & 4.0 & 2.06 & 1024.0 & 3.61x & 3.77x \\
+GPTQ & 7.24B & 4.0 & 0.90 & 1024.0 & 3.48x & 1.59x \\
+AWQ & 7.24B & 4.0 & 2.12 & 1024.0 & 3.49x & 3.75x \\
+HQQ & 7.24B & 4.0 & 0.81 & 1024.0 & 3.61x & 1.49x \\
+\hline
+\end{tabular}
+\end{table}
+
+% \subsubsection{Pruning Methods}
+
+% \begin{table}[H]
+% \centering
+% \caption{Efficiency comparison of pruning methods on Tesla T4 GPU}
+% \label{tab:pruning_efficiency}
+% \small
+% \begin{tabular}{lccccccccc}
+% \hline
+% \textbf{Method} & \textbf{Size} & \textbf{Memory} & \textbf{Latency} & \textbf{TTFT} & \textbf{Throughput} & \textbf{MFU} & \textbf{Energy} & \textbf{Prefill} & \textbf{Decode} \\
+%  & \textbf{(GB)} & \textbf{(MB)} & \textbf{(ms/tok)} & \textbf{(ms)} & \textbf{(tok/s)} & \textbf{(\%)} & \textbf{(mJ/tok)} & \textbf{(ms)} & \textbf{(ms/tok)} \\
+% \hline
+% FP16 & 13.49 & 7010.65 & 62.48 & --- & 15.97 & 2.38 & 3061.60 & --- & --- \\
+% SparseGPT & --- & --- & --- & --- & --- & --- & --- & --- & --- \\
+% Structured & --- & --- & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{Memory and compression details for pruning methods}
+% \label{tab:pruning_memory}
+% \small
+% \begin{tabular}{lcccccc}
+% \hline
+% \textbf{Method} & \textbf{Total} & \textbf{Sparsity/} & \textbf{Memory} & \textbf{KV Cache} & \textbf{Compression} & \textbf{Speedup} \\
+%  & \textbf{Params} & \textbf{Reduction} & \textbf{Efficiency} & \textbf{(MB)} & \textbf{Ratio} & \textbf{vs Baseline} \\
+% \hline
+% FP16 & 7.24B & 0\% & --- & --- & 1.00x & 1.00x \\
+% SparseGPT & 7.24B & 50\% sparse & --- & --- & --- & --- \\
+% Structured & 4.53B & 37.5\% layers & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \subsubsection{Knowledge Distillation}
+
+% \begin{table}[H]
+% \centering
+% \caption{Efficiency comparison of knowledge distillation on Tesla T4 GPU}
+% \label{tab:distill_efficiency}
+% \small
+% \begin{tabular}{lccccccccc}
+% \hline
+% \textbf{Method} & \textbf{Size} & \textbf{Memory} & \textbf{Latency} & \textbf{TTFT} & \textbf{Throughput} & \textbf{MFU} & \textbf{Energy} & \textbf{Prefill} & \textbf{Decode} \\
+%  & \textbf{(GB)} & \textbf{(MB)} & \textbf{(ms/tok)} & \textbf{(ms)} & \textbf{(tok/s)} & \textbf{(\%)} & \textbf{(mJ/tok)} & \textbf{(ms)} & \textbf{(ms/tok)} \\
+% \hline
+% FP16 & 13.49 & 7010.65 & 62.48 & --- & 15.97 & 2.38 & 3061.60 & --- & --- \\
+% Distilled & --- & --- & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{Memory and training details for knowledge distillation}
+% \label{tab:distill_memory}
+% \small
+% \begin{tabular}{lcccccc}
+% \hline
+% \textbf{Method} & \textbf{Total} & \textbf{Trainable} & \textbf{Memory} & \textbf{Training} & \textbf{Compression} & \textbf{Speedup} \\
+%  & \textbf{Params} & \textbf{Params} & \textbf{Efficiency} & \textbf{Time} & \textbf{Ratio} & \textbf{vs Baseline} \\
+% \hline
+% FP16 & 7.24B & 7.24B & --- & --- & 1.00x & 1.00x \\
+% Distilled & 7.24B & 100M (1.4\%) & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+\newpage
+\subsection{Performance Preservation Analysis}
+
+\subsubsection{Quantization Methods}
+
+\begin{table}[H]
+\centering
+\caption{Performance comparison of quantization methods across benchmarks}
+\label{tab:quant_performance}
+\small
+\begin{tabular}{lccccccc}
+\hline
+\textbf{Method} & \textbf{Perplexity} & \textbf{HellaSwag} & \textbf{ARC-Easy} & \textbf{ARC-Challenge} & \textbf{GSM8K} & \textbf{MMLU} & \textbf{HumanEval} \\
+ & \textit{(↓)} & \textit{(0-shot)} & \textit{(0-shot)} & \textit{(0-shot)} & \textit{(8-shot)} & \textit{(5-shot)} & \textit{(0-shot)} \\
+\hline
+FP16 & 12.79 & 0.72 & 0.76 & 0.58 & 0.36 & 1.00 & 0.05 \\
+NF4 & 13.02 & 0.70 & 0.75 & 0.58 & 0.27 & 0.55 & 0.05 \\
+GPTQ & 12.85 & 0.68 & 0.75 & 0.60 & --- & --- & 0.05 \\
+AWQ & 13.47 & --- & --- & --- & --- & --- & --- \\
+HQQ & 13.5 & 0.69 & 0.72 & 0.5 & --- & --- & --- \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Average accuracy and performance degradation for quantization methods}
+\label{tab:quant_performance_summary}
+\small
+\begin{tabular}{lcccc}
+\hline
+\textbf{Method} & \textbf{Average} & \textbf{Perplexity} & \textbf{Accuracy} & \textbf{Tasks} \\
+ & \textbf{Accuracy} & \textbf{Increase} & \textbf{Drop} & \textbf{Evaluated} \\
+\hline
+FP16 & 0.57 & --- & --- & 6 \\
+NF4 & 0.52 & +1.80\% & -0.05 & 6 \\
+GPTQ & 0.52 & +0.47\% & -0.05 & 6 \\
+AWQ & --- & +5.32\% & --- & 6 \\
+HQQ & --- & --- & --- & 6 \\
+\hline
+\end{tabular}
+\end{table}
+
+% \subsubsection{Pruning Methods}
+
+% \begin{table}[H]
+% \centering
+% \caption{Performance comparison of pruning methods across benchmarks}
+% \label{tab:pruning_performance}
+% \small
+% \begin{tabular}{lccccccc}
+% \hline
+% \textbf{Method} & \textbf{Perplexity} & \textbf{HellaSwag} & \textbf{ARC-Easy} & \textbf{ARC-Challenge} & \textbf{GSM8K} & \textbf{MMLU} & \textbf{HumanEval} \\
+%  & \textit{(↓)} & \textit{(0-shot)} & \textit{(0-shot)} & \textit{(0-shot)} & \textit{(8-shot)} & \textit{(5-shot)} & \textit{(0-shot)} \\
+% \hline
+% FP16 & 12.79 & 0.72 & 0.76 & 0.58 & --- & --- & 0.05 \\
+% SparseGPT & --- & --- & --- & --- & --- & --- & --- \\
+% Structured & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{Average accuracy and performance degradation for pruning methods}
+% \label{tab:pruning_performance_summary}
+% \small
+% \begin{tabular}{lcccc}
+% \hline
+% \textbf{Method} & \textbf{Average} & \textbf{Perplexity} & \textbf{Accuracy} & \textbf{Tasks} \\
+%  & \textbf{Accuracy} & \textbf{Increase} & \textbf{Drop} & \textbf{Evaluated} \\
+% \hline
+% FP16 & --- & --- & --- & 4 \\
+% SparseGPT & --- & --- & --- & 0 \\
+% Structured & --- & --- & --- & 0 \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \subsubsection{Knowledge Distillation}
+
+% \begin{table}[H]
+% \centering
+% \caption{Performance comparison of knowledge distillation across benchmarks}
+% \label{tab:distill_performance}
+% \small
+% \begin{tabular}{lccccccc}
+% \hline
+% \textbf{Method} & \textbf{Perplexity} & \textbf{HellaSwag} & \textbf{ARC-Easy} & \textbf{ARC-Challenge} & \textbf{GSM8K} & \textbf{MMLU} & \textbf{HumanEval} \\
+%  & \textit{(↓)} & \textit{(0-shot)} & \textit{(0-shot)} & \textit{(0-shot)} & \textit{(8-shot)} & \textit{(5-shot)} & \textit{(0-shot)} \\
+% \hline
+% FP16 & 12.79 & 0.72 & 0.76 & 0.58 & --- & --- & 0.05 \\
+% Distilled & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{Average accuracy and performance degradation for knowledge distillation}
+% \label{tab:distill_performance_summary}
+% \small
+% \begin{tabular}{lcccc}
+% \hline
+% \textbf{Method} & \textbf{Average} & \textbf{Perplexity} & \textbf{Accuracy} & \textbf{Tasks} \\
+%  & \textbf{Accuracy} & \textbf{Increase} & \textbf{Drop} & \textbf{Evaluated} \\
+% \hline
+% FP16 & --- & --- & --- & 4 \\
+% Distilled & --- & --- & --- & 0 \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+\newpage
+\subsection{RAG Performance Analysis}
+
+\subsubsection{Quantization Methods}
+
+\begin{table}[H]
+\centering
+\caption{RAG answer quality evaluation of quantization methods}
+\label{tab:quant_rag}
+\small
+\begin{tabular}{lcccccccc}
+\hline
+\textbf{Method} & \textbf{F1} & \textbf{EM} & \textbf{Faithful-} & \textbf{Relevance} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} & \textbf{BERTScore} \\
+ & & & \textbf{ness} & & & & & \textbf{F1} \\
+\hline
+FP16 & 0.217 & 0.0 & 0.559 & 0.094 & 0.279 & 0.092 & 0.197 & 0.658 \\
+NF4 & 0.205 & 0.0 & 0.539 & 0.083 & 0.244 & 0.086 & 0.177 & 0.614 \\
+GPTQ & --- & --- & --- & --- & --- & --- & --- & --- \\
+AWQ & 0.191 & 0.0 & 0.476 & 0.082 & 0.243 & 0.088 & 0.181 & 0.615 \\
+HQQ & --- & --- & --- & --- & --- & --- & --- & --- \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{RAG vs no-RAG comparison for quantization methods}
+\label{tab:quant_rag_comparison}
+\small
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Method} & \textbf{No-RAG} & \textbf{No-RAG} & \textbf{F1} & \textbf{EM} & \textbf{Avg Answer} & \textbf{Avg Answer} \\
+ & \textbf{F1} & \textbf{EM} & \textbf{Improvement} & \textbf{Improvement} & \textbf{Length (RAG)} & \textbf{Length (No-RAG)} \\
+\hline
+FP16 & 0.190 & 0.0 & +0.027 & 0.0 & 33.75 & --- \\
+NF4 & 0.181 & 0.0 & +0.024 & 0.0 & 31.95 & --- \\
+GPTQ & --- & --- & --- & --- & --- & --- \\
+AWQ & 0.165 & 0.0 & +0.025 & 0.0 & 30.5 & --- \\
+HQQ & --- & --- & --- & --- & --- & --- \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Context retrieval quality across quantization methods}
+\label{tab:quant_retrieval}
+\small
+\begin{tabular}{lccccccc}
+\hline
+\textbf{Method} & \textbf{Sufficiency} & \textbf{Precision} & \textbf{Coverage} & \textbf{Consistency} & \textbf{Avg Score} & \textbf{Avg Chunks} & \textbf{Avg Context} \\
+ & & & & \textbf{(std)} & & \textbf{Retrieved} & \textbf{Length} \\
+\hline
+FP16 & 0.796 & 0.564 & 0.756 & 0.090 & 0.800 & 3.0 & 1308.5 \\
+NF4 & 0.796 & 0.564 & 0.756 & 0.090 & 0.800 & 3.0 & 1308.5 \\
+GPTQ & --- & --- & --- & --- & --- & --- & --- \\
+AWQ & 0.796 & 0.564 & 0.756 & 0.090 & 0.800 & 3.0 & 1308.5 \\
+HQQ & --- & --- & --- & --- & --- & --- & --- \\
+\hline
+\end{tabular}
+\end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{IR-style retrieval metrics for quantization methods}
+% \label{tab:quant_ir_metrics}
+% \small
+% \begin{tabular}{lccccccc}
+% \hline
+% \textbf{Method} & \textbf{P@1} & \textbf{P@3} & \textbf{P@5} & \textbf{R@1} & \textbf{R@3} & \textbf{MRR} & \textbf{MAP} \\
+% \hline
+% FP16 & --- & --- & --- & --- & --- & --- & --- \\
+% NF4 & --- & --- & --- & --- & --- & --- & --- \\
+% GPTQ & --- & --- & --- & --- & --- & --- & --- \\
+% AWQ & --- & --- & --- & --- & --- & --- & --- \\
+% HQQ & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+\begin{table}[H]
+\centering
+\caption{RAG efficiency metrics for quantization methods}
+\label{tab:quant_rag_efficiency}
+\small
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Method} & \textbf{Retrieval} & \textbf{RAG Gen} & \textbf{No-RAG Gen} & \textbf{RAG} & \textbf{No-RAG} & \textbf{Generation} \\
+ & \textbf{Time (ms)} & \textbf{Time (ms)} & \textbf{Time (ms)} & \textbf{Throughput} & \textbf{Throughput} & \textbf{Speedup} \\
+ & & & & \textbf{(tok/s)} & \textbf{(tok/s)} & \\
+\hline
+FP16 & 24.7 & 8435.5 & 7855.2 & 5.33 & 9.34 & 0.93x \\
+NF4 & 28.0 & 10443.9 & 9965.0 & 4.37 & 7.06 & 0.95x \\
+GPTQ & --- & --- & --- & --- & --- & --- \\
+AWQ & 26.1 & 9993.9 & 7744.2 & 4.36 & 7.94 & 0.77x \\
+HQQ & --- & --- & --- & --- & --- & --- \\
+\hline
+\end{tabular}
+\end{table}
+
+% \subsubsection{Pruning Methods}
+
+% \begin{table}[H]
+% \centering
+% \caption{RAG answer quality evaluation of pruning methods}
+% \label{tab:pruning_rag}
+% \small
+% \begin{tabular}{lcccccccc}
+% \hline
+% \textbf{Method} & \textbf{F1} & \textbf{EM} & \textbf{Faithful-} & \textbf{Relevance} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} & \textbf{BERTScore} \\
+%  & & & \textbf{ness} & & & & & \textbf{F1} \\
+% \hline
+% FP16 & 0.183 & 0.0 & 0.414 & 0.109 & --- & --- & 0.169 & 0.528 \\
+% SparseGPT & --- & --- & --- & --- & --- & --- & --- & --- \\
+% Structured & --- & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{RAG vs no-RAG comparison for pruning methods}
+% \label{tab:pruning_rag_comparison}
+% \small
+% \begin{tabular}{lcccccc}
+% \hline
+% \textbf{Method} & \textbf{No-RAG} & \textbf{No-RAG} & \textbf{F1} & \textbf{EM} & \textbf{Avg Answer} & \textbf{Avg Answer} \\
+%  & \textbf{F1} & \textbf{EM} & \textbf{Improvement} & \textbf{Improvement} & \textbf{Length (RAG)} & \textbf{Length (No-RAG)} \\
+% \hline
+% FP16 & --- & --- & +0.011 & --- & --- & --- \\
+% SparseGPT & --- & --- & --- & --- & --- & --- \\
+% Structured & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{Context retrieval quality for pruning methods}
+% \label{tab:pruning_retrieval}
+% \small
+% \begin{tabular}{lccccccc}
+% \hline
+% \textbf{Method} & \textbf{Sufficiency} & \textbf{Precision} & \textbf{Coverage} & \textbf{Consistency} & \textbf{Avg Score} & \textbf{Avg Chunks} & \textbf{Avg Context} \\
+%  & & & & \textbf{(std)} & & \textbf{Retrieved} & \textbf{Length} \\
+% \hline
+% FP16 & 0.756 & 0.634 & 0.716 & 0.095 & --- & --- & --- \\
+% SparseGPT & --- & --- & --- & --- & --- & --- & --- \\
+% Structured & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{IR-style retrieval metrics for pruning methods}
+% \label{tab:pruning_ir_metrics}
+% \small
+% \begin{tabular}{lccccccc}
+% \hline
+% \textbf{Method} & \textbf{P@1} & \textbf{P@3} & \textbf{P@5} & \textbf{R@1} & \textbf{R@3} & \textbf{MRR} & \textbf{MAP} \\
+% \hline
+% FP16 & --- & --- & --- & --- & --- & --- & --- \\
+% SparseGPT & --- & --- & --- & --- & --- & --- & --- \\
+% Structured & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{RAG efficiency metrics for pruning methods}
+% \label{tab:pruning_rag_efficiency}
+% \small
+% \begin{tabular}{lcccccc}
+% \hline
+% \textbf{Method} & \textbf{Retrieval} & \textbf{RAG Gen} & \textbf{No-RAG Gen} & \textbf{RAG} & \textbf{No-RAG} & \textbf{Generation} \\
+%  & \textbf{Time (ms)} & \textbf{Time (ms)} & \textbf{Time (ms)} & \textbf{Throughput} & \textbf{Throughput} & \textbf{Speedup} \\
+%  & & & & \textbf{(tok/s)} & \textbf{(tok/s)} & \\
+% \hline
+% FP16 & --- & --- & --- & --- & --- & --- \\
+% SparseGPT & --- & --- & --- & --- & --- & --- \\
+% Structured & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \subsubsection{Knowledge Distillation}
+
+% \begin{table}[H]
+% \centering
+% \caption{RAG answer quality evaluation of knowledge distillation}
+% \label{tab:distill_rag}
+% \small
+% \begin{tabular}{lcccccccc}
+% \hline
+% \textbf{Method} & \textbf{F1} & \textbf{EM} & \textbf{Faithful-} & \textbf{Relevance} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} & \textbf{BERTScore} \\
+%  & & & \textbf{ness} & & & & & \textbf{F1} \\
+% \hline
+% FP16 & 0.183 & 0.0 & 0.414 & 0.109 & --- & --- & 0.169 & 0.528 \\
+% Distilled & --- & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{RAG vs no-RAG comparison for knowledge distillation}
+% \label{tab:distill_rag_comparison}
+% \small
+% \begin{tabular}{lcccccc}
+% \hline
+% \textbf{Method} & \textbf{No-RAG} & \textbf{No-RAG} & \textbf{F1} & \textbf{EM} & \textbf{Avg Answer} & \textbf{Avg Answer} \\
+%  & \textbf{F1} & \textbf{EM} & \textbf{Improvement} & \textbf{Improvement} & \textbf{Length (RAG)} & \textbf{Length (No-RAG)} \\
+% \hline
+% FP16 & --- & --- & +0.011 & --- & --- & --- \\
+% Distilled & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{Context retrieval quality for knowledge distillation}
+% \label{tab:distill_retrieval}
+% \small
+% \begin{tabular}{lccccccc}
+% \hline
+% \textbf{Method} & \textbf{Sufficiency} & \textbf{Precision} & \textbf{Coverage} & \textbf{Consistency} & \textbf{Avg Score} & \textbf{Avg Chunks} & \textbf{Avg Context} \\
+%  & & & & \textbf{(std)} & & \textbf{Retrieved} & \textbf{Length} \\
+% \hline
+% FP16 & 0.756 & 0.634 & 0.716 & 0.095 & --- & --- & --- \\
+% Distilled & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{IR-style retrieval metrics for knowledge distillation}
+% \label{tab:distill_ir_metrics}
+% \small
+% \begin{tabular}{lccccccc}
+% \hline
+% \textbf{Method} & \textbf{P@1} & \textbf{P@3} & \textbf{P@5} & \textbf{R@1} & \textbf{R@3} & \textbf{MRR} & \textbf{MAP} \\
+% \hline
+% FP16 & --- & --- & --- & --- & --- & --- & --- \\
+% Distilled & --- & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{RAG efficiency metrics for knowledge distillation}
+% \label{tab:pruning_rag_efficiency}
+% \small
+% \begin{tabular}{lcccccc}
+% \hline
+% \textbf{Method} & \textbf{Retrieval} & \textbf{RAG Gen} & \textbf{No-RAG Gen} & \textbf{RAG} & \textbf{No-RAG} & \textbf{Generation} \\
+%  & \textbf{Time (ms)} & \textbf{Time (ms)} & \textbf{Time (ms)} & \textbf{Throughput} & \textbf{Throughput} & \textbf{Speedup} \\
+%  & & & & \textbf{(tok/s)} & \textbf{(tok/s)} & \\
+% \hline
+% FP16 & --- & --- & --- & --- & --- & --- \\
+% Distilled & --- & --- & --- & --- & --- & --- \\
+% \hline
+% \end{tabular}
+% \end{table}
+
+\newpage
+\section{Discussion}
+
+[ discussion ]
+
+
+\section{Conclusion}
+
+[ conclusion ]
+
+
+\bibliographystyle{plain}
+\nocite{*}
+\bibliography{references}
+
+\end{document}
