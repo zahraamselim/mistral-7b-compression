@@ -26,16 +26,13 @@ def _tokenize_safe(model_interface, text, padding: bool = True, max_length: int 
     tokenizer = model_interface.get_tokenizer()
     device = model_interface.get_device()
     
-    # Check if model_interface has custom tokenize method (ExLlamaV2)
     if hasattr(model_interface, 'tokenize'):
         if isinstance(text, list):
-            # For batch, tokenize each separately
             all_input_ids = []
             for t in text:
                 result = model_interface.tokenize(t, return_tensors='pt', padding=padding)
                 all_input_ids.append(result['input_ids'])
             
-            # Pad to same length
             max_len = max(ids.shape[1] for ids in all_input_ids)
             padded_ids = []
             for ids in all_input_ids:
@@ -51,7 +48,6 @@ def _tokenize_safe(model_interface, text, padding: bool = True, max_length: int 
         else:
             return model_interface.tokenize(text, return_tensors='pt', padding=padding)
     
-    # Standard HuggingFace tokenizer
     kwargs = {'return_tensors': 'pt', 'padding': padding}
     if max_length:
         kwargs['truncation'] = True
@@ -100,28 +96,16 @@ def measure_throughput(
     """
     logger.info(f"Measuring throughput ({num_runs} runs)...")
     
-    model = model_interface.get_model()
-    tokenizer = model_interface.get_tokenizer()
     device = model_interface.get_device()
     is_cuda = 'cuda' in str(device).lower()
     
-    # Warmup
     logger.debug("Running throughput warmup...")
     try:
-        inputs = _tokenize_safe(model_interface, prompts[0])
-        if not hasattr(inputs['input_ids'], 'to'):
-            inputs['input_ids'] = inputs['input_ids'].to(device)
-            inputs['attention_mask'] = inputs['attention_mask'].to(device)
-        
-        pad_token_id = tokenizer.pad_token_id if hasattr(tokenizer, 'pad_token_id') else 0
-        
-        with inference_mode(is_cuda):
-            _ = model.generate(
-                **inputs,
-                max_new_tokens=10,
-                do_sample=False,
-                pad_token_id=pad_token_id
-            )
+        _ = model_interface.generate(
+            prompts[0],
+            max_new_tokens=10,
+            do_sample=False
+        )
     except Exception as e:
         logger.warning(f"Throughput warmup failed: {e}")
     
@@ -137,33 +121,31 @@ def measure_throughput(
         
         try:
             inputs = _tokenize_safe(model_interface, prompt)
-            if not hasattr(inputs['input_ids'], 'to'):
-                inputs['input_ids'] = inputs['input_ids'].to(device)
-                inputs['attention_mask'] = inputs['attention_mask'].to(device)
+            prompt_length = inputs['input_ids'].shape[1] if hasattr(inputs['input_ids'], 'shape') else len(inputs['input_ids'][0])
             
             if is_cuda and torch.cuda.is_available():
                 torch.cuda.synchronize()
             
             start_time = time.perf_counter()
             
-            pad_token_id = tokenizer.pad_token_id if hasattr(tokenizer, 'pad_token_id') else 0
-            eos_token_id = tokenizer.eos_token_id if hasattr(tokenizer, 'eos_token_id') else None
-            
-            with inference_mode(is_cuda):
-                outputs = model.generate(
-                    **inputs,
-                    max_new_tokens=max_new_tokens,
-                    do_sample=False,
-                    pad_token_id=pad_token_id,
-                    eos_token_id=eos_token_id
-                )
+            output = model_interface.generate(
+                prompt,
+                max_new_tokens=max_new_tokens,
+                do_sample=False
+            )
             
             if is_cuda and torch.cuda.is_available():
                 torch.cuda.synchronize()
             
             end_time = time.perf_counter()
             
-            tokens = outputs.shape[1] - inputs["input_ids"].shape[1]
+            if isinstance(output, str):
+                tokenizer = model_interface.get_tokenizer()
+                output_tokens = tokenizer.encode(output, add_special_tokens=False)
+                tokens = len(output_tokens)
+            else:
+                tokens = output.shape[1] - prompt_length if hasattr(output, 'shape') else max_new_tokens
+            
             run_time = end_time - start_time
             
             total_tokens += tokens
@@ -221,8 +203,6 @@ def measure_batch_throughput(
     """
     logger.info(f"Measuring batch throughput for sizes: {batch_sizes}")
     
-    model = model_interface.get_model()
-    tokenizer = model_interface.get_tokenizer()
     device = model_interface.get_device()
     is_cuda = 'cuda' in str(device).lower()
     
@@ -231,54 +211,41 @@ def measure_batch_throughput(
     for batch_size in batch_sizes:
         logger.info(f"Testing batch size {batch_size}...")
         
+        if batch_size > 1:
+            logger.warning(f"Batch size {batch_size} > 1 not supported for ExLlamaV2, skipping")
+            continue
+        
         try:
-            batch_prompts = prompts[:batch_size]
-            inputs = _tokenize_safe(
-                model_interface,
-                batch_prompts,
-                padding=True,
-                max_length=512
+            prompt = prompts[0]
+            
+            _ = model_interface.generate(
+                prompt,
+                max_new_tokens=10,
+                do_sample=False
             )
-            
-            if not hasattr(inputs['input_ids'], 'to'):
-                inputs['input_ids'] = inputs['input_ids'].to(device)
-                inputs['attention_mask'] = inputs['attention_mask'].to(device)
-            
-            # Warmup
-            pad_token_id = tokenizer.pad_token_id if hasattr(tokenizer, 'pad_token_id') else 0
-            
-            with inference_mode(is_cuda):
-                _ = model.generate(
-                    **inputs,
-                    max_new_tokens=10,
-                    do_sample=False,
-                    pad_token_id=pad_token_id
-                )
             
             if is_cuda and torch.cuda.is_available():
                 torch.cuda.synchronize()
             
-            # Measure
             start_time = time.perf_counter()
             
-            with inference_mode(is_cuda):
-                outputs = model.generate(
-                    **inputs,
-                    max_new_tokens=max_new_tokens,
-                    do_sample=False,
-                    pad_token_id=pad_token_id
-                )
+            output = model_interface.generate(
+                prompt,
+                max_new_tokens=max_new_tokens,
+                do_sample=False
+            )
             
             if is_cuda and torch.cuda.is_available():
                 torch.cuda.synchronize()
             
             end_time = time.perf_counter()
             
-            # Calculate total tokens
-            total_tokens = 0
-            for i in range(outputs.shape[0]):
-                num_new_tokens = outputs[i].shape[0] - inputs['input_ids'][i].shape[0]
-                total_tokens += num_new_tokens
+            if isinstance(output, str):
+                tokenizer = model_interface.get_tokenizer()
+                output_tokens = tokenizer.encode(output, add_special_tokens=False)
+                total_tokens = len(output_tokens)
+            else:
+                total_tokens = max_new_tokens
             
             run_time = end_time - start_time
             throughput = total_tokens / run_time if run_time > 0 else 0.0

@@ -78,78 +78,78 @@ Alexandria, Egypt\\
 
 \maketitle
 
-% \begin{abstract}
-% The deployment of Large Language Models (LLMs) on resource-constrained edge hardware is significantly impeded by memory bandwidth bottlenecks. Post-Training Quantization (PTQ) has emerged as a standard compression paradigm, yet comprehensive benchmarking of modern quantization methods on consumer-grade hardware remains limited. This study conducts a rigorous empirical evaluation of five advanced quantization techniques (NF4, GPTQ, AWQ, HQQ, and AutoRound) applied to Mistral-7B on NVIDIA Tesla T4 hardware. Our findings indicate that NormalFloat 4-bit (NF4) quantization establishes an optimal Pareto frontier, achieving 3.6× memory reduction while maintaining superior task performance and hardware compatibility. Critically, we identify that hardware-algorithm compatibility significantly influences performance, with distribution-based methods (NF4) providing superior stability on Turing architectures compared to kernel-dependent methods (GPTQ, HQQ) that may experience severe fallback overhead. Our analysis reveals task-dependent sensitivity to quantization, where mathematical reasoning degrades by 25\% while knowledge retrieval remains robust. We provide prescriptive deployment guidelines identifying NF4 as the superior strategy for balancing throughput, energy efficiency, and task performance on edge hardware.
-% \end{abstract}
+\begin{abstract}
+The deployment of Large Language Models (LLMs) on resource-constrained edge hardware is significantly impeded by memory bandwidth bottlenecks. Post-Training Quantization (PTQ) has emerged as a standard compression paradigm, yet comprehensive benchmarking of modern quantization methods on consumer-grade hardware remains limited. This study conducts a rigorous empirical evaluation of five advanced quantization techniques (NF4, GPTQ, AWQ, HQQ, and AutoRound) applied to Mistral-7B on NVIDIA Tesla T4 hardware. Our findings indicate that NormalFloat 4-bit (NF4) quantization establishes an optimal Pareto frontier, achieving 3.6× memory reduction while maintaining superior task performance and hardware compatibility. Critically, we identify that hardware-algorithm compatibility significantly influences performance, with distribution-based methods (NF4) providing superior stability on Turing architectures compared to kernel-dependent methods (GPTQ, HQQ) that may experience severe fallback overhead. Our analysis reveals task-dependent sensitivity to quantization, where mathematical reasoning degrades by 25\% while knowledge retrieval remains robust. We provide prescriptive deployment guidelines identifying NF4 as the superior strategy for balancing throughput, energy efficiency, and task performance on edge hardware.
+\end{abstract}
 
-% \begin{IEEEkeywords}
-% LLM Quantization, Edge Computing, Mistral-7B, Efficiency Benchmarking, Post-Training Quantization, Hardware Compatibility
-% \end{IEEEkeywords}
+\begin{IEEEkeywords}
+LLM Quantization, Edge Computing, Mistral-7B, Efficiency Benchmarking, Post-Training Quantization, Hardware Compatibility
+\end{IEEEkeywords}
 
-% \section{Introduction}
+\section{Introduction}
 
-% The democratization of Large Language Models (LLMs), as exemplified by architectures such as Mistral-7B \cite{jiang2023mistral}, holds the potential to introduce advanced reasoning capabilities to edge environments. Nonetheless, the shift from cloud-scale infrastructure to consumer-grade hardware, such as the NVIDIA T4 and RTX series, is impeded by a fundamental resource constraint: memory bandwidth. A typical 7-billion parameter model in half-precision (FP16) necessitates approximately 14GB of Video Random Access Memory (VRAM) solely for weights, thereby leaving minimal capacity for the dynamic memory allocation required during inference.
+The democratization of Large Language Models (LLMs), as exemplified by architectures such as Mistral-7B \cite{jiang2023mistral}, holds the potential to introduce advanced reasoning capabilities to edge environments. Nonetheless, the shift from cloud-scale infrastructure to consumer-grade hardware, such as the NVIDIA T4 and RTX series, is impeded by a fundamental resource constraint: memory bandwidth. A typical 7-billion parameter model in half-precision (FP16) necessitates approximately 14GB of Video Random Access Memory (VRAM) solely for weights, thereby leaving minimal capacity for the dynamic memory allocation required during inference.
 
-% While 4-bit Post-Training Quantization (PTQ) techniques such as GPTQ \cite{frantar2023gptq} and AWQ \cite{lin2023awq} theoretically reduce model size by approximately 70\%, existing literature predominantly evaluates these methods via perplexity (PPL) or zero-shot accuracy on general benchmarks. A critical gap exists in understanding how these compression methods perform across diverse task categories and, crucially, how hardware architecture influences their practical effectiveness.
+While 4-bit Post-Training Quantization (PTQ) techniques such as GPTQ \cite{frantar2023gptq} and AWQ \cite{lin2023awq} theoretically reduce model size by approximately 70\%, existing literature predominantly evaluates these methods via perplexity (PPL) or zero-shot accuracy on general benchmarks. A critical gap exists in understanding how these compression methods perform across diverse task categories and, crucially, how hardware architecture influences their practical effectiveness.
 
-% \subsection{Research Gaps}
+\subsection{Research Gaps}
 
-% Current quantization research exhibits three critical limitations:
+Current quantization research exhibits three critical limitations:
 
-% \textbf{Hardware-Agnostic Evaluation:} Most studies assume kernel support universality, overlooking that quantization methods optimized for Ampere/Ada architectures may experience severe degradation on older Turing GPUs prevalent in edge deployments.
+\textbf{Hardware-Agnostic Evaluation:} Most studies assume kernel support universality, overlooking that quantization methods optimized for Ampere/Ada architectures may experience severe degradation on older Turing GPUs prevalent in edge deployments.
 
-% \textbf{Limited Task Diversity:} Evaluations typically focus on perplexity and a narrow benchmark suite, failing to assess task-specific sensitivity across mathematical reasoning, code generation, and knowledge retrieval domains.
+\textbf{Limited Task Diversity:} Evaluations typically focus on perplexity and a narrow benchmark suite, failing to assess task-specific sensitivity across mathematical reasoning, code generation, and knowledge retrieval domains.
 
-% \textbf{Incomplete Efficiency Profiling:} Beyond model size and latency, critical metrics like energy consumption, Model FLOPs Utilization (MFU), and Time-to-First-Token (TTFT) remain underexplored, yet are essential for edge deployment viability.
+\textbf{Incomplete Efficiency Profiling:} Beyond model size and latency, critical metrics like energy consumption, Model FLOPs Utilization (MFU), and Time-to-First-Token (TTFT) remain underexplored, yet are essential for edge deployment viability.
 
-% \subsection{Contributions}
+\subsection{Contributions}
 
-% This study addresses these gaps through three principal contributions:
+This study addresses these gaps through three principal contributions:
 
-% \begin{enumerate}
-% \item \textbf{Hardware-Aware Compatibility Analysis:} We demonstrate that algorithm-hardware compatibility significantly influences performance. Distribution-based methods (NF4) provide superior stability on Turing architectures (Tesla T4) compared to methods reliant on specific kernel optimizations.
+\begin{enumerate}
+\item \textbf{Hardware-Aware Compatibility Analysis:} We demonstrate that algorithm-hardware compatibility significantly influences performance. Distribution-based methods (NF4) provide superior stability on Turing architectures (Tesla T4) compared to methods reliant on specific kernel optimizations.
 
-% \item \textbf{Comprehensive Task-Specific Evaluation:} Extending beyond perplexity, we assess performance across six task categories: mathematical reasoning, code generation, world knowledge, commonsense reasoning, reading comprehension, and language understanding. We establish that quantization impacts tasks differentially, with mathematical reasoning showing 25\% degradation while knowledge retrieval remains robust.
+\item \textbf{Comprehensive Task-Specific Evaluation:} Extending beyond perplexity, we assess performance across six task categories: mathematical reasoning, code generation, world knowledge, commonsense reasoning, reading comprehension, and language understanding. We establish that quantization impacts tasks differentially, with mathematical reasoning showing 25\% degradation while knowledge retrieval remains robust.
 
-% \item \textbf{System-Level Efficiency Profiling:} We provide complete efficiency analysis including latency decomposition (prefill vs. decode), energy consumption, MFU, and memory footprint, enabling practitioners to make informed deployment decisions.
-% \end{enumerate}
+\item \textbf{System-Level Efficiency Profiling:} We provide complete efficiency analysis including latency decomposition (prefill vs. decode), energy consumption, MFU, and memory footprint, enabling practitioners to make informed deployment decisions.
+\end{enumerate}
 
-% The remainder of this paper is organized as follows: Section II reviews related work in model quantization. Section III details our experimental methodology. Section IV presents comprehensive results across efficiency and performance dimensions. Section V discusses implications and provides deployment guidelines. Section VI concludes with future research directions.
+The remainder of this paper is organized as follows: Section II reviews related work in model quantization. Section III details our experimental methodology. Section IV presents comprehensive results across efficiency and performance dimensions. Section V discusses implications and provides deployment guidelines. Section VI concludes with future research directions.
 
-% \section{Related Work}
+\section{Related Work}
 
-% Model compression for large language models (LLMs) has emerged as a critical research area to address substantial computational and memory requirements. We focus our review on quantization techniques, the primary compression paradigm evaluated in this study.
+Model compression for large language models (LLMs) has emerged as a critical research area to address substantial computational and memory requirements. We focus our review on quantization techniques, the primary compression paradigm evaluated in this study.
 
-% \subsection{Quantization Fundamentals}
+\subsection{Quantization Fundamentals}
 
-% Quantization reduces numerical precision of model parameters and activations, typically converting from 32-bit floating-point (FP32) or 16-bit floating-point (FP16) to lower-bit integer formats. Two fundamental strategies exist: \textit{quantization-aware training (QAT)} and \textit{post-training quantization (PTQ)}.
+Quantization reduces numerical precision of model parameters and activations, typically converting from 32-bit floating-point (FP32) or 16-bit floating-point (FP16) to lower-bit integer formats. Two fundamental strategies exist: \textit{quantization-aware training (QAT)} and \textit{post-training quantization (PTQ)}.
 
-% \subsubsection{Quantization-Aware Training}
+\subsubsection{Quantization-Aware Training}
 
-% QAT incorporates quantization simulation during training, enabling models to adapt to reduced precision. \textbf{LLM-QAT} \cite{liu2023llmqat} implements standard QAT through knowledge distillation from full-precision models. \textbf{BitDistiller} \cite{shao2024bitdistiller} advances QAT for sub-4-bit precisions through asymmetric quantization and adaptive clipping. \textbf{OneBit} \cite{li2024onebit} achieves 1-bit parameter representation. However, QAT's limitation is substantial retraining cost, leading researchers to integrate Parameter-Efficient Fine-Tuning techniques like LoRA.
+QAT incorporates quantization simulation during training, enabling models to adapt to reduced precision. \textbf{LLM-QAT} \cite{liu2023llmqat} implements standard QAT through knowledge distillation from full-precision models. \textbf{BitDistiller} \cite{shao2024bitdistiller} advances QAT for sub-4-bit precisions through asymmetric quantization and adaptive clipping. \textbf{OneBit} \cite{li2024onebit} achieves 1-bit parameter representation. However, QAT's limitation is substantial retraining cost, leading researchers to integrate Parameter-Efficient Fine-Tuning techniques like LoRA.
 
-% \subsubsection{Post-Training Quantization}
+\subsubsection{Post-Training Quantization}
 
-% PTQ applies quantization after training without retraining costs, making it attractive for resource-constrained practitioners. PTQ methods are categorized by quantization targets:
+PTQ applies quantization after training without retraining costs, making it attractive for resource-constrained practitioners. PTQ methods are categorized by quantization targets:
 
-% \paragraph{Weight-Only Quantization}
-% This approach compresses only model weights while maintaining full-precision activations. \textbf{GPTQ} \cite{frantar2023gptq} proposes layer-wise quantization using inverse Hessian information for 3/4-bit quantization. \textbf{QuIP} \cite{chee2023quip} achieves 2-bit quantization through LDL decomposition of the Hessian matrix.
+\paragraph{Weight-Only Quantization}
+This approach compresses only model weights while maintaining full-precision activations. \textbf{GPTQ} \cite{frantar2023gptq} proposes layer-wise quantization using inverse Hessian information for 3/4-bit quantization. \textbf{QuIP} \cite{chee2023quip} achieves 2-bit quantization through LDL decomposition of the Hessian matrix.
 
-% Several methods preserve sensitive weights: \textbf{AWQ} \cite{lin2023awq} stores the top 1\% most impactful weights in high-precision with per-channel scaling. \textbf{OWQ} \cite{lee2024owq} preserves weights sensitive to activation outliers. \textbf{SpQR} \cite{dettmers2024spqr} uses L2 error as a sensitivity metric. \textbf{SqueezeLLM} \cite{kim2023squeezellm} introduces sensitivity-based weight clustering using k-means.
+Several methods preserve sensitive weights: \textbf{AWQ} \cite{lin2023awq} stores the top 1\% most impactful weights in high-precision with per-channel scaling. \textbf{OWQ} \cite{lee2024owq} preserves weights sensitive to activation outliers. \textbf{SpQR} \cite{dettmers2024spqr} uses L2 error as a sensitivity metric. \textbf{SqueezeLLM} \cite{kim2023squeezellm} introduces sensitivity-based weight clustering using k-means.
 
-% \paragraph{Weight-Activation Quantization}
-% This extends quantization to both weights and activations for true end-to-end low-precision inference. \textbf{ZeroQuant} \cite{yao2022zeroquant} pioneered this approach with group-wise weight quantization and token-wise activation quantization for INT8. \textbf{LLM.int8()} \cite{dettmers2022llmint8} addresses outliers by storing outlier features in high-precision. \textbf{SmoothQuant} \cite{xiao2023smoothquant} uses per-channel scaling to smooth activation outliers. \textbf{OmniQuant} \cite{shao2024omniquant} shifts quantization challenges from activations to weights through clipping threshold optimization.
+\paragraph{Weight-Activation Quantization}
+This extends quantization to both weights and activations for true end-to-end low-precision inference. \textbf{ZeroQuant} \cite{yao2022zeroquant} pioneered this approach with group-wise weight quantization and token-wise activation quantization for INT8. \textbf{LLM.int8()} \cite{dettmers2022llmint8} addresses outliers by storing outlier features in high-precision. \textbf{SmoothQuant} \cite{xiao2023smoothquant} uses per-channel scaling to smooth activation outliers. \textbf{OmniQuant} \cite{shao2024omniquant} shifts quantization challenges from activations to weights through clipping threshold optimization.
 
-% \paragraph{On-the-Fly Quantization}
-% \textbf{Half-Quadratic Quantization (HQQ)} \cite{badri2024hqq} facilitates rapid, calibration-free quantization suitable for dynamic deployment, optimizing quantization parameters on-the-fly via a custom loss function.
+\paragraph{On-the-Fly Quantization}
+\textbf{Half-Quadratic Quantization (HQQ)} \cite{badri2024hqq} facilitates rapid, calibration-free quantization suitable for dynamic deployment, optimizing quantization parameters on-the-fly via a custom loss function.
 
-% \subsection{Emerging Methods}
+\subsection{Emerging Methods}
 
-% \textbf{AutoRound} represents recent advances in adaptive quantization, using iterative optimization to determine optimal quantization parameters per layer based on reconstruction error minimization.
+\textbf{AutoRound} represents recent advances in adaptive quantization, using iterative optimization to determine optimal quantization parameters per layer based on reconstruction error minimization.
 
-% \subsection{Research Gap}
+\subsection{Research Gap}
 
-% While these methods demonstrate theoretical compression effectiveness, systematic evaluation on consumer-grade edge hardware with comprehensive efficiency profiling remains limited. Our work fills this gap by providing hardware-aware benchmarking on Tesla T4 with complete task-specific and efficiency analysis.
+While these methods demonstrate theoretical compression effectiveness, systematic evaluation on consumer-grade edge hardware with comprehensive efficiency profiling remains limited. Our work fills this gap by providing hardware-aware benchmarking on Tesla T4 with complete task-specific and efficiency analysis.
 
 \section{Methodology}
 
@@ -158,6 +158,37 @@ Alexandria, Egypt\\
 This study utilizes \textbf{Mistral-7B-v0.1} \cite{jiang2023mistral} as the baseline model, selected for its parameter efficiency and strong performance profile. All experiments are conducted on a single \textbf{NVIDIA Tesla T4 GPU (16GB VRAM)} to simulate realistic edge deployment scenarios. The software environment includes PyTorch 2.x, Transformers 4.x, and quantization-specific libraries (bitsandbytes, AutoGPTQ, AutoAWQ, HQQ).
 
 \subsection{Compression Techniques}
+
+\subsubsection{NF4 (NormalFloat 4-bit)}
+
+NF4 utilizes the quantile-based NormalFloat data type, which is information-theoretically optimal for zero-centered normal distributions. Double quantization is employed to further minimize memory footprint by quantizing the quantization constants themselves \cite{dettmers2023qlora}.
+
+\textbf{Configuration:}
+\begin{itemize}
+\item Quantization type: NF4 (NormalFloat4)
+\item Double quantization: Enabled
+\item Compute dtype: float16
+\item Group size: Per-tensor
+\end{itemize}
+
+\textbf{Implementation:}
+\begin{lstlisting}
+from transformers import BitsAndBytesConfig
+import torch
+
+nf4_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_compute_dtype=torch.float16
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "mistralai/Mistral-7B-Instruct-v0.1",
+    quantization_config=nf4_config,
+    device_map="auto"
+)
+\end{lstlisting}
 
 \subsubsection{GPTQ}
 
@@ -297,37 +328,6 @@ For Mistral-7B with 7.24B parameters, theoretical model sizes are:
 \end{itemize}
 
 where overhead includes quantization metadata (scales, zero-points) and unquantized components (embeddings, layer norms).
-
-\subsubsection{NF4 (NormalFloat 4-bit)}
-
-NF4 utilizes the quantile-based NormalFloat data type, which is information-theoretically optimal for zero-centered normal distributions. Double quantization is employed to further minimize memory footprint by quantizing the quantization constants themselves \cite{dettmers2023qlora}.
-
-\textbf{Configuration:}
-\begin{itemize}
-\item Quantization type: NF4 (NormalFloat4)
-\item Double quantization: Enabled
-\item Compute dtype: float16
-\item Group size: Per-tensor
-\end{itemize}
-
-\textbf{Implementation:}
-\begin{lstlisting}
-from transformers import BitsAndBytesConfig
-import torch
-
-nf4_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_use_double_quant=True,
-    bnb_4bit_compute_dtype=torch.float16
-)
-
-model = AutoModelForCausalLM.from_pretrained(
-    "mistralai/Mistral-7B-Instruct-v0.1",
-    quantization_config=nf4_config,
-    device_map="auto"
-)
-\end{lstlisting}
 
 \subsubsection{AWQ (Activation-aware Weight Quantization)}
 

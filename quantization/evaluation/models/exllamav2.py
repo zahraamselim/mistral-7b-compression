@@ -110,6 +110,7 @@ class ExLlamaV2Model(ModelInterface):
     
     def generate(
         self,
+        prompt: str = None,
         input_ids: torch.Tensor = None,
         attention_mask: torch.Tensor = None,
         max_new_tokens: int = 128,
@@ -119,42 +120,59 @@ class ExLlamaV2Model(ModelInterface):
         top_k: int = 50,
         pad_token_id: int = None,
         eos_token_id: int = None,
+        return_full_text: bool = False,
         **kwargs
-    ) -> torch.Tensor:
+    ) -> str:
         """
-        HuggingFace-compatible generate method for benchmarking.
+        Generate text from prompt or input_ids.
         
-        Returns tensor of token IDs including input.
+        Args:
+            prompt: Input text string
+            input_ids: Token IDs tensor
+            attention_mask: Attention mask tensor
+            max_new_tokens: Maximum tokens to generate
+            do_sample: Whether to use sampling
+            temperature: Sampling temperature
+            top_p: Nucleus sampling parameter
+            top_k: Top-k sampling parameter
+            pad_token_id: Padding token ID
+            eos_token_id: End of sequence token ID
+            return_full_text: Return prompt + generation
+            kwargs: Additional arguments
+            
+        Returns:
+            Generated text string
         """
         try:
             from exllamav2.generator import ExLlamaV2StreamingGenerator, ExLlamaV2Sampler
         except ImportError:
             raise ImportError("exllamav2 required")
         
-        # Handle input
-        if input_ids is None:
-            raise ValueError("input_ids required")
+        if prompt is None and input_ids is None:
+            raise ValueError("Either prompt or input_ids required")
         
-        # Convert to ExLlamaV2 format
-        if input_ids.dim() == 2:
-            input_ids = input_ids[0]  # Take first batch item
+        if input_ids is not None:
+            if input_ids.dim() == 2:
+                input_ids = input_ids[0]
+            
+            if return_full_text:
+                prompt_text = self.tokenizer.decode(input_ids)
+            else:
+                prompt_text = ""
+        else:
+            prompt_text = prompt if return_full_text else ""
+            input_ids = self.tokenizer.encode(prompt, add_bos=True, add_eos=False)
         
-        prompt_length = input_ids.shape[0]
-        
-        # Create generator
         generator = ExLlamaV2StreamingGenerator(self.model, self.cache, self.tokenizer)
         
-        # Setup sampling
         settings = ExLlamaV2Sampler.Settings()
         settings.temperature = temperature if do_sample and temperature > 0 else 0.0
         settings.top_p = top_p
         settings.top_k = top_k
         settings.token_repetition_penalty = 1.15
         
-        # Begin generation
         generator.begin_stream(input_ids.unsqueeze(0) if input_ids.dim() == 1 else input_ids, settings)
         
-        # Collect generated token IDs
         output_text = ""
         tokens_generated = 0
         
@@ -166,12 +184,7 @@ class ExLlamaV2Model(ModelInterface):
             if eos:
                 break
         
-        # Encode the full output to get token IDs
-        full_text = self.tokenizer.decode(input_ids)
-        full_text += output_text
-        full_output = self.tokenizer.encode(full_text, add_bos=False, add_eos=False)
-        
-        return full_output.unsqueeze(0)  # Add batch dimension
+        return prompt_text + output_text if return_full_text else output_text
     
     def get_loglikelihood(self, text: str, context: str = "") -> float:
         """Calculate log-likelihood."""
