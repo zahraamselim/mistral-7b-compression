@@ -8,7 +8,9 @@
 *.out
 *.synctex.gz
 
-.quantization/
 .rag/
 .education/
+.papers/
+
 drafts/
+.
