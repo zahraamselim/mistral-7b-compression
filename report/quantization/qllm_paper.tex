@@ -173,13 +173,7 @@ GPTQ addresses the computational challenges of optimal quantization by reformula
 
 where $W$ is the original weight matrix, $\hat{W}$ is the quantized weight matrix, and $X \in \mathbb{R}^{d_{in} \times n}$ represents calibration inputs with $n$ samples.
 
-The key innovation is the use of approximate second-order information through the Hessian matrix:
-
-\begin{equation}
-H = \frac{2}{n}XX^T
-\end{equation}
-
-GPTQ employs a greedy coordinate descent approach, quantizing weights column-by-column while adjusting subsequent weights to compensate for quantization error. For each weight $w_q$ being quantized:
+The key innovation is the use of approximate second-order information through the Hessian matrix $H = \frac{2}{n}XX^T$. GPTQ employs a greedy coordinate descent approach, quantizing weights column-by-column while adjusting subsequent weights to compensate for quantization error. For each weight $w_q$ being quantized:
 
 \begin{equation}
 \hat{w}_q = \text{quant}(w_q), \quad \delta_q = w_q - \hat{w}_q
@@ -195,7 +189,7 @@ This Optimal Brain Quantization (OBQ)-inspired approach ensures that quantizatio
 
 \textbf{Group-wise Quantization:}
 
-To balance precision and compression, GPTQ applies quantization in groups. Each group of $g$ weights (e.g., $g=128$) shares quantization parameters (scale $s$ and zero-point $z$):
+To balance precision and compression, GPTQ applies quantization in groups. Each group of $g$ weights (typically $g=128$) shares quantization parameters (scale $s$ and zero-point $z$):
 
 \begin{equation}
 \hat{w}_i = \text{round}\left(\frac{w_i}{s}\right) - z, \quad s = \frac{\max(w_g) - \min(w_g)}{2^b - 1}
@@ -203,32 +197,21 @@ To balance precision and compression, GPTQ applies quantization in groups. Each 
 
 where $b$ is the number of bits (2, 3, or 4). Smaller group sizes increase accuracy at the cost of additional metadata storage.
 
-\textbf{Activation Ordering:}
-
-The optional \texttt{desc\_act} parameter reorders columns by activation magnitude to group similar-scale weights, potentially reducing quantization error:
-
-\begin{equation}
-\pi = \text{argsort}(\text{diag}(H)), \quad W \leftarrow W[:, \pi]
-\end{equation}
-
 \textbf{Quantization Process:}
 
-We quantized Mistral-7B-v0.1 at three precision levels (4-bit, 3-bit, and 2-bit) using auto-gptq on a P100 GPU, with the following configuration:
+We quantized Mistral-7B-v0.1 at three precision levels (4-bit, 3-bit, and 2-bit) using auto-gptq on a P100 GPU:
 
 \begin{itemize}
 \item Base model: mistralai/Mistral-7B-v0.1 (7.24B parameters)
 \item Bits: 2, 3, 4
-\item Group size: 128 (default), 64 (quality experiment)
-\item Calibration dataset: WikiText-2 (128-512 samples, max length 512)
-\item Damping factor: 0.01 (regularization for Hessian stability)
-\item desc\_act: False (basic), True (quality experiment)
+\item Group size: 128
+\item Calibration dataset: WikiText-2 (128 samples, max length 512 tokens)
+\item Damping factor: 0.01 (Hessian regularization)
 \item Memory optimization: cache\_examples\_on\_gpu=False
-\item Environment: PYTORCH\_CUDA\_ALLOC\_CONF="expandable\_segments:True"
 \end{itemize}
 
 \textbf{Implementation:}
 \begin{lstlisting}[language=Python]
-import torch
 from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
 from datasets import load_dataset
 
@@ -241,14 +224,9 @@ def prepare_calibration_data(tokenizer, n_samples=128,
     
     examples = []
     for i in range(min(n_samples, len(dataset))):
-        text = dataset[i]["text"]
-        tokenized = tokenizer(
-            text,
-            return_tensors="pt",
-            max_length=max_length,
-            truncation=True,
-            padding=False
-        )
+        tokenized = tokenizer(dataset[i]["text"],
+            return_tensors="pt", max_length=max_length,
+            truncation=True, padding=False)
         examples.append({
             "input_ids": tokenized["input_ids"],
             "attention_mask": tokenized["attention_mask"]
@@ -261,32 +239,22 @@ calibration_data = prepare_calibration_data(tokenizer)
 model = AutoGPTQForCausalLM.from_pretrained(
     "mistralai/Mistral-7B-v0.1",
     quantize_config=BaseQuantizeConfig(
-        bits=4,
-        group_size=128,
-        desc_act=False,
-        damp_percent=0.01
-    ),
-    max_memory={0: "10GiB", "cpu": "50GiB"}
-)
+        bits=4, group_size=128, desc_act=False,
+        damp_percent=0.01),
+    max_memory={0: "10GiB", "cpu": "50GiB"})
 
-# Layer-wise quantization with error compensation
-model.quantize(
-    calibration_data,
-    use_triton=False,
-    batch_size=1,
-    cache_examples_on_gpu=False  # Critical for P100
-)
+model.quantize(calibration_data, use_triton=False, 
+    batch_size=1, cache_examples_on_gpu=False)
 
-# Save quantized weights
 model.save_quantized("./mistral-7b-gptq-4bit", 
                      use_safetensors=True)
 \end{lstlisting}
 
-The quantization process takes approximately 22 minutes per model on a P100 GPU, with memory usage optimized through CPU offloading and disabling GPU caching of calibration data.
+The quantization process takes approximately 22 minutes per model on a P100 GPU, with memory usage optimized through CPU offloading.
 
-\textbf{Optimized Inference:}
+\textbf{Optimized Inference with ExLlamaV2:}
 
-For evaluation, we employed ExLlamaV2, an optimized inference engine for GPTQ models that provides 2-3x faster inference through specialized CUDA kernels and efficient memory management:
+For evaluation, we employed ExLlamaV2, an optimized inference engine for GPTQ models that provides 2-3x faster inference through specialized CUDA kernels:
 
 \begin{lstlisting}[language=Python]
 from exllamav2 import (ExLlamaV2, ExLlamaV2Config, 
@@ -303,7 +271,6 @@ config.max_seq_len = 4096
 model = ExLlamaV2(config)
 cache = ExLlamaV2Cache(model, lazy=True)
 model.load_autosplit(cache)
-
 tokenizer = ExLlamaV2Tokenizer(config)
 
 # Generate with optimized kernels
@@ -317,46 +284,7 @@ input_ids = tokenizer.encode(prompt)
 generator.begin_stream(input_ids, settings)
 \end{lstlisting}
 
-ExLlamaV2 optimizations include:
-\begin{itemize}
-\item Custom CUDA kernels for 2/3/4-bit matrix multiplication
-\item Fused attention and MLP operations
-\item Lazy KV cache loading to reduce memory overhead
-\item Efficient memory layout for quantized weights
-\end{itemize}
-
-\textbf{Quality Enhancement Experiments:}
-
-To investigate quality-efficiency trade-offs, we conducted additional experiments beyond baseline configurations:
-
-\begin{enumerate}
-\item \textbf{Activation ordering} (desc\_act=True): Reorders weight columns by activation magnitude, grouping similar-scale weights to reduce intra-group variance:
-\begin{lstlisting}[language=Python]
-quantize_config=BaseQuantizeConfig(
-    bits=3,
-    group_size=128,
-    desc_act=True  # Enable activation ordering
-)
-\end{lstlisting}
-
-\item \textbf{Smaller group size} (group\_size=64): Reduces quantization granularity, allowing finer-grained scale/zero-point adaptation at the cost of 2x metadata storage:
-\begin{lstlisting}[language=Python]
-quantize_config=BaseQuantizeConfig(
-    bits=3,
-    group_size=64  # Halve group size
-)
-\end{lstlisting}
-
-\item \textbf{Increased calibration} (512 samples): For 2-bit quantization, we quadrupled calibration data to provide more representative Hessian approximation:
-\begin{lstlisting}[language=Python]
-calibration_data = prepare_calibration_data(
-    tokenizer, 
-    n_samples=512  # 4x increase
-)
-\end{lstlisting}
-\end{enumerate}
-
-These configurations were systematically evaluated to characterize the quality-compression frontier across 2-4 bit precision levels, with results presented in Section~\ref{sec:results}.
+ExLlamaV2 optimizations include custom CUDA kernels for 2/3/4-bit matrix multiplication, fused attention and MLP operations, and lazy KV cache loading to reduce memory overhead.
 
 \textbf{Theoretical Compression:}
 

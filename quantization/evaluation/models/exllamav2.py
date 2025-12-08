@@ -3,6 +3,7 @@
 import torch
 import logging
 from typing import Optional
+from types import SimpleNamespace
 
 from core.model_interface import ModelInterface
 
@@ -69,6 +70,10 @@ class ExLlamaV2Model(ModelInterface):
             
             self.tokenizer = ExLlamaV2Tokenizer(self.config)
             
+            # Set pad_token_id for compatibility
+            if not hasattr(self.tokenizer, 'pad_token_id'):
+                self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+            
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
             
             info = self.get_model_info()
@@ -105,43 +110,68 @@ class ExLlamaV2Model(ModelInterface):
     
     def generate(
         self,
-        prompt: str,
+        input_ids: torch.Tensor = None,
+        attention_mask: torch.Tensor = None,
         max_new_tokens: int = 128,
-        temperature: float = 0.7,
         do_sample: bool = True,
+        temperature: float = 1.0,
         top_p: float = 0.9,
         top_k: int = 50,
-        return_full_text: bool = False,
+        pad_token_id: int = None,
+        eos_token_id: int = None,
         **kwargs
-    ) -> str:
-        """Generate text from prompt."""
+    ) -> torch.Tensor:
+        """
+        HuggingFace-compatible generate method for benchmarking.
+        
+        Returns tensor of token IDs including input.
+        """
         try:
             from exllamav2.generator import ExLlamaV2StreamingGenerator, ExLlamaV2Sampler
         except ImportError:
             raise ImportError("exllamav2 required")
         
+        # Handle input
+        if input_ids is None:
+            raise ValueError("input_ids required")
+        
+        # Convert to ExLlamaV2 format
+        if input_ids.dim() == 2:
+            input_ids = input_ids[0]  # Take first batch item
+        
+        prompt_length = input_ids.shape[0]
+        
+        # Create generator
         generator = ExLlamaV2StreamingGenerator(self.model, self.cache, self.tokenizer)
         
+        # Setup sampling
         settings = ExLlamaV2Sampler.Settings()
-        settings.temperature = temperature if do_sample else 0.0
+        settings.temperature = temperature if do_sample and temperature > 0 else 0.0
         settings.top_p = top_p
         settings.top_k = top_k
         settings.token_repetition_penalty = 1.15
         
-        input_ids = self.tokenizer.encode(prompt)
-        generator.begin_stream(input_ids, settings)
+        # Begin generation
+        generator.begin_stream(input_ids.unsqueeze(0) if input_ids.dim() == 1 else input_ids, settings)
         
-        generated_text = prompt if return_full_text else ""
+        # Collect generated token IDs
+        output_text = ""
         tokens_generated = 0
         
         while tokens_generated < max_new_tokens:
             chunk, eos, _ = generator.stream()
-            generated_text += chunk
+            output_text += chunk
             tokens_generated += 1
+            
             if eos:
                 break
         
-        return generated_text.strip()
+        # Encode the full output to get token IDs
+        full_text = self.tokenizer.decode(input_ids)
+        full_text += output_text
+        full_output = self.tokenizer.encode(full_text, add_bos=False, add_eos=False)
+        
+        return full_output.unsqueeze(0)  # Add batch dimension
     
     def get_loglikelihood(self, text: str, context: str = "") -> float:
         """Calculate log-likelihood."""
@@ -164,11 +194,57 @@ class ExLlamaV2Model(ModelInterface):
         
         return total_log_prob
     
-    def forward(self, input_ids: torch.Tensor, **kwargs) -> torch.Tensor:
-        """Forward pass."""
+    def forward(self, input_ids: torch.Tensor, labels: torch.Tensor = None, **kwargs):
+        """
+        Forward pass with optional labels for loss calculation.
+        
+        Args:
+            input_ids: Token IDs [batch_size, seq_len] or [seq_len]
+            labels: Optional labels for loss calculation
+            **kwargs: Additional arguments
+            
+        Returns:
+            Namespace with logits and optionally loss
+        """
+        # Ensure input is 2D
+        if input_ids.dim() == 1:
+            input_ids = input_ids.unsqueeze(0)
+        
         self.cache.current_seq_len = 0
         logits = self.model.forward(input_ids, self.cache, input_mask=None)
-        return logits
+        
+        # If labels provided, calculate loss
+        if labels is not None:
+            # Ensure labels is 2D
+            if labels.dim() == 1:
+                labels = labels.unsqueeze(0)
+            
+            # Shift logits and labels for next-token prediction
+            shift_logits = logits[:, :-1, :].contiguous()
+            shift_labels = labels[:, 1:].contiguous()
+            
+            # Calculate cross-entropy loss
+            loss_fct = torch.nn.CrossEntropyLoss()
+            loss = loss_fct(
+                shift_logits.view(-1, shift_logits.size(-1)),
+                shift_labels.view(-1)
+            )
+            
+            return SimpleNamespace(logits=logits, loss=loss)
+        
+        return SimpleNamespace(logits=logits)
+    
+    def __call__(self, input_ids: torch.Tensor, attention_mask: torch.Tensor = None, **kwargs):
+        """Make model callable for forward pass compatibility."""
+        return self.forward(input_ids, **kwargs)
+    
+    def parameters(self):
+        """Dummy parameters method for compatibility."""
+        return iter([])
+    
+    def eval(self):
+        """Set model to eval mode (no-op for ExLlamaV2)."""
+        return self
     
     def get_model_info(self):
         """Get model information."""
@@ -180,6 +256,19 @@ class ExLlamaV2Model(ModelInterface):
         
         if hasattr(self.config, 'max_seq_len'):
             info["max_seq_len"] = self.config.max_seq_len
+        
+        # Add model size estimate
+        estimated_params = 7_240_000_000  # Mistral 7B
+        info["num_parameters"] = estimated_params
+        
+        # Estimate size based on quantization (4-bit default)
+        bits_per_param = 4.0
+        if self.model_path and '2bit' in str(self.model_path).lower():
+            bits_per_param = 2.0
+        elif self.model_path and '3bit' in str(self.model_path).lower():
+            bits_per_param = 3.0
+        
+        info["size_gb"] = (estimated_params * bits_per_param / 8) / (1024**3)
         
         if torch.cuda.is_available():
             info["gpu_memory_allocated_gb"] = torch.cuda.memory_allocated() / (1024**3)
