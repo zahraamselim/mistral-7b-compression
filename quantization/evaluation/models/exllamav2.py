@@ -183,7 +183,19 @@ class ExLlamaV2Model(ModelInterface):
             if eos:
                 break
         
-        return prompt_text + output_text if return_full_text else output_text
+        result = prompt_text + output_text if return_full_text else output_text
+        
+        # Store the actual token count for retrieval
+        if hasattr(self, '_last_generated_tokens'):
+            self._last_generated_tokens = tokens_generated
+        else:
+            self._last_generated_tokens = tokens_generated
+            
+        return result
+    
+    def get_last_generated_token_count(self):
+        """Get the number of tokens generated in the last generate() call."""
+        return getattr(self, '_last_generated_tokens', 0)
     
     def get_loglikelihood(self, text: str, context: str = "") -> float:
         """Calculate log-likelihood."""

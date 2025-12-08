@@ -138,12 +138,22 @@ def measure_throughput(
             
             end_time = time.perf_counter()
             
-            if isinstance(output, str):
-                output_tokens = tokenizer.encode(output, add_bos=False, add_eos=False) if hasattr(tokenizer, 'encode') else tokenizer(output, add_special_tokens=False)['input_ids']
-                if hasattr(output_tokens, '__len__'):
-                    tokens = len(output_tokens)
+            # Get actual token count from the generation
+            if hasattr(model_interface, 'get_last_generated_token_count'):
+                tokens = model_interface.get_last_generated_token_count()
+            elif isinstance(output, str):
+                tokenizer = model_interface.get_tokenizer()
+                if hasattr(tokenizer, 'encode'):
+                    output_tokens = tokenizer.encode(output, add_bos=False, add_eos=False)
+                    if hasattr(output_tokens, 'shape'):
+                        tokens = output_tokens.shape[0]
+                    elif hasattr(output_tokens, '__len__'):
+                        tokens = len(output_tokens)
+                    else:
+                        tokens = max_new_tokens
                 else:
-                    tokens = output_tokens.shape[0] if hasattr(output_tokens, 'shape') else max_new_tokens
+                    output_ids = tokenizer(output, add_special_tokens=False)['input_ids']
+                    tokens = len(output_ids)
             else:
                 tokens = max_new_tokens
             

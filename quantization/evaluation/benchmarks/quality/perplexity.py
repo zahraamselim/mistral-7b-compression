@@ -193,7 +193,7 @@ class PerplexityEvaluator:
                     if input_ids.size(1) < 2:
                         continue
                     
-                    outputs = self.model(input_ids, labels=input_ids)
+                    outputs = self.model_interface.forward(input_ids, labels=input_ids)
                     
                     if hasattr(outputs, 'loss') and outputs.loss is not None:
                         nll = outputs.loss.item() * (input_ids.size(1) - 1)
@@ -282,7 +282,7 @@ class PerplexityEvaluator:
                         if input_chunk.size(1) < 2:
                             continue
                         
-                        outputs = self.model(input_chunk, labels=input_chunk)
+                        outputs = self.model_interface.forward(input_chunk, labels=input_chunk)
                         
                         if hasattr(outputs, 'loss') and outputs.loss is not None:
                             target_len = (end_loc - begin_loc - (begin_loc - prev_end_loc)
