@@ -6,7 +6,7 @@ Comprehensive evaluation framework for quantized large language models.
 
 - **Efficiency Benchmarks**: Latency, throughput, memory, energy, FLOPs, MFU
 - **Quality Benchmarks**: Perplexity, task accuracy via lm-eval-harness
-- **Model Support**: HuggingFace, GPTQ, AWQ, HQQ
+- **Model Support**: HuggingFace, GPTQ, AWQ, HQQ, ExLlamaV2
 - **Analysis Tools**: Comparison, visualization, reporting, export
 
 ## Installation
@@ -28,6 +28,7 @@ pip install torch transformers datasets evaluate
 pip install auto-gptq  # GPTQ
 pip install autoawq    # AWQ
 pip install hqq        # HQQ
+pip install exllamav2  # ExLlamaV2 (optimized GPTQ inference)
 
 # For task evaluation
 pip install lm-eval
@@ -100,7 +101,8 @@ llm-quant-eval/
 │   ├── huggingface.py          # Standard HF models
 │   ├── gptq.py                 # GPTQ quantized
 │   ├── awq.py                  # AWQ quantized
-│   └── hqq.py                  # HQQ quantized
+│   ├── hqq.py                  # HQQ quantized
+│   └── exllamav2.py            # ExLlamaV2 optimized
 │
 ├── benchmarks/                 # Evaluation benchmarks
 │   ├── efficiency/             # Efficiency benchmarks
@@ -133,78 +135,55 @@ llm-quant-eval/
 └── README.md                   # Documentation
 ```
 
-## Configuration
+## Supported Models
 
-### Model Configuration
+### HuggingFace Models
 
-```json
-{
-  "model": {
-    "model_path": "model-name-or-path",
-    "interface_type": "huggingface", // or "gptq", "awq", "hqq"
-    "torch_dtype": "float16",
-    "device_map": "auto",
-    "quantization": {
-      // Quantization-specific options
-    }
-  }
-}
+```python
+model = create_model_interface('huggingface')
+model.load('meta-llama/Llama-2-7b-chat-hf')
 ```
 
-### Efficiency Benchmarks
+### GPTQ (4-bit)
 
-```json
-{
-  "benchmarks": {
-    "efficiency": {
-      "num_warmup": 3,
-      "num_runs": 10,
-      "max_new_tokens": 128,
-      "prompts": ["prompt1", "prompt2"],
-      "measure_prefill_decode": true,
-      "measure_batch_throughput": false
-    }
-  }
-}
+```python
+model = create_model_interface('gptq')
+model.load('TheBloke/Llama-2-7B-Chat-GPTQ')
 ```
 
-### Quality Benchmarks
+### AWQ (4-bit)
 
-```json
-{
-  "benchmarks": {
-    "quality": {
-      "perplexity": {
-        "enabled": true,
-        "dataset": "wikitext",
-        "num_samples": 100
-      },
-      "tasks": {
-        "enabled": false,
-        "task_list": {
-          "hellaswag": {
-            "enabled": false,
-            "num_fewshot": 0
-          }
-        }
-      }
-    }
-  }
-}
+```python
+model = create_model_interface('awq')
+model.load('TheBloke/Llama-2-7B-Chat-AWQ')
+```
+
+### HQQ (2/3/4/8-bit)
+
+```python
+model = create_model_interface('hqq')
+model.load('meta-llama/Llama-2-7b-chat-hf', nbits=4, group_size=64)
+```
+
+### ExLlamaV2 (Optimized GPTQ)
+
+```python
+model = create_model_interface('exllamav2')
+model.load('./mistral-7b-gptq-4bit', max_seq_len=4096)
 ```
 
 ## Usage Examples
 
-### Evaluate Quantized Model
+### Evaluate Quantized Model with ExLlamaV2
 
 ```python
 from core.model_interface import create_model_interface
 from benchmarks.efficiency import EfficiencyBenchmark
 from benchmarks.quality import QualityBenchmark
 
-# Load quantized model
-model = create_model_interface('gptq')
-model.load('TheBloke/Llama-2-7B-GPTQ')
+# Load quantized model with ExLlamaV2 for optimized inference
+model = create_model_interface('exllamav2')
+model.load('./mistral-7b-gptq-4bit', max_seq_len=4096)
 
 # Run efficiency benchmark
 efficiency = EfficiencyBenchmark(model, config)
@@ -245,7 +224,7 @@ viz.load_results(['results/model1.json', 'results/model2.json'])
 viz.plot_efficiency_comparison(save_path='plots/efficiency.png')
 
 # Quality comparison
-viz.plot_performance_comparison(save_path='plots/quality.png')
+viz.plot_quality_comparison(save_path='plots/quality.png')
 
 # Radar chart
 viz.plot_radar_chart(
@@ -269,36 +248,6 @@ exporter.export_all_formats(output_dir='exports', base_name='comparison')
 exporter.export_to_csv('results.csv')
 exporter.export_to_markdown('results.md')
 exporter.export_to_latex('results.tex')
-```
-
-## Supported Models
-
-### HuggingFace Models
-
-```python
-model = create_model_interface('huggingface')
-model.load('meta-llama/Llama-2-7b-chat-hf')
-```
-
-### GPTQ (4-bit)
-
-```python
-model = create_model_interface('gptq')
-model.load('TheBloke/Llama-2-7B-Chat-GPTQ')
-```
-
-### AWQ (4-bit)
-
-```python
-model = create_model_interface('awq')
-model.load('TheBloke/Llama-2-7B-Chat-AWQ')
-```
-
-### HQQ (2/3/4/8-bit)
-
-```python
-model = create_model_interface('hqq')
-model.load('meta-llama/Llama-2-7b-chat-hf', nbits=4, group_size=64)
 ```
 
 ## Metrics
@@ -370,6 +319,29 @@ python -m analysis.reporter results/*.json --output report.html
 # Export results
 python -m analysis.exporter results/*.json --output results.csv --format csv
 ```
+
+## Performance Tips
+
+### Using ExLlamaV2 for GPTQ Models
+
+ExLlamaV2 provides significantly faster inference for GPTQ quantized models:
+
+```python
+# Standard GPTQ (slower)
+model = create_model_interface('gptq')
+model.load('./model-gptq')
+
+# ExLlamaV2 (faster, optimized)
+model = create_model_interface('exllamav2')
+model.load('./model-gptq', max_seq_len=4096, lazy_load=True)
+```
+
+Benefits:
+
+- 2-3x faster inference
+- Better memory efficiency
+- Optimized CUDA kernels
+- Streaming generation support
 
 ## License
 

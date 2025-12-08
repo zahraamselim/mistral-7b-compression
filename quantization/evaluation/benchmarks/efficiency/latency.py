@@ -26,6 +26,29 @@ def inference_mode(is_cuda: bool):
             yield
 
 
+def _tokenize_safe(model_interface, text: str, padding: bool = True):
+    """
+    Safely tokenize text handling different tokenizer interfaces.
+    
+    Args:
+        model_interface: ModelInterface instance
+        text: Input text
+        padding: Whether to pad
+        
+    Returns:
+        Dictionary with input_ids and attention_mask
+    """
+    tokenizer = model_interface.get_tokenizer()
+    device = model_interface.get_device()
+    
+    # Check if model_interface has custom tokenize method (ExLlamaV2)
+    if hasattr(model_interface, 'tokenize'):
+        return model_interface.tokenize(text, return_tensors='pt', padding=padding)
+    
+    # Standard HuggingFace tokenizer
+    return tokenizer(text, return_tensors='pt', padding=padding).to(device)
+
+
 def measure_loading_time(
     model_class,
     model_path: str,
@@ -118,13 +141,17 @@ def measure_latency(
     logger.debug("Running warmup...")
     for i in range(num_warmup):
         try:
-            inputs = tokenizer(prompts[0], return_tensors='pt', padding=True).to(device)
+            inputs = _tokenize_safe(model_interface, prompts[0], padding=True)
+            if not hasattr(inputs['input_ids'], 'to'):
+                inputs['input_ids'] = inputs['input_ids'].to(device)
+                inputs['attention_mask'] = inputs['attention_mask'].to(device)
+            
             with inference_mode(is_cuda):
                 _ = model.generate(
                     **inputs,
                     max_new_tokens=10,
                     do_sample=False,
-                    pad_token_id=tokenizer.pad_token_id
+                    pad_token_id=tokenizer.pad_token_id if hasattr(tokenizer, 'pad_token_id') else 0
                 )
             logger.debug(f"Warmup {i+1}/{num_warmup} complete")
         except Exception as e:
@@ -141,20 +168,26 @@ def measure_latency(
         prompt = prompts[i % len(prompts)]
         
         try:
-            inputs = tokenizer(prompt, return_tensors='pt', padding=True).to(device)
+            inputs = _tokenize_safe(model_interface, prompt, padding=True)
+            if not hasattr(inputs['input_ids'], 'to'):
+                inputs['input_ids'] = inputs['input_ids'].to(device)
+                inputs['attention_mask'] = inputs['attention_mask'].to(device)
             
             if is_cuda and torch.cuda.is_available():
                 torch.cuda.synchronize()
             
             start_time = time.perf_counter()
             
+            pad_token_id = tokenizer.pad_token_id if hasattr(tokenizer, 'pad_token_id') else 0
+            eos_token_id = tokenizer.eos_token_id if hasattr(tokenizer, 'eos_token_id') else None
+            
             with inference_mode(is_cuda):
                 outputs = model.generate(
                     **inputs,
                     max_new_tokens=max_new_tokens,
                     do_sample=False,
-                    pad_token_id=tokenizer.pad_token_id,
-                    eos_token_id=tokenizer.eos_token_id
+                    pad_token_id=pad_token_id,
+                    eos_token_id=eos_token_id
                 )
             
             if is_cuda and torch.cuda.is_available():
@@ -228,15 +261,21 @@ def measure_ttft(
     
     # Warmup
     logger.debug("Running TTFT warmup...")
-    inputs = tokenizer(prompt, return_tensors='pt', padding=True).to(device)
     for i in range(2):
         try:
+            inputs = _tokenize_safe(model_interface, prompt, padding=True)
+            if not hasattr(inputs['input_ids'], 'to'):
+                inputs['input_ids'] = inputs['input_ids'].to(device)
+                inputs['attention_mask'] = inputs['attention_mask'].to(device)
+            
+            pad_token_id = tokenizer.pad_token_id if hasattr(tokenizer, 'pad_token_id') else 0
+            
             with inference_mode(is_cuda):
                 _ = model.generate(
                     **inputs,
                     max_new_tokens=1,
                     do_sample=False,
-                    pad_token_id=tokenizer.pad_token_id
+                    pad_token_id=pad_token_id
                 )
             logger.debug(f"TTFT warmup {i+1}/2 complete")
         except Exception as e:
@@ -249,20 +288,26 @@ def measure_ttft(
     
     for i in range(num_runs):
         try:
-            inputs = tokenizer(prompt, return_tensors='pt', padding=True).to(device)
+            inputs = _tokenize_safe(model_interface, prompt, padding=True)
+            if not hasattr(inputs['input_ids'], 'to'):
+                inputs['input_ids'] = inputs['input_ids'].to(device)
+                inputs['attention_mask'] = inputs['attention_mask'].to(device)
             
             if is_cuda and torch.cuda.is_available():
                 torch.cuda.synchronize()
             
             start_time = time.perf_counter()
             
+            pad_token_id = tokenizer.pad_token_id if hasattr(tokenizer, 'pad_token_id') else 0
+            eos_token_id = tokenizer.eos_token_id if hasattr(tokenizer, 'eos_token_id') else None
+            
             with inference_mode(is_cuda):
                 _ = model.generate(
                     **inputs,
                     max_new_tokens=1,
                     do_sample=False,
-                    pad_token_id=tokenizer.pad_token_id,
-                    eos_token_id=tokenizer.eos_token_id
+                    pad_token_id=pad_token_id,
+                    eos_token_id=eos_token_id
                 )
             
             if is_cuda and torch.cuda.is_available():
@@ -333,7 +378,10 @@ def measure_prefill_decode_latency(
     
     for i in range(num_runs):
         try:
-            inputs = tokenizer(prompt, return_tensors='pt').to(device)
+            inputs = _tokenize_safe(model_interface, prompt, padding=False)
+            if not hasattr(inputs['input_ids'], 'to'):
+                inputs['input_ids'] = inputs['input_ids'].to(device)
+            
             prompt_length = inputs['input_ids'].shape[1]
             
             if is_cuda and torch.cuda.is_available():
@@ -358,12 +406,14 @@ def measure_prefill_decode_latency(
             
             start_time = time.perf_counter()
             
+            pad_token_id = tokenizer.pad_token_id if hasattr(tokenizer, 'pad_token_id') else 0
+            
             with inference_mode(is_cuda):
                 outputs = model.generate(
                     **inputs,
                     max_new_tokens=num_decode_tokens,
                     do_sample=False,
-                    pad_token_id=tokenizer.pad_token_id
+                    pad_token_id=pad_token_id
                 )
             
             if is_cuda and torch.cuda.is_available():

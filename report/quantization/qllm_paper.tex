@@ -159,7 +159,216 @@ This study utilizes \textbf{Mistral-7B-v0.1} \cite{jiang2023mistral} as the base
 
 \subsection{Compression Techniques}
 
-We evaluate five distinct 4-bit quantization strategies, each representing different algorithmic approaches:
+\subsubsection{GPTQ}
+
+GPTQ (Generative Pre-trained Transformer Quantization) is a post-training quantization method that quantizes weights to 2-8 bits while maintaining model quality through layer-wise optimization \cite{frantar2023gptq}.
+
+\textbf{Method Overview:}
+
+GPTQ addresses the computational challenges of optimal quantization by reformulating the problem as a series of layer-wise optimizations. For each layer's weight matrix $W \in \mathbb{R}^{d_{out} \times d_{in}}$, GPTQ solves:
+
+\begin{equation}
+\min_{\hat{W}} ||WX - \hat{W}X||_2^2
+\end{equation}
+
+where $W$ is the original weight matrix, $\hat{W}$ is the quantized weight matrix, and $X \in \mathbb{R}^{d_{in} \times n}$ represents calibration inputs with $n$ samples.
+
+The key innovation is the use of approximate second-order information through the Hessian matrix:
+
+\begin{equation}
+H = \frac{2}{n}XX^T
+\end{equation}
+
+GPTQ employs a greedy coordinate descent approach, quantizing weights column-by-column while adjusting subsequent weights to compensate for quantization error. For each weight $w_q$ being quantized:
+
+\begin{equation}
+\hat{w}_q = \text{quant}(w_q), \quad \delta_q = w_q - \hat{w}_q
+\end{equation}
+
+The quantization error $\delta_q$ is then propagated to remaining weights:
+
+\begin{equation}
+w_{q'} \leftarrow w_{q'} - \delta_q \cdot \frac{H_{qq'}}{H_{qq}} \quad \forall q' > q
+\end{equation}
+
+This Optimal Brain Quantization (OBQ)-inspired approach ensures that quantization errors are minimized across the entire weight matrix \cite{frantar2022optimal}.
+
+\textbf{Group-wise Quantization:}
+
+To balance precision and compression, GPTQ applies quantization in groups. Each group of $g$ weights (e.g., $g=128$) shares quantization parameters (scale $s$ and zero-point $z$):
+
+\begin{equation}
+\hat{w}_i = \text{round}\left(\frac{w_i}{s}\right) - z, \quad s = \frac{\max(w_g) - \min(w_g)}{2^b - 1}
+\end{equation}
+
+where $b$ is the number of bits (2, 3, or 4). Smaller group sizes increase accuracy at the cost of additional metadata storage.
+
+\textbf{Activation Ordering:}
+
+The optional \texttt{desc\_act} parameter reorders columns by activation magnitude to group similar-scale weights, potentially reducing quantization error:
+
+\begin{equation}
+\pi = \text{argsort}(\text{diag}(H)), \quad W \leftarrow W[:, \pi]
+\end{equation}
+
+\textbf{Quantization Process:}
+
+We quantized Mistral-7B-v0.1 at three precision levels (4-bit, 3-bit, and 2-bit) using auto-gptq on a P100 GPU, with the following configuration:
+
+\begin{itemize}
+\item Base model: mistralai/Mistral-7B-v0.1 (7.24B parameters)
+\item Bits: 2, 3, 4
+\item Group size: 128 (default), 64 (quality experiment)
+\item Calibration dataset: WikiText-2 (128-512 samples, max length 512)
+\item Damping factor: 0.01 (regularization for Hessian stability)
+\item desc\_act: False (basic), True (quality experiment)
+\item Memory optimization: cache\_examples\_on\_gpu=False
+\item Environment: PYTORCH\_CUDA\_ALLOC\_CONF="expandable\_segments:True"
+\end{itemize}
+
+\textbf{Implementation:}
+\begin{lstlisting}[language=Python]
+import torch
+from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+from datasets import load_dataset
+
+# Prepare calibration data
+def prepare_calibration_data(tokenizer, n_samples=128, 
+                            max_length=512):
+    dataset = load_dataset("wikitext", "wikitext-2-raw-v1", 
+                          split="train")
+    dataset = dataset.filter(lambda x: len(x["text"]) > 200)
+    
+    examples = []
+    for i in range(min(n_samples, len(dataset))):
+        text = dataset[i]["text"]
+        tokenized = tokenizer(
+            text,
+            return_tensors="pt",
+            max_length=max_length,
+            truncation=True,
+            padding=False
+        )
+        examples.append({
+            "input_ids": tokenized["input_ids"],
+            "attention_mask": tokenized["attention_mask"]
+        })
+    return examples
+
+calibration_data = prepare_calibration_data(tokenizer)
+
+# Quantize model
+model = AutoGPTQForCausalLM.from_pretrained(
+    "mistralai/Mistral-7B-v0.1",
+    quantize_config=BaseQuantizeConfig(
+        bits=4,
+        group_size=128,
+        desc_act=False,
+        damp_percent=0.01
+    ),
+    max_memory={0: "10GiB", "cpu": "50GiB"}
+)
+
+# Layer-wise quantization with error compensation
+model.quantize(
+    calibration_data,
+    use_triton=False,
+    batch_size=1,
+    cache_examples_on_gpu=False  # Critical for P100
+)
+
+# Save quantized weights
+model.save_quantized("./mistral-7b-gptq-4bit", 
+                     use_safetensors=True)
+\end{lstlisting}
+
+The quantization process takes approximately 22 minutes per model on a P100 GPU, with memory usage optimized through CPU offloading and disabling GPU caching of calibration data.
+
+\textbf{Optimized Inference:}
+
+For evaluation, we employed ExLlamaV2, an optimized inference engine for GPTQ models that provides 2-3x faster inference through specialized CUDA kernels and efficient memory management:
+
+\begin{lstlisting}[language=Python]
+from exllamav2 import (ExLlamaV2, ExLlamaV2Config, 
+                       ExLlamaV2Cache, ExLlamaV2Tokenizer)
+from exllamav2.generator import (ExLlamaV2StreamingGenerator,
+                                 ExLlamaV2Sampler)
+
+# Load with ExLlamaV2
+config = ExLlamaV2Config()
+config.model_dir = "./mistral-7b-gptq-4bit"
+config.prepare()
+config.max_seq_len = 4096
+
+model = ExLlamaV2(config)
+cache = ExLlamaV2Cache(model, lazy=True)
+model.load_autosplit(cache)
+
+tokenizer = ExLlamaV2Tokenizer(config)
+
+# Generate with optimized kernels
+generator = ExLlamaV2StreamingGenerator(model, cache, 
+                                        tokenizer)
+settings = ExLlamaV2Sampler.Settings()
+settings.temperature = 0.7
+settings.top_p = 0.9
+
+input_ids = tokenizer.encode(prompt)
+generator.begin_stream(input_ids, settings)
+\end{lstlisting}
+
+ExLlamaV2 optimizations include:
+\begin{itemize}
+\item Custom CUDA kernels for 2/3/4-bit matrix multiplication
+\item Fused attention and MLP operations
+\item Lazy KV cache loading to reduce memory overhead
+\item Efficient memory layout for quantized weights
+\end{itemize}
+
+\textbf{Quality Enhancement Experiments:}
+
+To investigate quality-efficiency trade-offs, we conducted additional experiments beyond baseline configurations:
+
+\begin{enumerate}
+\item \textbf{Activation ordering} (desc\_act=True): Reorders weight columns by activation magnitude, grouping similar-scale weights to reduce intra-group variance:
+\begin{lstlisting}[language=Python]
+quantize_config=BaseQuantizeConfig(
+    bits=3,
+    group_size=128,
+    desc_act=True  # Enable activation ordering
+)
+\end{lstlisting}
+
+\item \textbf{Smaller group size} (group\_size=64): Reduces quantization granularity, allowing finer-grained scale/zero-point adaptation at the cost of 2x metadata storage:
+\begin{lstlisting}[language=Python]
+quantize_config=BaseQuantizeConfig(
+    bits=3,
+    group_size=64  # Halve group size
+)
+\end{lstlisting}
+
+\item \textbf{Increased calibration} (512 samples): For 2-bit quantization, we quadrupled calibration data to provide more representative Hessian approximation:
+\begin{lstlisting}[language=Python]
+calibration_data = prepare_calibration_data(
+    tokenizer, 
+    n_samples=512  # 4x increase
+)
+\end{lstlisting}
+\end{enumerate}
+
+These configurations were systematically evaluated to characterize the quality-compression frontier across 2-4 bit precision levels, with results presented in Section~\ref{sec:results}.
+
+\textbf{Theoretical Compression:}
+
+For Mistral-7B with 7.24B parameters, theoretical model sizes are:
+\begin{itemize}
+\item FP16 baseline: $7.24 \times 2 = 14.48$ GB
+\item 4-bit GPTQ: $7.24 \times 0.5 + \text{overhead} \approx 3.62$ GB (4.0x compression)
+\item 3-bit GPTQ: $7.24 \times 0.375 + \text{overhead} \approx 2.72$ GB (5.3x compression)
+\item 2-bit GPTQ: $7.24 \times 0.25 + \text{overhead} \approx 1.81$ GB (8.0x compression)
+\end{itemize}
+
+where overhead includes quantization metadata (scales, zero-points) and unquantized components (embeddings, layer norms).
 
 \subsubsection{NF4 (NormalFloat 4-bit)}
 
@@ -189,33 +398,6 @@ model = AutoModelForCausalLM.from_pretrained(
     "mistralai/Mistral-7B-Instruct-v0.1",
     quantization_config=nf4_config,
     device_map="auto"
-)
-\end{lstlisting}
-
-\subsubsection{GPTQ}
-
-GPTQ employs layer-wise quantization minimizing reconstruction error via inverse Hessian information \cite{frantar2023gptq}:
-\begin{equation}
-\min_{\hat{W}} ||WX - \hat{W}X||_2^2
-\end{equation}
-where $W$ is the weight matrix and $X$ represents calibration inputs.
-
-\textbf{Configuration:}
-\begin{itemize}
-\item Bits: 4
-\item Group size: 128
-\item Dataset: C4 (calibration)
-\item Kernel: ExLlamaV2
-\end{itemize}
-
-\textbf{Implementation:}
-\begin{lstlisting}
-from auto_gptq import AutoGPTQForCausalLM
-
-model = AutoGPTQForCausalLM.from_quantized(
-    "TheBloke/Mistral-7B-Instruct-v0.1-GPTQ",
-    device="cuda:0",
-    use_safetensors=True
 )
 \end{lstlisting}
 
@@ -539,21 +721,7 @@ For Turing-generation hardware, NF4 represents the \textbf{only viable quantizat
 
 This research was conducted at Egypt-Japan University of Science and Technology (E-JUST). We thank the Anthropic team for access to computational resources.
 
-Bibliography section - uncomment and fill in when ready
-\begin{thebibliography}{99}
-\bibitem{jiang2023mistral}
-A. Q. Jiang et al., ``Mistral 7B,'' \textit{arXiv preprint arXiv:2310.06825}, 2023.
-% 
-% \bibitem{frantar2023gptq}
-% E. Frantar, S. Ashkboos, T. Hoefler, and D. Alistarh, ``GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers,'' \textit{arXiv preprint arXiv:2210.17323}, 2023.
-% 
-% \bibitem{lin2023awq}
-% J. Lin, J. Tang, H. Wang, et al., ``AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration,'' \textit{arXiv preprint arXiv:2306.00978}, 2023.
-% 
-% \bibitem{dettmers2023qlora}
-% T. Dettmers, A. Pagnoni, A. Holtzman, and L. Zettlemoyer, ``QLoRA: Efficient Finetuning of Quantized LLMs,'' \textit{arXiv preprint arXiv:2305.14314}, 2023.
-% 
-% Add all other citations here...
-\end{thebibliography}
+\bibliographystyle{IEEEtran}
+\bibliography{references}
 
 \end{document}

@@ -162,6 +162,7 @@ def create_model_interface(model_type: str = "huggingface") -> ModelInterface:
             - 'gptq': GPTQ 4-bit quantized
             - 'awq': AWQ 4-bit quantized
             - 'hqq': HQQ quantized (2/3/4/8-bit)
+            - 'exllamav2' or 'exl2': ExLlamaV2 optimized GPTQ
         
     Returns:
         ModelInterface instance
@@ -170,8 +171,8 @@ def create_model_interface(model_type: str = "huggingface") -> ModelInterface:
         >>> model = create_model_interface('huggingface')
         >>> model.load('mistralai/Mistral-7B-Instruct-v0.1')
         
-        >>> model = create_model_interface('gptq')
-        >>> model.load('TheBloke/Mistral-7B-Instruct-v0.1-GPTQ')
+        >>> model = create_model_interface('exllamav2')
+        >>> model.load('./mistral-7b-gptq-4bit')
     """
     model_type = model_type.lower()
     
@@ -191,8 +192,12 @@ def create_model_interface(model_type: str = "huggingface") -> ModelInterface:
         from models.hqq import HQQModel
         return HQQModel()
     
+    elif model_type in ['exllamav2', 'exl2']:
+        from models.exllamav2 import ExLlamaV2Model
+        return ExLlamaV2Model()
+    
     else:
         raise ValueError(
             f"Unknown model type: {model_type}. "
-            f"Available: huggingface, gptq, awq, hqq"
+            f"Available: huggingface, gptq, awq, hqq, exllamav2"
         )
