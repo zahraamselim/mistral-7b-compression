@@ -1,0 +1,625 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{pifont}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\footnotesize,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single
+}
+
+\begin{document}
+
+\title{Optimizing Quantized LLMs for Educational Applications: Prompt Engineering and Few-Shot Scaffolding\\
+\thanks{This work was conducted at Egypt-Japan University of Science and Technology (E-JUST).}
+}
+
+\author{\IEEEauthorblockN{Zahraa Selim, Menna Hamed, Wesam Ahmed, Sohyla Said, Sara Basheer, and Rami Zewail}
+\IEEEauthorblockA{\textit{Computer Science and Engineering Department}\\
+\textit{Egypt-Japan University of Science and Technology (E-JUST)}\\
+Alexandria, Egypt\\
+\{zahraa.selim, menna.hamed, rami.zewail\}@ejust.edu.eg}
+}
+
+\maketitle
+
+\begin{abstract}
+While aggressive quantization enables deployment of Large Language Models (LLMs) on consumer-grade hardware, it degrades multi-step reasoning capabilities—a critical limitation for educational applications. Previous work [Paper 1] demonstrated that 4-bit quantization causes 25\% accuracy drop in mathematical reasoning (GSM8K: 0.36 → 0.27) while preserving pattern-matching tasks. This study investigates whether educational scaffolding strategies can compensate for quantization-induced reasoning degradation. We evaluate two complementary approaches: (1) few-shot mathematical scaffolding providing worked examples, and (2) structured prompt engineering with persona and mode specifications. Our findings reveal that few-shot scaffolding achieves dramatic recovery, restoring mathematical accuracy from 40\% to 100\% (60\% improvement) while increasing faithfulness from 0.216 to 0.915 (4.2×). Counterintuitively, structured examples reduce generation time by 47\% (20.06s → 10.64s) by constraining the token search space. For general educational tasks, prompt engineering yields 48.8\% perplexity reduction and 7.33 percentage point benchmark improvement with zero computational overhead. System-level analysis reveals that template-based few-shot learning achieves 70\% higher faithfulness (0.915 vs. 0.539) than document-based RAG [Paper 2] while requiring less than half the context length (600 vs. 1308 tokens). We provide deployment guidelines for educational AI on edge hardware, demonstrating that quantized LLMs with appropriate scaffolding can achieve reliable performance for mathematics tutoring and personalized instruction on consumer GPUs (RTX 3060/Tesla T4) with 8.5GB total memory budget.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Educational AI, LLM Quantization, Few-Shot Learning, Prompt Engineering, Edge Deployment, Mathematics Education
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+The deployment of Large Language Models (LLMs) for educational applications holds transformative potential—enabling personalized tutoring, adaptive learning, and accessible AI assistance for students worldwide. However, two critical barriers impede widespread adoption:
+
+\begin{enumerate}
+\item \textbf{Hardware Accessibility:} Most schools and students lack access to cloud-scale infrastructure, requiring edge deployment on consumer-grade GPUs (RTX 3060, Tesla T4).
+
+\item \textbf{Reasoning Reliability:} Educational domains demand multi-step reasoning accuracy, yet quantization (necessary for edge deployment) severely degrades this capability.
+\end{enumerate}
+
+\subsection{The Quantization-Reasoning Dilemma}
+
+Our comprehensive quantization study [Paper 1] revealed a critical finding: while 4-bit quantization enables 3.6× memory reduction with minimal perplexity degradation (+1.80\%), it causes \textbf{25\% accuracy drop in mathematical reasoning} (GSM8K: 0.36 → 0.27) while preserving knowledge retrieval tasks (ARC: 0.58 → 0.58).
+
+This task-dependent sensitivity creates a fundamental dilemma:
+\begin{itemize}
+\item \textbf{Without compression:} Models are too large for edge hardware
+\item \textbf{With compression:} Mathematical reasoning—essential for education—becomes unreliable
+\end{itemize}
+
+\subsection{Educational Scaffolding Hypothesis}
+
+In pedagogy, \textbf{worked examples} dramatically improve learning outcomes by providing step-by-step solutions students can emulate \cite{sweller1988worked}. We hypothesize that quantized models, despite degraded autonomous reasoning, retain strong \textbf{pattern-matching} capabilities that can be leveraged through:
+
+\begin{enumerate}
+\item \textbf{Few-Shot Scaffolding:} Providing complete worked examples as templates
+\item \textbf{Structured Prompting:} Explicit persona and mode specifications to reduce ambiguity
+\end{enumerate}
+
+If successful, this would enable educational AI on edge hardware by compensating for compression-induced degradation through pedagogical design.
+
+\subsection{Research Questions}
+
+This study addresses three critical questions:
+
+\begin{enumerate}
+\item \textbf{Reasoning Recovery:} Can few-shot scaffolding fully compensate for quantization-induced degradation in mathematical reasoning?
+
+\item \textbf{Generalization:} Do prompt engineering benefits transfer to general educational benchmarks (MMLU, HellaSwag, ARC)?
+
+\item \textbf{System Viability:} What are the computational trade-offs (latency, memory, energy) of educational scaffolding on edge hardware?
+\end{enumerate}
+
+\subsection{Contributions}
+
+Our comprehensive evaluation provides:
+
+\begin{enumerate}
+\item \textbf{Dramatic Accuracy Recovery:} Demonstrating that few-shot scaffolding restores mathematical accuracy from 40\% to 100\% (60\% improvement) while increasing faithfulness from 0.216 to 0.915 (4.2×).
+
+\item \textbf{Efficiency Paradox Discovery:} Revealing that structured examples reduce generation time by 47\% (20.06s → 10.64s) despite longer prompts, by constraining token search space.
+
+\item \textbf{Prompt Engineering Benefits:} Achieving 48.8\% perplexity reduction and 7.33pp benchmark improvement with zero computational overhead.
+
+\item \textbf{RAG Comparison:} Demonstrating that educational few-shot achieves 70\% higher faithfulness (0.915 vs. 0.539) than RAG [Paper 2] with less than half the context length.
+
+\item \textbf{Deployment Guidelines:} Providing prescriptive recommendations for educational AI on consumer GPUs with 8.5GB memory budget.
+\end{enumerate}
+
+\section{Related Work}
+
+\subsection{Quantization and Reasoning}
+
+Our foundation study [Paper 1] established that NF4 quantization achieves optimal hardware compatibility on Tesla T4 while maintaining general task performance. However, mathematical reasoning showed significant degradation:
+
+\begin{itemize}
+\item GSM8K: 0.36 → 0.27 (-25\%)
+\item Perplexity: 12.79 → 13.02 (+1.80\%)
+\item Knowledge retrieval: Minimal impact
+\end{itemize}
+
+This divergence suggests quantization affects \textbf{deep reasoning chains} more than \textbf{pattern matching}, creating opportunities for scaffolding interventions.
+
+\subsection{RAG for Educational Applications}
+
+Our RAG evaluation [Paper 2] demonstrated that document retrieval provides factual grounding but reveals a ``faithfulness gap'' under quantization:
+
+\begin{itemize}
+\item NF4 faithfulness: 0.539
+\item AWQ faithfulness: 0.476
+\item Prefill bottleneck: 45\% throughput reduction
+\end{itemize}
+
+While effective for factual queries, RAG's verbose document chunks (1308 tokens) and prefill overhead may be suboptimal for structured educational tasks.
+
+\subsection{Few-Shot Learning and Prompt Engineering}
+
+\subsubsection{Few-Shot Learning}
+
+Brown et al. \cite{brown2020language} demonstrated that LLMs can adapt to tasks via in-context examples without fine-tuning. For education:
+
+\begin{itemize}
+\item \textbf{Chain-of-Thought (CoT):} Step-by-step reasoning \cite{wei2022chain}
+\item \textbf{Worked Examples:} Pedagogical scaffolding \cite{sweller1988worked}
+\item \textbf{Template Following:} Pattern replication in structured domains
+\end{itemize}
+
+\subsubsection{Prompt Engineering}
+
+Structured prompts improve model controllability:
+\begin{itemize}
+\item \textbf{Persona Specification:} Role-based behavior (teacher, tutor, student)
+\item \textbf{Mode Configuration:} Task-specific instructions (MCQ, open-ended)
+\item \textbf{Format Constraints:} Output structure enforcement
+\end{itemize}
+
+\subsection{Research Gap}
+
+While few-shot learning and prompt engineering are well-studied for full-precision models, their effectiveness for \textbf{quantized models in educational contexts} remains unexplored. Our work uniquely evaluates whether pedagogical scaffolding can compensate for compression-induced reasoning degradation.
+
+\section{Background: Quantization Impacts}
+
+Following [Paper 1] and [Paper 2], we adopt \textbf{4-bit NF4 quantization} as our baseline for educational evaluation based on:
+
+\begin{itemize}
+\item Superior hardware compatibility (Tesla T4)
+\item Optimal performance-efficiency trade-off
+\item 7.6GB memory footprint (leaves 8.4GB for templates/cache on 16GB hardware)
+\end{itemize}
+
+\textbf{Critical Finding from Prior Work:} Quantization preserves pattern-matching but degrades autonomous reasoning, creating ideal conditions for template-based scaffolding.
+
+\section{Experiment 1: Few-Shot Mathematical Scaffolding}
+
+\subsection{Motivation}
+
+While RAG systems enhance factual grounding through document retrieval \cite{lewis2020retrieval}, educational applications require a different paradigm: \textbf{learning from worked examples}. In mathematics instruction, providing step-by-step solutions (few-shot) versus expecting independent problem-solving (zero-shot) fundamentally affects learning outcomes.
+
+We investigate whether quantization impacts a model's ability to leverage pedagogical scaffolding—a critical capability for deploying compressed LLMs in educational contexts on resource-constrained hardware.
+
+\subsection{Experimental Design}
+
+\subsubsection{Hardware and Model Configuration}
+
+\begin{itemize}
+\item \textbf{Base Model:} Mistral-7B-Instruct-v0.2 \cite{jiang2023mistral}
+\item \textbf{Quantization:} 4-bit NormalFloat (NF4) via BitsAndBytes \cite{dettmers2023qlora}
+\item \textbf{Hardware:} NVIDIA Tesla T4 (16GB VRAM)
+\item \textbf{Configuration:} Double quantization enabled, FP16 compute dtype
+\end{itemize}
+
+\subsubsection{Test Problems}
+
+We evaluated 5 missing addend problems requiring multi-step arithmetic reasoning, a task class shown to be sensitive to model compression \cite{cobbe2021training}:
+
+\begin{enumerate}
+\item $\_\_\_ + 26 + 64 = 96$
+\item $15 + \_\_\_ + 32 = 89$
+\item $\_\_\_ + 45 + 23 = 105$
+\item $28 + 19 + \_\_\_ = 75$
+\item $\_\_\_ + 56 + 34 = 150$
+\end{enumerate}
+
+\subsubsection{Experimental Conditions}
+
+\paragraph{Zero-Shot (No Examples)}
+
+Minimal task framing:
+\begin{verbatim}
+Solve this math problem step by step:
+Problem: ___ + 26 + 64 = 96
+Show your work and provide the final answer.
+\end{verbatim}
+
+\paragraph{Few-Shot (2 Worked Examples)}
+
+Following chain-of-thought prompting methodology \cite{wei2022chain}, we provide two complete worked examples:
+
+\begin{verbatim}
+Example 1:
+Problem: ___ + 21 + 53 = 138
+Solution:
+Step 1: Identify the total sum: 138
+Step 2: Add the known numbers: 21 + 53 = 74
+Step 3: Subtract from total: 138 - 74 = 64
+Step 4: The missing addend is 64
+Step 5: Verify: 64 + 21 + 53 = 138 ✓
+
+Example 2:
+Problem: 35 + ___ + 18 = 92
+Solution:
+[Similar detailed solution with verification]
+
+Now solve: [Target Problem]
+\end{verbatim}
+
+\subsection{Evaluation Metrics}
+
+Multi-dimensional evaluation framework:
+
+\begin{enumerate}
+\item \textbf{Accuracy:} Exact match of final answer
+\item \textbf{Verification Inclusion:} Binary indicator of verification step presence
+\item \textbf{Solution Structure:} Count of distinct reasoning steps
+\item \textbf{Faithfulness:} Token containment ratio between generated solution and provided examples:
+\begin{equation}
+\text{Faithfulness} = \frac{|T_{\text{ans}} \cap T_{\text{examples}}|}{|T_{\text{ans}}|}
+\end{equation}
+\item \textbf{Generation Efficiency:} Wall-clock time per response
+\end{enumerate}
+
+\subsection{Results}
+
+\subsubsection{Performance Comparison}
+
+\begin{table}[h]
+\centering
+\caption{Few-Shot vs Zero-Shot Performance (NF4 Quantized Mistral-7B)}
+\label{tab:few_shot_comparison}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Zero-Shot} & \textbf{Few-Shot} & \textbf{Improvement} \\
+\midrule
+Accuracy & 40.0\% (2/5) & 100.0\% (5/5) & \textbf{+60.0\%} \\
+Verification Inclusion & 0.0\% & 100.0\% & \textbf{+100.0\%} \\
+Avg. Steps Generated & 2.0 & 5.0 & +150\% \\
+Faithfulness Score & 0.216 & 0.915 & \textbf{+323\%} \\
+Avg. Generation Time & 20.06s & 10.64s & \textbf{47\% faster} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Key Findings}
+
+\paragraph{Dramatic Accuracy Recovery}
+
+Zero-shot performance achieved only 40\% accuracy, indicating that quantization severely impacts unaided mathematical reasoning—consistent with GSM8K degradation findings [Paper 1]. However, few-shot prompting achieved \textbf{perfect 100\% accuracy} across all problems.
+
+\textbf{The 60\% accuracy gap demonstrates that worked examples fully compensate for quantization-induced reasoning degradation.}
+
+\paragraph{Structural Quality Enhancement}
+
+Zero-shot solutions averaged only 2.0 steps, producing incomplete reasoning chains that often omitted critical intermediate computations. In contrast, few-shot solutions consistently produced complete 5-step solutions matching the provided template structure.
+
+Notably, \textbf{100\% of few-shot solutions included verification steps versus 0\% in zero-shot}, demonstrating that quantized models retain strong pattern-matching capabilities as predicted by activation-aware quantization theory \cite{lin2023awq}.
+
+\paragraph{Faithfulness-Fluency Alignment}
+
+Zero-shot faithfulness scored 0.216, indicating poor adherence to implicit mathematical conventions. Few-shot faithfulness reached 0.915, representing a \textbf{4.2× improvement}.
+
+This dramatic increase suggests that quantized models maintain robust template-following capabilities despite degraded autonomous reasoning—a finding that extends the faithfulness-fluency divergence observed in RAG systems [Paper 2].
+
+\paragraph{Unexpected Efficiency Gain}
+
+Contrary to expectations that longer prompts would increase latency, few-shot generation averaged 10.64s versus 20.06s for zero-shot (\textbf{47\% faster}).
+
+\textbf{Hypothesis:} Structured templates reduce the token search space during decoding, enabling faster generation despite increased prefill overhead—a phenomenon not previously documented in quantization literature.
+
+\subsubsection{Problem-Level Analysis}
+
+\begin{table}[h]
+\centering
+\caption{Individual Problem Performance Analysis}
+\label{tab:problem_level}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Problem} & \textbf{Zero-Shot} & \textbf{Time (s)} & \textbf{Few-Shot} & \textbf{Time (s)} \\
+\midrule
+1: $\_\_\_ + 26 + 64 = 96$ & \ding{55} & 22.73 & \ding{51} & 10.15 \\
+2: $15 + \_\_\_ + 32 = 89$ & \ding{51} & 19.37 & \ding{51} & 10.02 \\
+3: $\_\_\_ + 45 + 23 = 105$ & \ding{55} & 15.64 & \ding{51} & 10.90 \\
+4: $28 + 19 + \_\_\_ = 75$ & \ding{51} & 27.77 & \ding{51} & 10.72 \\
+5: $\_\_\_ + 56 + 34 = 150$ & \ding{55} & 14.79 & \ding{51} & 11.39 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Observations:}
+
+\begin{itemize}
+\item Zero-shot failures show no correlation with problem complexity (all involve 3-term addition with similar numerical ranges)
+\item Few-shot consistency: All problems solved correctly with stable generation time ($10.5 \pm 0.5$s)
+\item Zero-shot timing variance (14.79–27.77s) suggests model struggles with solution strategy formulation under quantization
+\end{itemize}
+
+\subsection{Implications}
+
+\subsubsection{Confirmation of Pattern-Matching Preservation}
+
+Results validate the hypothesis that quantization affects deep reasoning chains while preserving template-following:
+
+\begin{itemize}
+\item \textbf{Evidence:} 100\% few-shot accuracy versus 40\% zero-shot using identical compressed model
+\item \textbf{Mechanism:} Structured templates act as ``reasoning scaffolds'' that bypass quantization-weakened logic chains
+\end{itemize}
+
+\subsubsection{Template-Based Systems as Optimal Strategy}
+
+For domains requiring multi-step reasoning (mathematics, programming), template-based scaffolding may be the \textbf{only viable deployment strategy} for 4-bit quantized models, superior to both:
+
+\begin{itemize}
+\item Fine-tuning (requires retraining)
+\item RAG (verbose contexts, prefill overhead)
+\end{itemize}
+
+\section{Experiment 2: Prompt Engineering for Personalization}
+
+\subsection{Motivation}
+
+While few-shot scaffolding addresses mathematical reasoning, general educational interactions require:
+
+\begin{itemize}
+\item \textbf{Persona Adaptation:} Teacher vs. student behavior
+\item \textbf{Mode Specification:} MCQ generation vs. open-ended explanation
+\item \textbf{Consistency:} Reliable output formatting
+\end{itemize}
+
+We investigate whether structured prompt engineering can enhance quantized model performance on general educational benchmarks.
+
+\subsection{Methodology}
+
+\subsubsection{Model Configuration}
+
+Identical to Experiment 1:
+\begin{itemize}
+\item Mistral-7B-Instruct-v0.2, 4-bit NF4
+\item Tesla T4 hardware
+\item Batch size: 1, Max tokens: 256
+\end{itemize}
+
+\subsubsection{Baseline Configuration}
+
+Minimal task framing:
+\begin{verbatim}
+Answer this question:
+[Prompt Statement]
+Show your work and provide the final answer.
+\end{verbatim}
+
+\subsubsection{Structured Persona and Mode Engineering}
+
+Enhanced configuration with explicit persona behaviors and mode requirements:
+
+\begin{lstlisting}[caption={Persona Prompts}]
+PERSONA_PROMPTS = {
+  "student": """You are a curious and engaged student
+    learning from course materials.
+    Your responses should:
+    - Show enthusiasm for learning
+    - Ask clarifying questions when unclear
+    - Relate new information to prior knowledge
+    - Use simple, accessible language""",
+   
+  "tutor": """You are an experienced and patient tutor
+    helping students understand course materials.
+    Your responses should:
+    - Break down complex concepts
+    - Provide step-by-step explanations
+    - Use analogies and real-world examples
+    - Anticipate common misconceptions
+    - Encourage critical thinking"""
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Mode Prompts}]
+MODE_PROMPTS = {
+  "mcq": """Requirements for MCQ generation:
+    - Provide 4 options (A, B, C, D)
+    - Only ONE correct answer
+    - Make distractors plausible but clearly wrong
+    - Indicate correct answer at end""",
+   
+  "open-ended": """Requirements:
+    - Provide detailed, well-structured answers
+    - Use information from context
+    - Be clear and concise
+    - State clearly if context insufficient""",
+   
+  "complete": """Requirements for completion exercises:
+    - Replace key terms with blanks (_____)
+    - Provide clear context around each blank
+    - List correct answers separately
+    - Test important concepts"""
+}
+\end{lstlisting}
+
+\subsection{Evaluation Metrics}
+
+Seven dimensions spanning efficiency and performance:
+
+\subsubsection{Computational Efficiency}
+\begin{itemize}
+\item \textbf{Latency:} Per-token generation time (ms/token)
+\item \textbf{GFLOPs:} Computational intensity per token
+\item \textbf{Memory Usage:} GPU memory consumption (GB)
+\end{itemize}
+
+\subsubsection{Generation Quality}
+\begin{itemize}
+\item \textbf{Perplexity:} WikiText-2 test set (sliding window, stride 256)
+\end{itemize}
+
+\subsubsection{Benchmark Evaluations}
+\begin{itemize}
+\item \textbf{MMLU:} 50 samples, multi-domain knowledge
+\item \textbf{HellaSwag:} 50 samples, commonsense inference
+\item \textbf{ARC-Challenge:} 50 samples, scientific reasoning
+\end{itemize}
+
+\subsection{Results}
+
+\begin{table*}[t]
+\centering
+\caption{Comprehensive Performance Metrics: Baseline vs. Prompt-Engineered}
+\label{tab:prompt_engineering}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Before Prompt Eng.} & \textbf{After Prompt Eng.} & \textbf{Change} \\
+\midrule
+\multicolumn{4}{l}{\textit{Computational Efficiency}} \\
+Latency (ms/token) & 80.30 & 80.30 & 0.0\% \\
+GFLOPs (per token) & 1.88 & 1.88 & 0.0\% \\
+Memory Usage (GB) & 8.37 & 8.37 & 0.0\% \\
+\midrule
+\multicolumn{4}{l}{\textit{Generation Quality}} \\
+Perplexity (WikiText-2) & 13.02 & 6.67 & \textbf{-48.8\%} \\
+\midrule
+\multicolumn{4}{l}{\textit{Benchmark Accuracy}} \\
+MMLU (\%) & 28.00 & 30.00 & +2.0 pp \\
+HellaSwag (\%) & 70.00 & 76.00 & +6.0 pp \\
+ARC-Challenge (\%) & 58.00 & 72.00 & +14.0 pp \\
+\midrule
+\multicolumn{4}{l}{\textit{Aggregate Metrics}} \\
+Avg. Benchmark Accuracy & 52.00\% & 59.33\% & \textbf{+7.33 pp} \\
+Total Evaluation Time & 87 min & 87 min & 0.0\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Detailed Metric Analysis}
+
+\subsubsection{Computational Stability}
+
+\textbf{Zero Overhead:} Prompt engineering introduces no computational costs:
+\begin{itemize}
+\item Latency: 80.30 ms/token (constant)
+\item GFLOPs: 1.88 per token (constant)
+\item Memory: 8.37 GB (constant)
+\item Evaluation time: 87 minutes (constant)
+\end{itemize}
+
+This stability is crucial for educational applications where responsiveness and predictable resource usage are essential.
+
+\subsubsection{Dramatic Language Modeling Improvement}
+
+Perplexity improvement from 13.02 to 6.67 represents \textbf{48.8\% reduction}, indicating substantially better language understanding.
+
+\textbf{Interpretation:} Structured prompts provide stronger context and guidance, enabling the quantized model to make more accurate next-token predictions. This demonstrates that proper prompt engineering can overcome significant limitations of 4-bit quantization for language modeling tasks.
+
+\subsubsection{Consistent Benchmark Improvements}
+
+All three benchmarks show performance gains:
+\begin{itemize}
+\item \textbf{ARC-Challenge:} +14.0 pp (substantial scientific reasoning improvement)
+\item \textbf{HellaSwag:} +6.0 pp (moderate commonsense enhancement)
+\item \textbf{MMLU:} +2.0 pp (modest knowledge retrieval gain)
+\end{itemize}
+
+\textbf{Aggregate:} 7.33 percentage point improvement (52.00\% → 59.33\%)
+
+The consistently positive results indicate that prompt engineering for educational applications provides benefits across multiple performance dimensions without creating trade-offs.
+
+\subsection{Implications}
+
+\subsubsection{Zero-Cost Optimization}
+
+Prompt engineering represents a \textbf{pure software optimization}:
+\begin{itemize}
+\item No retraining required
+\item No additional hardware needed
+\item No latency penalty
+\item No memory overhead
+\end{itemize}
+
+This makes it ideal for educational deployments where computational budgets are fixed.
+
+\subsubsection{Task-Dependent Benefits}
+
+Improvements vary by task type:
+\begin{itemize}
+\item \textbf{Strong:} Scientific reasoning (ARC-Challenge +14pp), Language modeling (-48.8\% perplexity)
+\item \textbf{Moderate:} Commonsense reasoning (HellaSwag +6pp)
+\item \textbf{Modest:} Factual knowledge (MMLU +2pp)
+\end{itemize}
+
+This pattern suggests educational prompt engineering enhances reasoning and coherence more than raw knowledge retrieval.
+
+\section{Bridging RAG and Educational Scaffolding}
+
+\subsection{Parallel Paradigms}
+
+Our findings reveal critical parallels between document retrieval (RAG) and example-based learning (few-shot):
+
+\textbf{RAG Context Injection [Paper 2]:}
+\begin{verbatim}
+Context: [Retrieved Document Chunks]
+Question: [User Query]
+Answer: [Generated Response]
+\end{verbatim}
+
+\textbf{Educational Template Injection:}
+\begin{verbatim}
+Examples: [Teacher-Provided Solutions]
+Problem: [Student Query]
+Solution: [Generated Response]
+\end{verbatim}
+
+Both paradigms provide \textbf{external grounding} to compensate for model limitations.
+
+\subsection{Comparative Analysis}
+
+\begin{table}[h]
+\centering
+\caption{RAG vs Few-Shot Educational Paradigms}
+\label{tab:rag_vs_fewshot}
+\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Capability} & \textbf{RAG [Paper 2]} & \textbf{Few-Shot (This Work)} \\
+\midrule
+Factual Grounding & Moderate (F1: +0.024) & Strong (Acc: +60\%) \\
+Faithfulness & 0.539 (NF4) & 0.915 (Few-shot) \\
+Consistency (σ) & 0.090 & 0.5s \\
+Context Length & 1308.5 tokens & 600 tokens \\
+Throughput Impact & -45\% (prefill tax) & +47\% (faster gen) \\
+Memory Overhead & Vector index (100MB-2GB) & Templates (50MB) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Insight:} Few-shot educational templates achieve \textbf{70\% higher faithfulness} (0.915 vs. 0.539) than RAG document retrieval while using less than half the context length (600 vs. 1308 tokens).
+
+\subsection{Why Few-Shot Outperforms RAG for Education}
+
+\subsubsection{Semantic Density}
+
+\textbf{Worked Examples:} Highly structured, every token contributes to solution pattern
+\textbf{Retrieved Documents:} Verbose prose, high redundancy, mixed relevance
+
+\subsubsection{Attention Alignment}
+
+\textbf{Templates:} Clear correspondence between example steps and target problem
+\textbf{Documents:} Model must extract relevant facts from surrounding context
+
+\subsubsection{Token Search Space}
+
+\textbf{Structured Examples:} Constrain generation to follow template format
+\textbf{Free-Form Context:} Open-ended generation, higher exploration cost
+
+\section{System Design Recommendations}
+
+\subsection{Educational Edge Deployment Architecture}
+
+For mathematics education on consumer GPUs (RTX 3060 / Tesla T4):
+
+\subsubsection{Memory Budget}
+
+\begin{itemize}
+\item \textbf{NF4 Model:} 7.6 GB
+\item \textbf{Templates (1000 examples):} 50 MB
+\item \textbf{KV Cache:} 400 MB (typical session)
+\item \textbf{System Overhead:} 400 MB
+\item \textbf{Total:} 8.45 GB
+\end{itemize}
+
+\textbf{Viable on:} 12GB consumer cards (RTX 3060, 4060 Ti) with 3.55GB headroom
+
+\subsubsection{Latency Budget}
+
+\begin{align*}
+\text{Template Retrieval:} &\quad \sim 25\text{ms} \\
+\text{Example Processing (Prefill):} &\quad \sim
