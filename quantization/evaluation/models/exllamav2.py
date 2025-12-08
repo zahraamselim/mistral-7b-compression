@@ -70,7 +70,6 @@ class ExLlamaV2Model(ModelInterface):
             
             self.tokenizer = ExLlamaV2Tokenizer(self.config)
             
-            # Set pad_token_id for compatibility
             if not hasattr(self.tokenizer, 'pad_token_id'):
                 self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
             
@@ -219,24 +218,19 @@ class ExLlamaV2Model(ModelInterface):
         Returns:
             Namespace with logits and optionally loss
         """
-        # Ensure input is 2D
         if input_ids.dim() == 1:
             input_ids = input_ids.unsqueeze(0)
         
         self.cache.current_seq_len = 0
         logits = self.model.forward(input_ids, self.cache, input_mask=None)
         
-        # If labels provided, calculate loss
         if labels is not None:
-            # Ensure labels is 2D
             if labels.dim() == 1:
                 labels = labels.unsqueeze(0)
             
-            # Shift logits and labels for next-token prediction
             shift_logits = logits[:, :-1, :].contiguous()
             shift_labels = labels[:, 1:].contiguous()
             
-            # Calculate cross-entropy loss
             loss_fct = torch.nn.CrossEntropyLoss()
             loss = loss_fct(
                 shift_logits.view(-1, shift_logits.size(-1)),
@@ -270,11 +264,9 @@ class ExLlamaV2Model(ModelInterface):
         if hasattr(self.config, 'max_seq_len'):
             info["max_seq_len"] = self.config.max_seq_len
         
-        # Add model size estimate
-        estimated_params = 7_240_000_000  # Mistral 7B
+        estimated_params = 7_240_000_000
         info["num_parameters"] = estimated_params
         
-        # Estimate size based on quantization (4-bit default)
         bits_per_param = 4.0
         if self.model_path and '2bit' in str(self.model_path).lower():
             bits_per_param = 2.0
@@ -292,17 +284,22 @@ class ExLlamaV2Model(ModelInterface):
     def get_lm_eval_model(self):
         """Get lm-eval compatible model wrapper."""
         logger.warning("ExLlamaV2 does not natively support lm-eval")
-        logger.warning("Falling back to HuggingFace wrapper for task evaluation")
+        logger.info("Creating HuggingFace wrapper for task evaluation")
         
         try:
-            from transformers import AutoModelForCausalLM, AutoTokenizer
+            from transformers import AutoTokenizer, AutoConfig
+            from auto_gptq import AutoGPTQForCausalLM
             from lm_eval.models.huggingface import HFLM
             
             hf_tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-            hf_model = AutoModelForCausalLM.from_pretrained(
+            config = AutoConfig.from_pretrained(self.model_path, trust_remote_code=False)
+            
+            hf_model = AutoGPTQForCausalLM.from_quantized(
                 self.model_path,
                 device_map="auto",
-                torch_dtype=torch.float16
+                use_safetensors=True,
+                trust_remote_code=False,
+                use_triton=False
             )
             
             return HFLM(
@@ -310,6 +307,10 @@ class ExLlamaV2Model(ModelInterface):
                 tokenizer=hf_tokenizer,
                 batch_size=1
             )
+        except ImportError as e:
+            logger.error(f"Missing dependencies for lm-eval: {e}")
+            logger.error("Install: pip install optimum auto-gptq")
+            return None
         except Exception as e:
             logger.error(f"Could not create lm-eval wrapper: {e}")
             return None

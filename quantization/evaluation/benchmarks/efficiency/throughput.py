@@ -30,7 +30,7 @@ def _tokenize_safe(model_interface, text, padding: bool = True, max_length: int 
         if isinstance(text, list):
             all_input_ids = []
             for t in text:
-                result = model_interface.tokenize(t, return_tensors='pt', padding=padding)
+                result = model_interface.tokenize(t, add_special_tokens=True, return_tensors='pt', padding=padding)
                 all_input_ids.append(result['input_ids'])
             
             max_len = max(ids.shape[1] for ids in all_input_ids)
@@ -46,7 +46,7 @@ def _tokenize_safe(model_interface, text, padding: bool = True, max_length: int 
             attention_mask = torch.ones_like(input_ids)
             return {'input_ids': input_ids, 'attention_mask': attention_mask}
         else:
-            return model_interface.tokenize(text, return_tensors='pt', padding=padding)
+            return model_interface.tokenize(text, add_special_tokens=True, return_tensors='pt', padding=padding)
     
     kwargs = {'return_tensors': 'pt', 'padding': padding}
     if max_length:
@@ -120,8 +120,7 @@ def measure_throughput(
         prompt = prompts[i % len(prompts)]
         
         try:
-            inputs = _tokenize_safe(model_interface, prompt)
-            prompt_length = inputs['input_ids'].shape[1] if hasattr(inputs['input_ids'], 'shape') else len(inputs['input_ids'][0])
+            tokenizer = model_interface.get_tokenizer()
             
             if is_cuda and torch.cuda.is_available():
                 torch.cuda.synchronize()
@@ -140,11 +139,13 @@ def measure_throughput(
             end_time = time.perf_counter()
             
             if isinstance(output, str):
-                tokenizer = model_interface.get_tokenizer()
-                output_tokens = tokenizer.encode(output, add_special_tokens=False)
-                tokens = len(output_tokens)
+                output_tokens = tokenizer.encode(output, add_bos=False, add_eos=False) if hasattr(tokenizer, 'encode') else tokenizer(output, add_special_tokens=False)['input_ids']
+                if hasattr(output_tokens, '__len__'):
+                    tokens = len(output_tokens)
+                else:
+                    tokens = output_tokens.shape[0] if hasattr(output_tokens, 'shape') else max_new_tokens
             else:
-                tokens = output.shape[1] - prompt_length if hasattr(output, 'shape') else max_new_tokens
+                tokens = max_new_tokens
             
             run_time = end_time - start_time
             
@@ -240,10 +241,13 @@ def measure_batch_throughput(
             
             end_time = time.perf_counter()
             
+            tokenizer = model_interface.get_tokenizer()
             if isinstance(output, str):
-                tokenizer = model_interface.get_tokenizer()
-                output_tokens = tokenizer.encode(output, add_special_tokens=False)
-                total_tokens = len(output_tokens)
+                output_tokens = tokenizer.encode(output, add_bos=False, add_eos=False) if hasattr(tokenizer, 'encode') else tokenizer(output, add_special_tokens=False)['input_ids']
+                if hasattr(output_tokens, '__len__'):
+                    total_tokens = len(output_tokens)
+                else:
+                    total_tokens = output_tokens.shape[0] if hasattr(output_tokens, 'shape') else max_new_tokens
             else:
                 total_tokens = max_new_tokens
             

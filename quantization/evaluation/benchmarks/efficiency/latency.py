@@ -42,7 +42,7 @@ def _tokenize_safe(model_interface, text: str, padding: bool = True):
     device = model_interface.get_device()
     
     if hasattr(model_interface, 'tokenize'):
-        return model_interface.tokenize(text, return_tensors='pt', padding=padding)
+        return model_interface.tokenize(text, add_special_tokens=True, return_tensors='pt', padding=padding)
     
     return tokenizer(text, return_tensors='pt', padding=padding).to(device)
 
@@ -155,8 +155,7 @@ def measure_latency(
         prompt = prompts[i % len(prompts)]
         
         try:
-            inputs = _tokenize_safe(model_interface, prompt, padding=True)
-            prompt_length = inputs['input_ids'].shape[1] if hasattr(inputs['input_ids'], 'shape') else len(inputs['input_ids'][0])
+            tokenizer = model_interface.get_tokenizer()
             
             if is_cuda and torch.cuda.is_available():
                 torch.cuda.synchronize()
@@ -176,11 +175,13 @@ def measure_latency(
             latency_ms = (end_time - start_time) * 1000
             
             if isinstance(output, str):
-                tokenizer = model_interface.get_tokenizer()
-                output_tokens = tokenizer.encode(output, add_special_tokens=False)
-                num_tokens = len(output_tokens)
+                output_tokens = tokenizer.encode(output, add_bos=False, add_eos=False) if hasattr(tokenizer, 'encode') else tokenizer(output, add_special_tokens=False)['input_ids']
+                if hasattr(output_tokens, '__len__'):
+                    num_tokens = len(output_tokens)
+                else:
+                    num_tokens = output_tokens.shape[0] if hasattr(output_tokens, 'shape') else max_new_tokens
             else:
-                num_tokens = output.shape[1] - prompt_length if hasattr(output, 'shape') else max_new_tokens
+                num_tokens = max_new_tokens
             
             latencies.append(latency_ms)
             tokens_generated.append(num_tokens)

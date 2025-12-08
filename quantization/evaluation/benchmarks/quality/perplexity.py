@@ -110,8 +110,7 @@ class PerplexityEvaluator:
             dataset = load_dataset(
                 dataset_name,
                 dataset_config if dataset_config else None,
-                split=split,
-                trust_remote_code=True
+                split=split
             )
             
             if num_samples and len(dataset) > num_samples:
@@ -148,6 +147,25 @@ class PerplexityEvaluator:
             logger.error(f"Failed to load dataset: {e}")
             return []
     
+    def _tokenize_text(self, text: str, max_length: int):
+        """Tokenize text handling different tokenizer types."""
+        if hasattr(self.tokenizer, 'encode'):
+            input_ids = self.tokenizer.encode(text, add_bos=True, add_eos=False)
+            if input_ids.dim() == 1:
+                input_ids = input_ids.unsqueeze(0)
+            if input_ids.shape[1] > max_length:
+                input_ids = input_ids[:, :max_length]
+            return input_ids
+        else:
+            encodings = self.tokenizer(
+                text,
+                return_tensors="pt",
+                truncation=True,
+                max_length=max_length,
+                add_special_tokens=True
+            )
+            return encodings["input_ids"].to(self.device)
+    
     def _calculate_simple(
         self,
         texts: List[str],
@@ -170,15 +188,7 @@ class PerplexityEvaluator:
                     continue
                 
                 try:
-                    encodings = self.tokenizer(
-                        text,
-                        return_tensors="pt",
-                        truncation=True,
-                        max_length=max_length,
-                        add_special_tokens=True
-                    )
-                    
-                    input_ids = encodings["input_ids"].to(self.device)
+                    input_ids = self._tokenize_text(text, max_length)
                     
                     if input_ids.size(1) < 2:
                         continue
@@ -212,8 +222,11 @@ class PerplexityEvaluator:
                         logger.warning("OOM on sample, skipping")
                         if torch.cuda.is_available():
                             torch.cuda.empty_cache()
+                    else:
+                        logger.warning(f"Sample failed: {e}")
                     continue
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"Sample failed: {e}")
                     continue
         
         if total_tokens == 0:
@@ -253,12 +266,7 @@ class PerplexityEvaluator:
                     continue
                 
                 try:
-                    encodings = self.tokenizer(
-                        text,
-                        return_tensors="pt",
-                        add_special_tokens=True
-                    )
-                    input_ids = encodings["input_ids"].to(self.device)
+                    input_ids = self._tokenize_text(text, max_length=999999)
                     
                     seq_len = input_ids.size(1)
                     
@@ -320,8 +328,11 @@ class PerplexityEvaluator:
                         logger.warning("OOM on sample, skipping")
                         if torch.cuda.is_available():
                             torch.cuda.empty_cache()
+                    else:
+                        logger.warning(f"Sample failed: {e}")
                     continue
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"Sample failed: {e}")
                     continue
         
         if total_tokens == 0:
