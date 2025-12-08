@@ -8,9 +8,6 @@
 *.out
 *.synctex.gz
 
-.rag/
-.education/
-papers
-
+papers/
 drafts/
 .
