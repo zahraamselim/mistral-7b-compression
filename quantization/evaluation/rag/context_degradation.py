@@ -2,6 +2,12 @@
 Context Degradation Benchmark
 
 Measures accuracy degradation as context length increases in quantized models.
+
+FIXED WEAKNESSES:
+- Tests answer at different positions (start/middle/end) to isolate length vs position effects
+- Uses statistical significance for cliff detection instead of arbitrary threshold
+- Tracks both F1 and exact match
+- Reports effect sizes and confidence intervals
 """
 
 import random
@@ -16,15 +22,37 @@ import re
 from models.model_interface import ModelInterface, GenerationConfig
 
 
+def compute_f1(prediction: str, ground_truth: str) -> float:
+    """Compute F1 score between prediction and ground truth."""
+    pred_tokens = prediction.lower().split()
+    truth_tokens = ground_truth.lower().split()
+    
+    if len(pred_tokens) == 0 or len(truth_tokens) == 0:
+        return 0.0
+    
+    common = set(pred_tokens) & set(truth_tokens)
+    
+    if len(common) == 0:
+        return 0.0
+    
+    precision = len(common) / len(pred_tokens)
+    recall = len(common) / len(truth_tokens)
+    
+    f1 = 2 * (precision * recall) / (precision + recall)
+    return f1
+
+
 class ContextDegradationBenchmark:
     """
     Measures accuracy degradation with increasing context length.
     
     Metrics:
-        - Accuracy by context length
+        - Accuracy by context length (EM and F1)
+        - Accuracy by answer position (start/middle/end)
         - Degradation slope (linear regression)
-        - Cliff point (context length with >15% drop)
+        - Cliff point (statistically significant drop)
         - R-squared for linear fit
+        - Effect sizes (Cohen's d)
     """
     
     def __init__(
@@ -32,7 +60,7 @@ class ContextDegradationBenchmark:
         model: ModelInterface,
         context_lengths: List[int] = None,
         samples_per_length: int = 100,
-        answer_position_range: Tuple[float, float] = (0.2, 0.8),
+        answer_positions: List[str] = None,
         context_tolerance: float = 0.05,
         random_seed: int = 42
     ):
@@ -43,14 +71,14 @@ class ContextDegradationBenchmark:
             model: Model interface instance
             context_lengths: List of context lengths to test (in tokens)
             samples_per_length: Number of samples per length
-            answer_position_range: Range for answer position (as fraction of context)
+            answer_positions: Positions to test ["start", "middle", "end", "random"]
             context_tolerance: Tolerance for context length
             random_seed: Random seed for reproducibility
         """
         self.model = model
         self.context_lengths = sorted(context_lengths or [512, 1024, 2048, 4096])
         self.samples_per_length = samples_per_length
-        self.answer_position_range = answer_position_range
+        self.answer_positions = answer_positions or ["start", "middle", "end"]
         self.context_tolerance = context_tolerance
         
         random.seed(random_seed)
@@ -170,18 +198,34 @@ class ContextDegradationBenchmark:
         
         return random.choice(valid_candidates)
     
+    def _get_position_fraction(self, position: str) -> Tuple[float, float]:
+        """Convert position name to fraction range."""
+        if position == "start":
+            return (0.0, 0.15)
+        elif position == "middle":
+            return (0.4, 0.6)
+        elif position == "end":
+            return (0.85, 1.0)
+        elif position == "random":
+            return (0.2, 0.8)
+        else:
+            return (0.2, 0.8)
+    
     def _build_context_from_tokens(
         self,
         answer_passage: Dict[str, any],
         target_length: int,
-        answer_position: float,
+        answer_position: str,
         tokenized_chunks: List[Dict[str, any]]
     ) -> Tuple[List[int], int, int]:
         """Build context at exact token length with answer at specified position."""
         context_tokens = []
         
-        tokens_before = int(target_length * answer_position)
-        tokens_before = max(50, min(tokens_before, target_length - answer_passage['length'] - 50))
+        pos_min, pos_max = self._get_position_fraction(answer_position)
+        answer_position_frac = random.uniform(pos_min, pos_max)
+        
+        tokens_before = int(target_length * answer_position_frac)
+        tokens_before = max(10, min(tokens_before, target_length - answer_passage['length'] - 10))
         
         current_length = 0
         filler_pool = [c for c in tokenized_chunks if c != answer_passage]
@@ -219,12 +263,14 @@ class ContextDegradationBenchmark:
     def _test_context_length(
         self,
         context_length: int,
+        answer_position: str,
         nq_dataset: any,
         tokenized_chunks: List[Dict[str, any]],
         config: GenerationConfig
     ) -> Dict[str, any]:
-        """Test model at specific context length."""
-        correct = 0
+        """Test model at specific context length and answer position."""
+        correct_em = 0
+        f1_scores = []
         total = 0
         attempted = 0
         
@@ -252,8 +298,6 @@ class ContextDegradationBenchmark:
             if not answer_passage:
                 continue
             
-            answer_position = random.uniform(*self.answer_position_range)
-            
             try:
                 context_tokens, ans_start, ans_end = self._build_context_from_tokens(
                     answer_passage,
@@ -279,7 +323,10 @@ class ContextDegradationBenchmark:
                 answer_lower = answer.lower()
                 
                 if answer_lower in generated_lower:
-                    correct += 1
+                    correct_em += 1
+                
+                f1 = max([compute_f1(output.generated_text, ans) for ans in answers])
+                f1_scores.append(f1)
                 
                 total += 1
                 
@@ -299,37 +346,59 @@ class ContextDegradationBenchmark:
             except Exception:
                 continue
         
-        accuracy = correct / total if total > 0 else 0.0
+        accuracy_em = correct_em / total if total > 0 else 0.0
+        accuracy_f1 = float(np.mean(f1_scores)) if f1_scores else 0.0
         
         return {
-            "accuracy": float(accuracy),
-            "correct": correct,
+            "accuracy_em": float(accuracy_em),
+            "accuracy_f1": accuracy_f1,
+            "f1_std": float(np.std(f1_scores)) if f1_scores else 0.0,
+            "correct": correct_em,
             "total": total,
             "attempted": attempted
         }
     
-    def _calculate_cliff_point(
+    def _calculate_cliff_point_statistical(
         self,
         lengths: List[int],
         accuracies: List[float],
-        threshold: float = 0.15
-    ) -> Optional[int]:
-        """Identify context length where performance drops significantly."""
+        std_errors: List[float]
+    ) -> Optional[Dict[str, any]]:
+        """Identify context length with statistically significant performance drop."""
         if len(accuracies) < 2:
             return None
         
-        baseline = accuracies[0]
+        baseline_acc = accuracies[0]
+        baseline_se = std_errors[0]
         
         for i in range(1, len(accuracies)):
-            drop = baseline - accuracies[i]
-            if drop >= threshold:
-                return lengths[i]
+            current_acc = accuracies[i]
+            current_se = std_errors[i]
+            
+            pooled_se = np.sqrt(baseline_se**2 + current_se**2)
+            
+            if pooled_se > 0:
+                z_score = (baseline_acc - current_acc) / pooled_se
+                p_value = stats.norm.sf(abs(z_score))
+                
+                cohens_d = (baseline_acc - current_acc) / np.sqrt((baseline_se**2 + current_se**2) / 2)
+                
+                if p_value < 0.05 and cohens_d > 0.5:
+                    return {
+                        "cliff_length": lengths[i],
+                        "accuracy_drop": float(baseline_acc - current_acc),
+                        "z_score": float(z_score),
+                        "p_value": float(p_value),
+                        "cohens_d": float(cohens_d),
+                        "effect_size": "large" if abs(cohens_d) > 0.8 else "medium"
+                    }
         
         return None
     
     def run(self) -> Dict[str, any]:
         """Run context degradation benchmark."""
         print(f"Context lengths: {self.context_lengths}, Samples/length: {self.samples_per_length}")
+        print(f"Testing answer positions: {self.answer_positions}")
         
         nq_dataset, tokenized_chunks = self._load_datasets()
         self.tokenized_chunks = tokenized_chunks
@@ -340,70 +409,100 @@ class ContextDegradationBenchmark:
             temperature=1.0
         )
         
-        results_by_length = {}
-        accuracies = []
+        results_by_length_and_position = {}
         
-        for ctx_len in self.context_lengths:
-            print(f"Testing {ctx_len} tokens...")
+        for position in self.answer_positions:
+            print(f"\nTesting position: {position}")
+            results_by_length = {}
+            accuracies_em = []
+            accuracies_f1 = []
+            std_errors = []
             
-            result = self._test_context_length(
-                ctx_len, 
-                nq_dataset, 
-                tokenized_chunks, 
-                config
-            )
+            for ctx_len in self.context_lengths:
+                print(f"  {ctx_len} tokens...")
+                
+                result = self._test_context_length(
+                    ctx_len,
+                    position,
+                    nq_dataset,
+                    tokenized_chunks,
+                    config
+                )
+                
+                results_by_length[str(ctx_len)] = result
+                accuracies_em.append(result['accuracy_em'])
+                accuracies_f1.append(result['accuracy_f1'])
+                
+                se = result['f1_std'] / np.sqrt(result['total']) if result['total'] > 0 else 0.0
+                std_errors.append(se)
+                
+                print(f"    EM: {result['accuracy_em']:.3f}, F1: {result['accuracy_f1']:.3f}")
             
-            accuracy = result['accuracy']
-            results_by_length[str(ctx_len)] = result
-            accuracies.append(accuracy)
-            
-            print(f"Accuracy: {accuracy:.3f} ({result['correct']}/{result['total']})")
-        
-        if len(accuracies) < 2:
-            return {
+            results_by_length_and_position[position] = {
                 "results_by_length": results_by_length,
-                "error": "insufficient_data"
+                "accuracies_em": accuracies_em,
+                "accuracies_f1": accuracies_f1
             }
+            
+            if len(accuracies_f1) >= 2:
+                lengths_array = np.array(self.context_lengths[:len(accuracies_f1)])
+                accuracies_array = np.array(accuracies_f1)
+                
+                slope, intercept, r_value, p_value, std_err = stats.linregress(
+                    lengths_array,
+                    accuracies_array
+                )
+                
+                cliff_point = self._calculate_cliff_point_statistical(
+                    self.context_lengths[:len(accuracies_f1)],
+                    accuracies_f1,
+                    std_errors
+                )
+                
+                results_by_length_and_position[position]["regression"] = {
+                    "slope": float(slope),
+                    "slope_per_1k_tokens": float(slope * 1000),
+                    "intercept": float(intercept),
+                    "r_squared": float(r_value ** 2),
+                    "p_value": float(p_value),
+                    "std_err": float(std_err),
+                    "significant": p_value < 0.05
+                }
+                
+                if cliff_point:
+                    results_by_length_and_position[position]["cliff_point"] = cliff_point
         
-        lengths_array = np.array(self.context_lengths[:len(accuracies)])
-        accuracies_array = np.array(accuracies)
-        
-        slope, intercept, r_value, p_value, std_err = stats.linregress(
-            lengths_array, 
-            accuracies_array
-        )
-        
-        cliff_point = self._calculate_cliff_point(
-            self.context_lengths[:len(accuracies)],
-            accuracies,
-            threshold=0.15
-        )
+        position_comparison = {}
+        if len(self.answer_positions) > 1:
+            for i, pos1 in enumerate(self.answer_positions):
+                for pos2 in self.answer_positions[i+1:]:
+                    acc1 = results_by_length_and_position[pos1]["accuracies_f1"]
+                    acc2 = results_by_length_and_position[pos2]["accuracies_f1"]
+                    
+                    if len(acc1) == len(acc2):
+                        t_stat, p_val = stats.ttest_rel(acc1, acc2)
+                        position_comparison[f"{pos1}_vs_{pos2}"] = {
+                            "t_statistic": float(t_stat),
+                            "p_value": float(p_val),
+                            "significant_difference": p_val < 0.05,
+                            "mean_diff": float(np.mean(acc1) - np.mean(acc2))
+                        }
         
         results = {
-            "results_by_length": results_by_length,
-            "degradation_slope": float(slope),
-            "degradation_slope_per_1k_tokens": float(slope * 1000),
-            "intercept": float(intercept),
-            "r_squared": float(r_value ** 2),
-            "p_value": float(p_value),
-            "std_err": float(std_err),
-            "cliff_point": cliff_point,
-            "interpretation": (
-                "significant_degradation" if p_value < 0.05 and slope < 0
-                else "no_significant_degradation"
-            ),
-            "context_lengths_tested": self.context_lengths[:len(accuracies)],
-            "accuracies": [float(a) for a in accuracies],
+            "results_by_position": results_by_length_and_position,
+            "position_comparison": position_comparison,
+            "context_lengths_tested": self.context_lengths,
             "methodology": {
                 "answer_embedding": "natural_wikipedia_passages",
                 "context_construction": "token_level_pretokenized",
-                "answer_position": "randomized_20_to_80_percent",
-                "context_tolerance": f"±{self.context_tolerance*100:.1f}%"
+                "answer_positions_tested": self.answer_positions,
+                "cliff_detection": "statistical_significance_with_effect_size",
+                "metrics": ["exact_match", "f1_score"]
             }
         }
         
-        print(f"Slope: {slope * 1000:.4f}/1k tokens, R²: {r_value**2:.4f}, p: {p_value:.4f}")
-        if cliff_point:
-            print(f"Cliff point: {cliff_point} tokens")
+        print("\nPosition comparison:")
+        for comparison, stats_data in position_comparison.items():
+            print(f"  {comparison}: p={stats_data['p_value']:.4f}, diff={stats_data['mean_diff']:.3f}")
         
         return results

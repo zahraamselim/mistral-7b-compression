@@ -3,6 +3,12 @@ Attention Preservation Benchmark
 
 Measures whether quantized models preserve attention to relevant documents in 
 multi-document retrieval scenarios.
+
+FIXED WEAKNESSES:
+- Added answer accuracy tracking (exact match + F1 score)
+- Correlates attention metrics with answer quality
+- Tests multiple aggregation strategies
+- Distinguishes correct-with-attention vs correct-without-attention
 """
 
 import random
@@ -17,15 +23,48 @@ import re
 from models.model_interface import ModelInterface, GenerationConfig
 
 
+def compute_f1(prediction: str, ground_truth: str) -> float:
+    """Compute F1 score between prediction and ground truth."""
+    pred_tokens = prediction.lower().split()
+    truth_tokens = ground_truth.lower().split()
+    
+    if len(pred_tokens) == 0 or len(truth_tokens) == 0:
+        return 0.0
+    
+    common = set(pred_tokens) & set(truth_tokens)
+    
+    if len(common) == 0:
+        return 0.0
+    
+    precision = len(common) / len(pred_tokens)
+    recall = len(common) / len(truth_tokens)
+    
+    f1 = 2 * (precision * recall) / (precision + recall)
+    return f1
+
+
+def compute_exact_match(prediction: str, ground_truths: List[str]) -> bool:
+    """Check if prediction exactly matches any ground truth."""
+    pred_normalized = prediction.lower().strip()
+    
+    for gt in ground_truths:
+        gt_normalized = gt.lower().strip()
+        if pred_normalized == gt_normalized or gt_normalized in pred_normalized:
+            return True
+    
+    return False
+
+
 class AttentionPreservationBenchmark:
     """
     Measures attention preservation to relevant documents in quantized models.
     
     Metrics:
-        - Attention Precision@1: Fraction of cases where highest attention 
-          goes to the answer-containing document
+        - Attention Precision@1: Fraction where highest attention goes to answer doc
         - Attention Rank: Rank of answer document in attention distribution
         - Attention Concentration: Gini coefficient measuring attention spread
+        - Answer Accuracy: Exact match and F1 scores
+        - Attention-Accuracy Correlation: Does attention predict correctness?
     """
     
     def __init__(
@@ -35,6 +74,7 @@ class AttentionPreservationBenchmark:
         num_documents: int = 10,
         max_doc_tokens: int = 128,
         layers_to_analyze: Optional[List[int]] = None,
+        test_aggregation_strategies: bool = False,
         random_seed: int = 42
     ):
         """
@@ -46,6 +86,7 @@ class AttentionPreservationBenchmark:
             num_documents: Number of documents per test (1 relevant + rest distractors)
             max_doc_tokens: Maximum tokens per document
             layers_to_analyze: Which layers to analyze (None = middle 50%)
+            test_aggregation_strategies: Test multiple aggregation methods
             random_seed: Random seed for reproducibility
         """
         self.model = model
@@ -53,6 +94,7 @@ class AttentionPreservationBenchmark:
         self.num_documents = num_documents
         self.max_doc_tokens = max_doc_tokens
         self.layers_to_analyze = layers_to_analyze
+        self.test_aggregation_strategies = test_aggregation_strategies
         
         random.seed(random_seed)
         np.random.seed(random_seed)
@@ -81,7 +123,7 @@ class AttentionPreservationBenchmark:
     
     def _load_datasets(self) -> Tuple[any, List[Dict[str, str]]]:
         """Load Natural Questions dataset with contexts."""
-        print("Loading Natural Questions dataset...")
+        print("Loading Natural Questions...")
         nq_dataset = load_dataset("nq_open", split="validation")
         
         print("Loading Wikipedia corpus...")
@@ -109,24 +151,20 @@ class AttentionPreservationBenchmark:
             print(f"Loaded {len(wiki_samples)} Wikipedia documents")
             
         except Exception as e:
-            print(f"Failed to load Wikipedia from wikimedia/wikipedia: {e}")
+            print(f"Failed to load wikimedia/wikipedia: {e}")
             print("Falling back to simple-wikipedia...")
             
-            try:
-                wiki_dataset = load_dataset("wikipedia", "20220301.simple", split="train[:2000]")
-                wiki_samples = []
-                for sample in wiki_dataset:
-                    text = sample.get('text', '')
-                    title = sample.get('title', '')
-                    if len(text) > 200:
-                        wiki_samples.append({
-                            'text': text,
-                            'title': title
-                        })
-                print(f"Loaded {len(wiki_samples)} Wikipedia documents")
-                
-            except Exception as e2:
-                raise RuntimeError(f"Failed to load Wikipedia corpus: {e2}")
+            wiki_dataset = load_dataset("wikipedia", "20220301.simple", split="train[:2000]")
+            wiki_samples = []
+            for sample in wiki_dataset:
+                text = sample.get('text', '')
+                title = sample.get('title', '')
+                if len(text) > 200:
+                    wiki_samples.append({
+                        'text': text,
+                        'title': title
+                    })
+            print(f"Loaded {len(wiki_samples)} Wikipedia documents")
         
         return nq_dataset, wiki_samples
     
@@ -252,18 +290,18 @@ class AttentionPreservationBenchmark:
         attentions: Tuple[torch.Tensor],
         input_ids: torch.Tensor,
         doc_marker_ids: List[int],
-        num_generated: int
+        num_generated: int,
+        aggregation_strategy: str = "middle_50"
     ) -> np.ndarray:
         """
         Aggregate attention weights to document level.
-        
-        Uses only final generation step to avoid double-counting.
         
         Args:
             attentions: Tuple of attention tensors from FINAL generation step
             input_ids: Input token IDs [1, seq_len]
             doc_marker_ids: Token IDs that mark document boundaries
             num_generated: Number of generated tokens
+            aggregation_strategy: "middle_50", "all_layers", "last_layer"
             
         Returns:
             Array of per-document attention scores [num_docs]
@@ -273,12 +311,16 @@ class AttentionPreservationBenchmark:
         model_info = self.model.get_model_info()
         num_layers = model_info.get('num_layers', 32)
         
-        if self.layers_to_analyze is None:
+        if aggregation_strategy == "middle_50":
             start_layer = num_layers // 4
             end_layer = 3 * num_layers // 4
             layers_to_use = list(range(start_layer, end_layer))
+        elif aggregation_strategy == "all_layers":
+            layers_to_use = list(range(num_layers))
+        elif aggregation_strategy == "last_layer":
+            layers_to_use = [num_layers - 1]
         else:
-            layers_to_use = self.layers_to_analyze
+            layers_to_use = self.layers_to_analyze or list(range(num_layers // 4, 3 * num_layers // 4))
         
         doc_attention = np.zeros(self.num_documents)
         total_attention = 0.0
@@ -366,6 +408,20 @@ class AttentionPreservationBenchmark:
         attention_ranks = []
         attention_gini = []
         
+        exact_matches = []
+        f1_scores = []
+        
+        correct_with_high_attention = []
+        correct_with_low_attention = []
+        attention_scores_when_correct = []
+        attention_scores_when_wrong = []
+        
+        aggregation_results = {
+            "middle_50": {"precision": [], "rank": []},
+            "all_layers": {"precision": [], "rank": []},
+            "last_layer": {"precision": [], "rank": []}
+        } if self.test_aggregation_strategies else None
+        
         config = GenerationConfig(
             max_new_tokens=30,
             do_sample=False,
@@ -422,6 +478,14 @@ class AttentionPreservationBenchmark:
                 inputs = self.model.encode(prompt, max_length=2048)
                 output = self.model.generate(prompt, config, return_attentions=True)
                 
+                generated_text = output.generated_text
+                
+                em = compute_exact_match(generated_text, answers)
+                f1 = max([compute_f1(generated_text, ans) for ans in answers])
+                
+                exact_matches.append(1.0 if em else 0.0)
+                f1_scores.append(f1)
+                
                 if output.attentions and len(output.attentions) > 0:
                     final_step_attentions = output.attentions[-1]
                     
@@ -429,12 +493,15 @@ class AttentionPreservationBenchmark:
                         final_step_attentions,
                         inputs['input_ids'],
                         doc_marker_ids,
-                        output.num_generated_tokens
+                        output.num_generated_tokens,
+                        aggregation_strategy="middle_50"
                     )
                     
                     if doc_attention.sum() > 0:
                         top_doc = np.argmax(doc_attention)
-                        precision_at_1.append(1.0 if top_doc == answer_idx else 0.0)
+                        high_attention = (top_doc == answer_idx)
+                        
+                        precision_at_1.append(1.0 if high_attention else 0.0)
                         
                         sorted_indices = np.argsort(doc_attention)[::-1]
                         rank = int(np.where(sorted_indices == answer_idx)[0][0] + 1)
@@ -442,6 +509,37 @@ class AttentionPreservationBenchmark:
                         
                         gini = self._calculate_gini_coefficient(doc_attention)
                         attention_gini.append(gini)
+                        
+                        relevant_doc_attention = doc_attention[answer_idx]
+                        
+                        if em or f1 > 0.3:
+                            attention_scores_when_correct.append(relevant_doc_attention)
+                            if high_attention:
+                                correct_with_high_attention.append(1.0)
+                            else:
+                                correct_with_low_attention.append(1.0)
+                        else:
+                            attention_scores_when_wrong.append(relevant_doc_attention)
+                        
+                        if self.test_aggregation_strategies:
+                            for strategy in ["all_layers", "last_layer"]:
+                                doc_attn_alt = self._aggregate_attention_to_documents(
+                                    final_step_attentions,
+                                    inputs['input_ids'],
+                                    doc_marker_ids,
+                                    output.num_generated_tokens,
+                                    aggregation_strategy=strategy
+                                )
+                                
+                                if doc_attn_alt.sum() > 0:
+                                    top_doc_alt = np.argmax(doc_attn_alt)
+                                    aggregation_results[strategy]["precision"].append(
+                                        1.0 if top_doc_alt == answer_idx else 0.0
+                                    )
+                                    
+                                    sorted_indices_alt = np.argsort(doc_attn_alt)[::-1]
+                                    rank_alt = int(np.where(sorted_indices_alt == answer_idx)[0][0] + 1)
+                                    aggregation_results[strategy]["rank"].append(rank_alt)
                         
                         successful += 1
                 
@@ -477,6 +575,40 @@ class AttentionPreservationBenchmark:
         gini_mean = float(np.mean(attention_gini))
         gini_std = float(np.std(attention_gini))
         
+        em_mean = float(np.mean(exact_matches))
+        f1_mean = float(np.mean(f1_scores))
+        
+        from scipy.stats import pearsonr, spearmanr
+        
+        attention_quality_correlation = {}
+        if len(precision_at_1) == len(f1_scores):
+            pearson_r, pearson_p = pearsonr(precision_at_1, f1_scores)
+            spearman_r, spearman_p = spearmanr(attention_ranks, f1_scores)
+            
+            attention_quality_correlation = {
+                "precision_vs_f1_pearson_r": float(pearson_r),
+                "precision_vs_f1_pearson_p": float(pearson_p),
+                "rank_vs_f1_spearman_r": float(spearman_r),
+                "rank_vs_f1_spearman_p": float(spearman_p),
+                "interpretation": (
+                    "significant_positive" if pearson_p < 0.05 and pearson_r > 0
+                    else "significant_negative" if pearson_p < 0.05 and pearson_r < 0
+                    else "no_significant_correlation"
+                )
+            }
+        
+        attention_by_correctness = {
+            "attention_when_correct_mean": float(np.mean(attention_scores_when_correct)) if attention_scores_when_correct else 0.0,
+            "attention_when_correct_std": float(np.std(attention_scores_when_correct)) if attention_scores_when_correct else 0.0,
+            "attention_when_wrong_mean": float(np.mean(attention_scores_when_wrong)) if attention_scores_when_wrong else 0.0,
+            "attention_when_wrong_std": float(np.std(attention_scores_when_wrong)) if attention_scores_when_wrong else 0.0,
+            "correct_with_high_attention": len(correct_with_high_attention),
+            "correct_with_low_attention": len(correct_with_low_attention),
+            "high_attention_improves_accuracy": (
+                len(correct_with_high_attention) > len(correct_with_low_attention)
+            )
+        }
+        
         results = {
             "attention_precision_at_1": precision_mean,
             "attention_precision_at_1_ci_95_lower": precision_ci[0],
@@ -486,18 +618,34 @@ class AttentionPreservationBenchmark:
             "attention_rank_std": rank_std,
             "attention_concentration_gini": gini_mean,
             "attention_concentration_gini_std": gini_std,
+            "exact_match_accuracy": em_mean,
+            "f1_score_mean": f1_mean,
+            "attention_quality_correlation": attention_quality_correlation,
+            "attention_by_correctness": attention_by_correctness,
             "num_samples": len(precision_at_1),
             "samples_attempted": attempted,
             "power_analysis": self.power_analysis,
             "methodology": {
                 "layers_analyzed": "middle_50_percent" if self.layers_to_analyze is None else self.layers_to_analyze,
                 "attention_aggregation": "final_step_only_no_double_counting",
-                "distractor_selection": "bm25_semantic"
+                "distractor_selection": "bm25_semantic",
+                "answer_quality_measured": True
             }
         }
         
+        if self.test_aggregation_strategies and aggregation_results:
+            results["aggregation_comparison"] = {
+                strategy: {
+                    "precision_at_1": float(np.mean(data["precision"])) if data["precision"] else 0.0,
+                    "rank_mean": float(np.mean(data["rank"])) if data["rank"] else 0.0
+                }
+                for strategy, data in aggregation_results.items()
+            }
+        
         print(f"Precision@1: {precision_mean:.3f} [{precision_ci[0]:.3f}, {precision_ci[1]:.3f}]")
         print(f"Mean rank: {rank_mean:.2f}, Gini: {gini_mean:.3f}")
+        print(f"Answer quality: EM={em_mean:.3f}, F1={f1_mean:.3f}")
+        print(f"Attention-quality correlation: r={attention_quality_correlation.get('precision_vs_f1_pearson_r', 0):.3f}, p={attention_quality_correlation.get('precision_vs_f1_pearson_p', 1):.3f}")
         print(f"Success: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
         
         return results

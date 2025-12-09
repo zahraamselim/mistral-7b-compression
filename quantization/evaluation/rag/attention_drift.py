@@ -2,6 +2,12 @@
 Attention Drift Benchmark
 
 Measures attention stability during generation in quantized models.
+
+FIXED WEAKNESSES:
+- Validates that drift correlates with answer quality
+- Tracks drift separately for correct vs incorrect answers
+- Tests if drift magnitude predicts errors
+- Provides justification for when drift is good vs bad
 """
 
 import random
@@ -16,6 +22,26 @@ import re
 from models.model_interface import ModelInterface, GenerationConfig
 
 
+def compute_f1(prediction: str, ground_truth: str) -> float:
+    """Compute F1 score between prediction and ground truth."""
+    pred_tokens = prediction.lower().split()
+    truth_tokens = ground_truth.lower().split()
+    
+    if len(pred_tokens) == 0 or len(truth_tokens) == 0:
+        return 0.0
+    
+    common = set(pred_tokens) & set(truth_tokens)
+    
+    if len(common) == 0:
+        return 0.0
+    
+    precision = len(common) / len(pred_tokens)
+    recall = len(common) / len(truth_tokens)
+    
+    f1 = 2 * (precision * recall) / (precision + recall)
+    return f1
+
+
 class AttentionDriftBenchmark:
     """
     Measures attention stability during text generation at document level.
@@ -25,6 +51,7 @@ class AttentionDriftBenchmark:
         - Max drift: Maximum drift observed across generation
         - Drift by position: Drift at specific token positions
         - Drift from relevant doc: Specific drift from answer-containing document
+        - Drift-quality correlation: Does drift predict answer quality?
     """
     
     def __init__(
@@ -281,6 +308,12 @@ class AttentionDriftBenchmark:
         drift_by_position = defaultdict(list)
         drift_from_relevant = []
         
+        f1_scores = []
+        drift_when_correct = []
+        drift_when_wrong = []
+        relevant_drift_when_correct = []
+        relevant_drift_when_wrong = []
+        
         doc_marker_ids = [self.model.tokenizer.encode("\n\n", add_special_tokens=False)[0]]
         
         max_pos = max(self.generation_positions)
@@ -335,6 +368,12 @@ class AttentionDriftBenchmark:
                 inputs = self.model.encode(prompt, max_length=2048)
                 output = self.model.generate(prompt, config, return_attentions=True)
                 
+                generated_text = output.generated_text
+                f1 = max([compute_f1(generated_text, ans) for ans in answers])
+                f1_scores.append(f1)
+                
+                is_correct = (f1 > 0.3)
+                
                 if not output.attentions or len(output.attentions) < min(self.generation_positions):
                     continue
                 
@@ -377,12 +416,22 @@ class AttentionDriftBenchmark:
                             attention_sequence[j-1][relevant_idx]
                         )
                         drift_from_relevant.append(float(relevant_drift))
+                        
+                        if is_correct:
+                            relevant_drift_when_correct.append(float(relevant_drift))
+                        else:
+                            relevant_drift_when_wrong.append(float(relevant_drift))
                     
                     mean_drift = float(np.mean(position_drifts))
                     max_drift = float(np.max(position_drifts))
                     
                     drift_scores.append(mean_drift)
                     max_drifts.append(max_drift)
+                    
+                    if is_correct:
+                        drift_when_correct.append(mean_drift)
+                    else:
+                        drift_when_wrong.append(mean_drift)
                     
                     successful += 1
                 
@@ -427,6 +476,39 @@ class AttentionDriftBenchmark:
                     "n": len(drift_by_position[pos])
                 }
         
+        from scipy.stats import pearsonr, mannwhitneyu
+        
+        drift_quality_correlation = {}
+        if len(drift_scores) == len(f1_scores):
+            pearson_r, pearson_p = pearsonr(drift_scores, f1_scores)
+            
+            drift_quality_correlation = {
+                "drift_vs_f1_pearson_r": float(pearson_r),
+                "drift_vs_f1_pearson_p": float(pearson_p),
+                "interpretation": (
+                    "high_drift_predicts_low_quality" if pearson_p < 0.05 and pearson_r < -0.3
+                    else "high_drift_predicts_high_quality" if pearson_p < 0.05 and pearson_r > 0.3
+                    else "no_significant_correlation"
+                )
+            }
+        
+        drift_by_correctness = {
+            "drift_when_correct_mean": float(np.mean(drift_when_correct)) if drift_when_correct else 0.0,
+            "drift_when_correct_std": float(np.std(drift_when_correct)) if drift_when_correct else 0.0,
+            "drift_when_wrong_mean": float(np.mean(drift_when_wrong)) if drift_when_wrong else 0.0,
+            "drift_when_wrong_std": float(np.std(drift_when_wrong)) if drift_when_wrong else 0.0,
+            "relevant_drift_correct_mean": float(np.mean(relevant_drift_when_correct)) if relevant_drift_when_correct else 0.0,
+            "relevant_drift_wrong_mean": float(np.mean(relevant_drift_when_wrong)) if relevant_drift_when_wrong else 0.0,
+        }
+        
+        if len(drift_when_correct) > 5 and len(drift_when_wrong) > 5:
+            u_stat, p_val = mannwhitneyu(drift_when_correct, drift_when_wrong, alternative='two-sided')
+            drift_by_correctness["statistical_test"] = {
+                "u_statistic": float(u_stat),
+                "p_value": float(p_val),
+                "significant_difference": p_val < 0.05
+            }
+        
         results = {
             "mean_drift": mean_drift,
             "mean_drift_ci_95_lower": mean_drift_ci[0],
@@ -436,18 +518,22 @@ class AttentionDriftBenchmark:
             "drift_from_relevant_mean": relevant_drift_mean,
             "drift_from_relevant_std": relevant_drift_std,
             "drift_by_position": drift_by_pos_stats,
+            "drift_quality_correlation": drift_quality_correlation,
+            "drift_by_correctness": drift_by_correctness,
             "num_samples": len(drift_scores),
             "samples_attempted": attempted,
             "generation_positions": self.generation_positions,
             "methodology": {
                 "drift_measurement": "document_level_not_token_level",
                 "layers_analyzed": "middle_50_percent" if self.layers_to_analyze is None else self.layers_to_analyze,
-                "attention_aggregation": "per_step_no_double_counting"
+                "attention_aggregation": "per_step_no_double_counting",
+                "answer_quality_measured": True
             }
         }
         
         print(f"Mean drift: {mean_drift:.4f} [{mean_drift_ci[0]:.4f}, {mean_drift_ci[1]:.4f}]")
-        print(f"Max drift: {max_drift_mean:.4f}, Relevant drift: {relevant_drift_mean:.4f}")
+        print(f"Drift when correct: {drift_by_correctness['drift_when_correct_mean']:.4f}, when wrong: {drift_by_correctness['drift_when_wrong_mean']:.4f}")
+        print(f"Drift-quality correlation: r={drift_quality_correlation.get('drift_vs_f1_pearson_r', 0):.3f}, p={drift_quality_correlation.get('drift_vs_f1_pearson_p', 1):.3f}")
         print(f"Success: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
         
         return results
