@@ -1,21 +1,7 @@
 """
 RAG Benchmark Suite Runner
 
-Orchestrates execution of all RAG-specific evaluation metrics and generates
-comprehensive results with statistical analysis.
-
-Usage:
-    from evaluation.rag import RAGBenchmarkSuite
-    from evaluation.models import HuggingFaceModel
-    
-    model = HuggingFaceModel("mistralai/Mistral-7B-v0.1")
-    model.load()
-    
-    suite = RAGBenchmarkSuite(model)
-    results = suite.run_all(
-        output_dir=Path("./results/rag"),
-        save_intermediate=True
-    )
+Orchestrates execution of all RAG-specific evaluation metrics.
 """
 
 import json
@@ -76,30 +62,16 @@ class RAGBenchmarkSuite:
         )
     
     def _save_json(self, data: Dict, filepath: Path) -> None:
-        """
-        Save results to JSON file.
-        
-        Args:
-            data: Dictionary to save
-            filepath: Output file path
-        """
+        """Save results to JSON file."""
         filepath.parent.mkdir(parents=True, exist_ok=True)
         
         with open(filepath, 'w') as f:
             json.dump(data, f, indent=2)
         
-        print(f"Saved results to {filepath}")
+        print(f"Saved to {filepath.name}")
     
     def _generate_summary(self, results: Dict[str, Dict]) -> Dict[str, any]:
-        """
-        Generate summary statistics across all benchmarks.
-        
-        Args:
-            results: Complete results dictionary
-            
-        Returns:
-            Summary statistics dictionary
-        """
+        """Generate summary statistics across all benchmarks."""
         summary = {
             "timestamp": datetime.now().isoformat(),
             "model_info": self.model.get_model_info(),
@@ -137,16 +109,8 @@ class RAGBenchmarkSuite:
         self,
         output_dir: Optional[Path] = None
     ) -> Dict[str, any]:
-        """
-        Run attention preservation benchmark.
-        
-        Args:
-            output_dir: Directory to save results (optional)
-            
-        Returns:
-            Attention preservation results
-        """
-        print("Running Attention Preservation Benchmark")
+        """Run attention preservation benchmark."""
+        print("\n[1/3] Attention Preservation")
         
         results = self.attention_preservation.run()
         
@@ -159,16 +123,8 @@ class RAGBenchmarkSuite:
         self,
         output_dir: Optional[Path] = None
     ) -> Dict[str, any]:
-        """
-        Run context degradation benchmark.
-        
-        Args:
-            output_dir: Directory to save results (optional)
-            
-        Returns:
-            Context degradation results
-        """
-        print("Running Context Degradation Benchmark")
+        """Run context degradation benchmark."""
+        print("\n[2/3] Context Degradation")
         
         results = self.context_degradation.run()
         
@@ -181,16 +137,8 @@ class RAGBenchmarkSuite:
         self,
         output_dir: Optional[Path] = None
     ) -> Dict[str, any]:
-        """
-        Run attention drift benchmark.
-        
-        Args:
-            output_dir: Directory to save results (optional)
-            
-        Returns:
-            Attention drift results
-        """
-        print("Running Attention Drift Benchmark")
+        """Run attention drift benchmark."""
+        print("\n[3/3] Attention Drift")
         
         results = self.attention_drift.run()
         
@@ -216,10 +164,7 @@ class RAGBenchmarkSuite:
         Returns:
             Dictionary with all RAG metrics
         """
-        print("RAG BENCHMARK SUITE")
-        print(f"Model: {self.model.model_path}")
-        print(f"Output directory: {output_dir}")
-        print(f"Save intermediate: {save_intermediate}")
+        print(f"\nRAG Benchmark Suite - Model: {self.model.model_path}")
         
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -232,9 +177,7 @@ class RAGBenchmarkSuite:
             ("attention_drift", self.run_attention_drift),
         ]
         
-        for i, (name, benchmark_func) in enumerate(benchmarks, 1):
-            print(f"\n[{i}/{len(benchmarks)}] {name.replace('_', ' ').title()}")
-            
+        for name, benchmark_func in benchmarks:
             try:
                 benchmark_output_dir = output_dir if save_intermediate else None
                 benchmark_results = benchmark_func(output_dir=benchmark_output_dir)
@@ -244,7 +187,7 @@ class RAGBenchmarkSuite:
                 print(f"ERROR in {name}: {str(e)}")
                 
                 if skip_on_error:
-                    print(f"Skipping {name} and continuing...")
+                    print(f"Skipping and continuing...")
                     results[name] = {"error": str(e)}
                 else:
                     raise
@@ -255,28 +198,22 @@ class RAGBenchmarkSuite:
         self._save_json(results, output_dir / "rag_complete_results.json")
         self._save_json(summary, output_dir / "rag_summary.json")
         
-        print("RAG BENCHMARK SUITE COMPLETE")
-        print(f"\nResults saved to: {output_dir}")
+        print("\nRAG Benchmark Complete")
+        print(f"Results: {output_dir}")
         
         if "attention_preservation" in results:
             ap = results["attention_preservation"]
-            print(f"\nAttention Preservation:")
-            print(f"  Precision@1: {ap.get('attention_precision_at_1', 0):.3f}")
-            print(f"  Mean Rank: {ap.get('attention_rank_mean', 0):.2f}")
+            print(f"\nAttention Preservation: Precision@1={ap.get('attention_precision_at_1', 0):.3f}, Rank={ap.get('attention_rank_mean', 0):.2f}")
         
         if "context_degradation" in results:
             cd = results["context_degradation"]
-            print(f"\nContext Degradation:")
-            print(f"  Slope (per 1k tokens): {cd.get('degradation_slope_per_1k_tokens', 0):.4f}")
-            print(f"  R-squared: {cd.get('r_squared', 0):.4f}")
+            print(f"Context Degradation: Slope={cd.get('degradation_slope_per_1k_tokens', 0):.4f}/1k, R²={cd.get('r_squared', 0):.4f}")
             if cd.get('cliff_point'):
                 print(f"  Cliff point: {cd['cliff_point']} tokens")
         
         if "attention_drift" in results:
             ad = results["attention_drift"]
-            print(f"\nAttention Drift:")
-            print(f"  Mean Drift: {ad.get('mean_drift', 0):.4f}")
-            print(f"  Max Drift: {ad.get('max_drift_mean', 0):.4f}")
+            print(f"Attention Drift: Mean={ad.get('mean_drift', 0):.4f}, Max={ad.get('max_drift_mean', 0):.4f}")
         
         return results
     

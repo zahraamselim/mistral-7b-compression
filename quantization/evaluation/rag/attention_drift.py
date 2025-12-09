@@ -2,26 +2,6 @@
 Attention Drift Benchmark
 
 Measures attention stability during generation in quantized models.
-
-Research Question:
-    Do quantized models exhibit unstable attention patterns during generation,
-    potentially leading to hallucinations or drift from relevant documents?
-
-Methodology:
-    - Track document-level attention at multiple generation steps
-    - Measure attention change between consecutive steps at document level
-    - Calculate mean drift, max drift, and drift by position
-    - Use Natural Questions with realistic multi-document contexts
-
-Novel Contribution:
-    First systematic measurement of attention stability in quantized models.
-    Establishes attention drift as a diagnostic metric for RAG quality.
-
-Fixed for Kaggle T4 (15GB VRAM):
-    - Proper attention aggregation (no double-counting)
-    - Memory-efficient processing
-    - Document-level drift measurement
-    - Reduced generation positions for memory
 """
 
 import random
@@ -78,32 +58,24 @@ class AttentionDriftBenchmark:
         torch.manual_seed(random_seed)
     
     def _load_datasets(self) -> Tuple[any, List[Dict[str, str]]]:
-        """
-        Load Natural Questions dataset with Wikipedia corpus.
+        """Load Natural Questions dataset with Wikipedia corpus."""
+        print("Loading Natural Questions...")
+        queries = load_dataset("nq_open", split="validation")
         
-        Returns:
-            Tuple of (queries dataset, passages list)
-        
-        Raises:
-            RuntimeError: If dataset cannot be loaded
-        """
-        print("Loading Natural Questions dataset...")
-        
-        try:
-            queries = load_dataset("nq_open", split="validation")
-        except Exception as e:
-            raise RuntimeError(f"Failed to load Natural Questions dataset: {str(e)}")
-        
-        print("Loading Wikipedia corpus for documents...")
+        print("Loading Wikipedia corpus...")
         try:
             wiki_dataset = load_dataset(
-                "wikipedia",
-                "20220301.en",
-                split="train[:800]"
+                "wikimedia/wikipedia",
+                "20231101.en",
+                split="train",
+                streaming=True
             )
             
             passages = []
-            for sample in wiki_dataset:
+            for i, sample in enumerate(wiki_dataset):
+                if i >= 800:
+                    break
+                
                 text = sample.get('text', '')
                 title = sample.get('title', '')
                 if len(text) > 200:
@@ -116,7 +88,19 @@ class AttentionDriftBenchmark:
                 raise RuntimeError("Insufficient Wikipedia passages loaded")
             
         except Exception as e:
-            raise RuntimeError(f"Failed to load Wikipedia corpus: {str(e)}")
+            print(f"Failed to load wikimedia/wikipedia: {e}")
+            print("Falling back to simple-wikipedia...")
+            
+            wiki_dataset = load_dataset("wikipedia", "20220301.simple", split="train[:800]")
+            passages = []
+            for sample in wiki_dataset:
+                text = sample.get('text', '')
+                title = sample.get('title', '')
+                if len(text) > 200:
+                    passages.append({
+                        'text': text,
+                        'title': title
+                    })
         
         print(f"Loaded {len(queries)} queries and {len(passages)} passages")
         return queries, passages
@@ -193,20 +177,7 @@ class AttentionDriftBenchmark:
         doc_marker_ids: List[int],
         num_generated: int
     ) -> Optional[np.ndarray]:
-        """
-        Extract document-level attention at a specific generation step.
-        
-        CRITICAL: Uses only the attention from THIS step, not cumulative.
-        
-        Args:
-            attentions: Attention tensors from ONE generation step
-            input_ids: Input token IDs
-            doc_marker_ids: Token IDs marking document boundaries
-            num_generated: Number of tokens generated so far
-            
-        Returns:
-            Array of document attention [num_docs] or None
-        """
+        """Extract document-level attention at a specific generation step."""
         doc_spans = self._get_document_token_spans(input_ids, doc_marker_ids)
         
         model_info = self.model.get_model_info()
@@ -301,10 +272,7 @@ class AttentionDriftBenchmark:
     
     def run(self) -> Dict[str, any]:
         """Run attention drift benchmark."""
-        print("\nAttention Drift Benchmark")
-        print(f"Samples: {self.num_samples}")
-        print(f"Generation positions: {self.generation_positions}")
-        print(f"Documents per sample: {self.num_documents}")
+        print(f"Samples: {self.num_samples}, Positions: {self.generation_positions}, Documents: {self.num_documents}")
         
         queries, passages = self._load_datasets()
         
@@ -321,8 +289,6 @@ class AttentionDriftBenchmark:
             do_sample=False,
             temperature=1.0
         )
-        
-        print(f"\nProcessing {self.num_samples} samples...")
         
         successful = 0
         attempted = 0
@@ -427,16 +393,13 @@ class AttentionDriftBenchmark:
                 
             except RuntimeError as e:
                 if "out of memory" in str(e):
-                    print(f"OOM on sample {attempted}, skipping...")
                     gc.collect()
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
                     continue
                 else:
-                    print(f"Warning: Failed on sample {attempted}: {str(e)}")
                     continue
-            except Exception as e:
-                print(f"Warning: Failed on sample {attempted}: {str(e)}")
+            except Exception:
                 continue
             
             if successful % 30 == 0 and successful > 0:
@@ -483,15 +446,8 @@ class AttentionDriftBenchmark:
             }
         }
         
-        print(f"\nResults:")
         print(f"Mean drift: {mean_drift:.4f} [{mean_drift_ci[0]:.4f}, {mean_drift_ci[1]:.4f}]")
-        print(f"Max drift: {max_drift_mean:.4f} (std: {max_drift_std:.4f})")
-        print(f"Drift from relevant doc: {relevant_drift_mean:.4f}")
-        print(f"Success rate: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
-        
-        if drift_by_pos_stats:
-            print(f"\nDrift by position:")
-            for pos, stats in sorted(drift_by_pos_stats.items(), key=lambda x: int(x[0])):
-                print(f"  Position {pos}: {stats['mean']:.4f} (median: {stats['median']:.4f})")
+        print(f"Max drift: {max_drift_mean:.4f}, Relevant drift: {relevant_drift_mean:.4f}")
+        print(f"Success: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
         
         return results

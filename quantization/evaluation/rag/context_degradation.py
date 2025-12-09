@@ -2,23 +2,6 @@
 Context Degradation Benchmark
 
 Measures accuracy degradation as context length increases in quantized models.
-
-Research Question:
-    Does quantization make models more susceptible to performance degradation 
-    with longer contexts? At what context length do quantized models fail?
-
-Methodology:
-    - Test at multiple context lengths (512, 1024, 2048, 4096 tokens)
-    - Embed answer naturally within Wikipedia passages (no artificial markers)
-    - Randomize answer position within context (20-80%)
-    - Use pre-tokenized chunks for efficiency
-    - Require true information retrieval across long contexts
-
-Fixed for Kaggle T4 (15GB VRAM):
-    - Reduced context lengths (max 4096 for 4-bit quantized models)
-    - Memory-efficient pre-tokenization
-    - Natural answer embedding (no "IMPORTANT:" markers)
-    - Proper error handling for OOM
 """
 
 import random
@@ -61,7 +44,7 @@ class ContextDegradationBenchmark:
             context_lengths: List of context lengths to test (in tokens)
             samples_per_length: Number of samples per length
             answer_position_range: Range for answer position (as fraction of context)
-            context_tolerance: Tolerance for context length (±5% default)
+            context_tolerance: Tolerance for context length
             random_seed: Random seed for reproducibility
         """
         self.model = model
@@ -77,49 +60,87 @@ class ContextDegradationBenchmark:
         self.tokenized_chunks = None
     
     def _load_datasets(self) -> Tuple[any, List[Dict[str, any]]]:
-        """
-        Load datasets and pre-tokenize for efficiency.
-        
-        Returns:
-            Tuple of (NQ dataset, pre-tokenized chunks)
-        """
-        print("Loading Natural Questions dataset...")
+        """Load datasets and pre-tokenize for efficiency."""
+        print("Loading Natural Questions...")
         nq_dataset = load_dataset("nq_open", split="validation")
         
-        print("Loading and pre-tokenizing Wikipedia corpus...")
-        wiki_dataset = load_dataset(
-            "wikipedia",
-            "20220301.en",
-            split="train[:1000]"
-        )
-        
-        tokenized_chunks = []
-        
-        for sample in wiki_dataset:
-            text = sample.get('text', '')
-            if len(text) < 200:
-                continue
+        print("Loading and pre-tokenizing Wikipedia...")
+        try:
+            wiki_dataset = load_dataset(
+                "wikimedia/wikipedia",
+                "20231101.en",
+                split="train",
+                streaming=True
+            )
             
-            sentences = re.split(r'[.!?]+\s+', text)
-            
-            for sent in sentences:
-                if len(sent.strip()) < 20:
+            tokenized_chunks = []
+            for i, sample in enumerate(wiki_dataset):
+                if i >= 1000:
+                    break
+                
+                text = sample.get('text', '')
+                if len(text) < 200:
                     continue
                 
-                try:
-                    tokens = self.model.tokenizer.encode(
-                        sent.strip() + ". ",
-                        add_special_tokens=False
-                    )
+                sentences = re.split(r'[.!?]+\s+', text)
+                
+                for sent in sentences:
+                    if len(sent.strip()) < 20:
+                        continue
                     
-                    if 10 <= len(tokens) <= 80:
-                        tokenized_chunks.append({
-                            'tokens': tokens,
-                            'text': sent.strip() + ". ",
-                            'length': len(tokens)
-                        })
-                except Exception:
+                    try:
+                        tokens = self.model.tokenizer.encode(
+                            sent.strip() + ". ",
+                            add_special_tokens=False
+                        )
+                        
+                        if 10 <= len(tokens) <= 80:
+                            tokenized_chunks.append({
+                                'tokens': tokens,
+                                'text': sent.strip() + ". ",
+                                'length': len(tokens)
+                            })
+                    except Exception:
+                        continue
+                    
+                    if len(tokenized_chunks) >= 5000:
+                        break
+                
+                if len(tokenized_chunks) >= 5000:
+                    break
+            
+        except Exception as e:
+            print(f"Failed to load wikimedia/wikipedia: {e}")
+            print("Falling back to simple-wikipedia...")
+            
+            wiki_dataset = load_dataset("wikipedia", "20220301.simple", split="train[:1000]")
+            tokenized_chunks = []
+            
+            for sample in wiki_dataset:
+                text = sample.get('text', '')
+                if len(text) < 200:
                     continue
+                
+                sentences = re.split(r'[.!?]+\s+', text)
+                
+                for sent in sentences:
+                    if len(sent.strip()) < 20:
+                        continue
+                    
+                    try:
+                        tokens = self.model.tokenizer.encode(
+                            sent.strip() + ". ",
+                            add_special_tokens=False
+                        )
+                        
+                        if 10 <= len(tokens) <= 80:
+                            tokenized_chunks.append({
+                                'tokens': tokens,
+                                'text': sent.strip() + ". ",
+                                'length': len(tokens)
+                            })
+                    except Exception:
+                        continue
         
         print(f"Pre-tokenized {len(tokenized_chunks)} chunks")
         return nq_dataset, tokenized_chunks
@@ -156,18 +177,7 @@ class ContextDegradationBenchmark:
         answer_position: float,
         tokenized_chunks: List[Dict[str, any]]
     ) -> Tuple[List[int], int, int]:
-        """
-        Build context at exact token length with answer at specified position.
-        
-        Args:
-            answer_passage: Passage containing answer
-            target_length: Target total tokens
-            answer_position: Position for answer (0-1)
-            tokenized_chunks: Pre-tokenized filler passages
-            
-        Returns:
-            Tuple of (token_ids, answer_start_token, answer_end_token)
-        """
+        """Build context at exact token length with answer at specified position."""
         context_tokens = []
         
         tokens_before = int(target_length * answer_position)
@@ -280,15 +290,13 @@ class ContextDegradationBenchmark:
                 
             except RuntimeError as e:
                 if "out of memory" in str(e):
-                    print(f"OOM at context length {context_length}, stopping this length...")
                     gc.collect()
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
                     break
                 else:
                     continue
-            except Exception as e:
-                print(f"Warning: Failed on sample {attempted}: {str(e)}")
+            except Exception:
                 continue
         
         accuracy = correct / total if total > 0 else 0.0
@@ -321,10 +329,7 @@ class ContextDegradationBenchmark:
     
     def run(self) -> Dict[str, any]:
         """Run context degradation benchmark."""
-        print("\nContext Degradation Benchmark")
-        print(f"Context lengths: {self.context_lengths}")
-        print(f"Samples per length: {self.samples_per_length}")
-        print(f"Context tolerance: ±{self.context_tolerance*100:.1f}%")
+        print(f"Context lengths: {self.context_lengths}, Samples/length: {self.samples_per_length}")
         
         nq_dataset, tokenized_chunks = self._load_datasets()
         self.tokenized_chunks = tokenized_chunks
@@ -339,7 +344,7 @@ class ContextDegradationBenchmark:
         accuracies = []
         
         for ctx_len in self.context_lengths:
-            print(f"\nTesting context length: {ctx_len} tokens")
+            print(f"Testing {ctx_len} tokens...")
             
             result = self._test_context_length(
                 ctx_len, 
@@ -353,10 +358,8 @@ class ContextDegradationBenchmark:
             accuracies.append(accuracy)
             
             print(f"Accuracy: {accuracy:.3f} ({result['correct']}/{result['total']})")
-            print(f"Success rate: {result['total']}/{result['attempted']}")
         
         if len(accuracies) < 2:
-            print("Warning: Not enough data points for regression analysis")
             return {
                 "results_by_length": results_by_length,
                 "error": "insufficient_data"
@@ -399,13 +402,7 @@ class ContextDegradationBenchmark:
             }
         }
         
-        print(f"\nRegression Analysis:")
-        print(f"Slope: {slope:.6f} (per token)")
-        print(f"Slope: {slope * 1000:.4f} (per 1000 tokens)")
-        print(f"R-squared: {r_value**2:.4f}")
-        print(f"p-value: {p_value:.4f}")
-        print(f"Significant degradation: {p_value < 0.05 and slope < 0}")
-        
+        print(f"Slope: {slope * 1000:.4f}/1k tokens, R²: {r_value**2:.4f}, p: {p_value:.4f}")
         if cliff_point:
             print(f"Cliff point: {cliff_point} tokens")
         

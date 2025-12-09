@@ -83,15 +83,17 @@ def measure_perplexity(
             continue
         
         try:
-            # Get perplexity for this text
-            perplexity = model.get_perplexity(text, max_length)
-            
-            # Convert perplexity back to loss
-            loss = np.log(perplexity)
-            
-            # Get token count
+            # Encode and get actual token count
             inputs = model.encode(text, max_length=max_length)
-            num_tokens = inputs['input_ids'].shape[1] - 1  # Exclude BOS token
+            
+            # Calculate loss directly
+            with torch.no_grad():
+                outputs = model.model(**inputs, labels=inputs["input_ids"])
+                loss = outputs.loss.item()
+            
+            # Get actual number of tokens (excluding padding)
+            attention_mask = inputs.get('attention_mask', torch.ones_like(inputs['input_ids']))
+            num_tokens = attention_mask.sum().item() - 1  # Exclude first token
             
             if num_tokens > 0:
                 total_loss += loss * num_tokens
@@ -125,7 +127,7 @@ def measure_perplexity(
         "max_length": max_length
     }
     
-    logger.info(f"✓ Perplexity: {perplexity:.4f}")
+    logger.info(f"Perplexity: {perplexity:.4f}")
     logger.info(f"  Loss: {avg_loss:.4f}")
     logger.info(f"  Valid samples: {valid_samples}")
     logger.info(f"  Total tokens: {total_tokens:,}")
