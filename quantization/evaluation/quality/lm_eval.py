@@ -34,7 +34,7 @@ def run_lm_eval_tasks(
         num_fewshot: Number of few-shot examples
         batch_size: Batch size for evaluation
         device: Device to use
-        model_args: Additional model arguments (e.g., "dtype=float16,trust_remote_code=True")
+        model_args: Additional model arguments (e.g., "trust_remote_code=True")
         limit: Limit number of examples per task (for testing)
         
     Returns:
@@ -52,19 +52,15 @@ def run_lm_eval_tasks(
     all_results = {}
     
     for task in tasks:
-        logger.info(f"\n{'='*60}")
-        logger.info(f"Task: {task}")
-        logger.info(f"{'='*60}")
+        logger.info(f"\nTask: {task}")
         
         output_file = output_dir / f"lm_eval_{task}.json"
         
-        # Build model arguments
         if model_args is None:
-            model_args_str = f"pretrained={model_path},dtype=float16"
+            model_args_str = f"pretrained={model_path},torch_dtype=float16"
         else:
             model_args_str = f"pretrained={model_path},{model_args}"
         
-        # Build command
         cmd = [
             "lm_eval",
             "--model", "hf",
@@ -82,7 +78,6 @@ def run_lm_eval_tasks(
         logger.info(f"Running command: {' '.join(cmd)}")
         
         try:
-            # Run lm_eval
             result = subprocess.run(
                 cmd,
                 capture_output=True,
@@ -92,7 +87,6 @@ def run_lm_eval_tasks(
             
             logger.info("Task completed successfully")
             
-            # Parse results
             task_results = parse_lm_eval_results(output_file)
             all_results[task] = task_results
             
@@ -131,10 +125,8 @@ def parse_lm_eval_results(output_file: Path) -> Dict[str, float]:
         
         results = {}
         
-        # Extract results (format depends on lm_eval version)
         if "results" in data:
             for task_name, task_data in data["results"].items():
-                # Get main metrics
                 if isinstance(task_data, dict):
                     for metric_name, metric_value in task_data.items():
                         if isinstance(metric_value, (int, float)):
@@ -236,11 +228,11 @@ def run_rag_suite(
         Dictionary with RAG task results
     """
     tasks = [
-        "squad",           # Reading comprehension
-        "nq_open",         # Natural Questions (open-domain)
-        "triviaqa",        # Trivia QA with evidence
-        "drop",            # Discrete reasoning over paragraphs
-        "quac"             # Question answering in context
+        "squad",
+        "nq_open",
+        "triviaqa",
+        "drop",
+        "quac"
     ]
     
     logger.info("Running RAG-focused task suite")

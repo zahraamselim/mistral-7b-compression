@@ -28,14 +28,12 @@ logger = logging.getLogger(__name__)
 class QualityResults:
     """Results from quality benchmarks."""
     
-    # Perplexity
     perplexity: float = 0.0
     perplexity_dataset: Optional[str] = None
     perplexity_loss: Optional[float] = None
     perplexity_num_samples: Optional[int] = None
     perplexity_total_tokens: Optional[int] = None
     
-    # Reasoning tasks (if run)
     hellaswag_acc: Optional[float] = None
     hellaswag_acc_norm: Optional[float] = None
     winogrande_acc: Optional[float] = None
@@ -45,25 +43,20 @@ class QualityResults:
     openbookqa_acc: Optional[float] = None
     boolq_acc: Optional[float] = None
     
-    # RAG tasks (if run)
     squad_acc: Optional[float] = None
     nq_open_acc: Optional[float] = None
     triviaqa_acc: Optional[float] = None
     drop_acc: Optional[float] = None
     quac_acc: Optional[float] = None
     
-    # MMLU (if run)
     mmlu_acc: Optional[float] = None
     
-    # Additional benchmarks
     truthfulqa_acc: Optional[float] = None
     gsm8k_acc: Optional[float] = None
     
-    # Comparison metrics (vs baseline)
     perplexity_ratio: Optional[float] = None
     perplexity_degradation_percent: Optional[float] = None
     
-    # Raw results
     raw_lm_eval_results: Optional[Dict] = None
     
     def to_dict(self) -> Dict[str, Any]:
@@ -288,10 +281,8 @@ class QualityBenchmark:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
         
-        # Initialize results
         results = QualityResults()
         
-        # 1. Perplexity
         logger.info("\n[1] Perplexity Measurement")
         perplexity_results = self.run_perplexity(
             dataset_name=perplexity_dataset,
@@ -307,7 +298,6 @@ class QualityBenchmark:
         
         self._save_json(perplexity_results, output_dir / "perplexity.json")
         
-        # Compare with baseline if provided
         if baseline_results and 'perplexity' in baseline_results:
             comparison = compare_perplexity(
                 baseline_results['perplexity'],
@@ -316,7 +306,6 @@ class QualityBenchmark:
             results.perplexity_ratio = comparison['perplexity_ratio']
             results.perplexity_degradation_percent = comparison['perplexity_degradation_percent']
         
-        # 2. Reasoning tasks
         if include_reasoning:
             logger.info("\n[2] Reasoning Tasks")
             reasoning_results = self.run_reasoning_tasks(
@@ -327,12 +316,10 @@ class QualityBenchmark:
                 limit=limit
             )
             
-            # Extract metrics
             results.raw_lm_eval_results = reasoning_results
             self._extract_reasoning_metrics(results, reasoning_results)
             self._save_json(reasoning_results, output_dir / "reasoning_tasks.json")
         
-        # 3. RAG-focused tasks
         if include_rag_tasks:
             logger.info("\n[3] RAG-Focused Tasks")
             rag_results = self.run_rag_tasks(
@@ -343,11 +330,9 @@ class QualityBenchmark:
                 limit=limit
             )
             
-            # Extract metrics
             self._extract_rag_metrics(results, rag_results)
             self._save_json(rag_results, output_dir / "rag_tasks.json")
         
-        # 4. MMLU (optional, disabled by default)
         if include_mmlu:
             logger.info("\n[4] MMLU Benchmark")
             mmlu_results = run_mmlu(
@@ -362,7 +347,6 @@ class QualityBenchmark:
             results.mmlu_acc = self._extract_metric(mmlu_results, 'mmlu', 'acc')
             self._save_json(mmlu_results, output_dir / "mmlu.json")
         
-        # 5. TruthfulQA
         if include_truthfulqa:
             logger.info("\n[5] TruthfulQA")
             truthfulqa_results = run_truthfulqa(
@@ -376,7 +360,6 @@ class QualityBenchmark:
             results.truthfulqa_acc = self._extract_metric(truthfulqa_results, 'truthfulqa', 'acc')
             self._save_json(truthfulqa_results, output_dir / "truthfulqa.json")
         
-        # 6. GSM8K
         if include_gsm8k:
             logger.info("\n[6] GSM8K")
             gsm8k_results = run_gsm8k(
@@ -391,7 +374,6 @@ class QualityBenchmark:
             results.gsm8k_acc = self._extract_metric(gsm8k_results, 'gsm8k', 'acc')
             self._save_json(gsm8k_results, output_dir / "gsm8k.json")
         
-        # Save complete results
         self._save_json(results.to_dict(), output_dir / "quality_complete_results.json")
         
         logger.info("QUALITY BENCHMARKS COMPLETE")
@@ -440,7 +422,6 @@ class QualityBenchmark:
         
         task_results = results[task]
         
-        # Try different key formats
         for key in [f"{task}_{metric}", metric, f"{metric}"]:
             if key in task_results:
                 return task_results[key]
@@ -456,9 +437,7 @@ class QualityBenchmark:
     
     def _print_summary(self, results: QualityResults) -> None:
         """Print summary of results."""
-        print("\n" + "="*60)
-        print("QUALITY RESULTS SUMMARY")
-        print("="*60)
+        print("\nQUALITY RESULTS SUMMARY")
         
         print(f"\nPerplexity:")
         print(f"  {results.perplexity:.2f} on {results.perplexity_dataset}")
@@ -500,5 +479,3 @@ class QualityBenchmark:
         
         if results.gsm8k_acc:
             print(f"\nGSM8K: {results.gsm8k_acc*100:.1f}%")
-        
-        print("\n" + "="*60)

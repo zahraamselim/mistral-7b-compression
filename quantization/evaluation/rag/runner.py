@@ -110,7 +110,6 @@ class RAGBenchmarkSuite:
         output_dir: Optional[Path] = None
     ) -> Dict[str, any]:
         """Run attention preservation benchmark."""
-        print("\n[1/3] Attention Preservation")
         
         results = self.attention_preservation.run()
         
@@ -124,7 +123,6 @@ class RAGBenchmarkSuite:
         output_dir: Optional[Path] = None
     ) -> Dict[str, any]:
         """Run context degradation benchmark."""
-        print("\n[2/3] Context Degradation")
         
         results = self.context_degradation.run()
         
@@ -138,7 +136,6 @@ class RAGBenchmarkSuite:
         output_dir: Optional[Path] = None
     ) -> Dict[str, any]:
         """Run attention drift benchmark."""
-        print("\n[3/3] Attention Drift")
         
         results = self.attention_drift.run()
         
@@ -177,7 +174,9 @@ class RAGBenchmarkSuite:
             ("attention_drift", self.run_attention_drift),
         ]
         
-        for name, benchmark_func in benchmarks:
+        for i, (name, benchmark_func) in enumerate(benchmarks, 1):
+            print(f"\n[{i}/{len(benchmarks)}] {name.replace('_', ' ').title()}")
+            
             try:
                 benchmark_output_dir = output_dir if save_intermediate else None
                 benchmark_results = benchmark_func(output_dir=benchmark_output_dir)
