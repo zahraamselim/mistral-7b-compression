@@ -24,9 +24,9 @@ from typing import Dict, Optional
 from datetime import datetime
 
 from models.model_interface import ModelInterface
-from .attention_preservation import AttentionPreservationBenchmark
-from .context_degradation import ContextDegradationBenchmark
-from .attention_drift import AttentionDriftBenchmark
+from rag.attention_preservation import AttentionPreservationBenchmark
+from rag.context_degradation import ContextDegradationBenchmark
+from rag.attention_drift import AttentionDriftBenchmark
 
 
 class RAGBenchmarkSuite:

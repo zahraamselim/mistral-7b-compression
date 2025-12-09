@@ -6,9 +6,9 @@ perplexity measurement and integration with lm-evaluation-harness for
 standard reasoning tasks (MMLU, HellaSwag, ARC, etc.).
 """
 
-from quality.perplexity import measure_perplexity
-from quality.lm_eval_runner import run_lm_eval_tasks, run_reasoning_suite, run_mmlu
-from quality.runner import QualityBenchmark, QualityResults
+from .perplexity import measure_perplexity
+from .lm_eval import run_lm_eval_tasks, run_reasoning_suite, run_mmlu
+from .runner import QualityBenchmark, QualityResults
 
 __all__ = [
     'QualityBenchmark',
