@@ -302,7 +302,7 @@ class EfficiencyBenchmark:
             decode_ms_per_token=prefill_decode_results.get('decode_ms_per_token') if prefill_decode_results else None,
             
             # Throughput
-            throughput_tokens_per_sec=throughput,
+            throughput_tokens_per_sec=throughput_results['throughput'],
             throughput_std=throughput_results.get('throughput_std', 0.0),
             
             # Memory
