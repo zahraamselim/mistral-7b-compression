@@ -57,7 +57,7 @@ def run_lm_eval_tasks(
         output_file = output_dir / f"lm_eval_{task}.json"
         
         if model_args is None:
-            model_args_str = f"pretrained={model_path},torch_dtype=float16"
+            model_args_str = f"pretrained={model_path},dtype=float16"
         else:
             model_args_str = f"pretrained={model_path},{model_args}"
         
