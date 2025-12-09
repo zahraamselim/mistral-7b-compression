@@ -1,7 +1,11 @@
-"""Energy estimation utilities."""
+"""
+Energy estimation utilities.
+
+Estimates energy consumption and carbon footprint for model inference.
+"""
 
 import logging
-from typing import Dict, Optional
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -12,15 +16,15 @@ def estimate_energy(
     idle_power_ratio: float = 0.3
 ) -> float:
     """
-    Estimate energy consumption per token.
+    Estimate energy consumption per token with idle power consideration.
     
-    Energy (J) = Active Power (W) * Time (s)
+    Energy (J) = Active Power (W) x Time (s)
     Active Power = TDP - Idle Power
     
     Args:
         latency_ms_per_token: Latency in milliseconds per token
         tdp_watts: Thermal Design Power in watts
-        idle_power_ratio: Fraction of TDP consumed at idle
+        idle_power_ratio: Fraction of TDP consumed at idle (default: 0.3)
         
     Returns:
         Energy consumption in millijoules per token
@@ -29,15 +33,23 @@ def estimate_energy(
         logger.warning(f"Invalid inputs: latency={latency_ms_per_token}, tdp={tdp_watts}")
         return 0.0
     
+    # Estimate active power
     idle_power = tdp_watts * idle_power_ratio
     active_power = tdp_watts - idle_power
     
+    # Convert latency to seconds
     latency_seconds = latency_ms_per_token / 1000.0
     
+    # Calculate energy in joules
     energy_joules = active_power * latency_seconds
+    
+    # Convert to millijoules
     energy_mj = energy_joules * 1000.0
     
-    logger.info(f"Energy per token: {energy_mj:.3f} mJ (active power: {active_power:.1f}W, idle: {idle_power:.1f}W)")
+    logger.info(
+        f"Energy per token: {energy_mj:.3f} mJ "
+        f"(active power: {active_power:.1f}W, idle: {idle_power:.1f}W)"
+    )
     
     return energy_mj
 
@@ -47,7 +59,7 @@ def estimate_total_energy(
     energy_per_token_mj: float
 ) -> Dict[str, float]:
     """
-    Estimate total energy consumption.
+    Estimate total energy consumption for a number of tokens.
     
     Args:
         num_tokens: Number of tokens to generate
@@ -80,7 +92,7 @@ def estimate_energy_cost(
     Args:
         num_tokens: Number of tokens to generate
         energy_per_token_mj: Energy per token in millijoules
-        electricity_cost_per_kwh: Cost per kilowatt-hour
+        electricity_cost_per_kwh: Cost per kilowatt-hour (default: $0.12)
         
     Returns:
         Estimated cost in dollars
@@ -105,6 +117,7 @@ def estimate_carbon_footprint(
         num_tokens: Number of tokens to generate
         energy_per_token_mj: Energy per token in millijoules
         carbon_intensity_g_per_kwh: Carbon intensity in grams CO2 per kWh
+                                    (default: 400g, global average)
         
     Returns:
         Carbon emissions in grams of CO2
@@ -141,7 +154,10 @@ def compare_energy_efficiency(
     reduction_ratio = baseline_energy_mj / current_energy_mj
     savings_percent = ((baseline_energy_mj - current_energy_mj) / baseline_energy_mj) * 100
     
-    logger.info(f"Energy efficiency improvement: {reduction_ratio:.2f}x ({savings_percent:.1f}% savings)")
+    logger.info(
+        f"Energy efficiency improvement: {reduction_ratio:.2f}x "
+        f"({savings_percent:.1f}% savings)"
+    )
     
     return {
         'energy_reduction_ratio': reduction_ratio,

@@ -1,4 +1,8 @@
-"""Device specification detection utilities."""
+"""
+Device specification detection utilities.
+
+Auto-detects hardware specifications for energy and performance calculations.
+"""
 
 import logging
 from typing import Dict, Optional
@@ -11,9 +15,9 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-# GPU specifications database
+
 GPU_SPECS = {
-    # NVIDIA Data Center
+    # NVIDIA Data Center GPUs
     't4': {'tdp': 70.0, 'tflops': 8.1, 'memory_gb': 16},
     'p100': {'tdp': 250.0, 'tflops': 18.7, 'memory_gb': 16},
     'v100': {'tdp': 300.0, 'tflops': 28.0, 'memory_gb': 32},
@@ -24,7 +28,7 @@ GPU_SPECS = {
     'h100': {'tdp': 700.0, 'tflops': 204.0, 'memory_gb': 80},
     'h200': {'tdp': 700.0, 'tflops': 204.0, 'memory_gb': 141},
     
-    # NVIDIA Gaming/Professional
+    # NVIDIA Gaming/Professional GPUs
     'rtx 2060': {'tdp': 160.0, 'tflops': 6.5, 'memory_gb': 6},
     'rtx 2070': {'tdp': 175.0, 'tflops': 7.5, 'memory_gb': 8},
     'rtx 2080': {'tdp': 215.0, 'tflops': 10.1, 'memory_gb': 8},
@@ -37,25 +41,35 @@ GPU_SPECS = {
     'rtx 4080': {'tdp': 320.0, 'tflops': 48.7, 'memory_gb': 16},
     'rtx 4090': {'tdp': 450.0, 'tflops': 82.6, 'memory_gb': 24},
     'rtx 5090': {'tdp': 575.0, 'tflops': 125.0, 'memory_gb': 32},
+    
+    # NVIDIA Professional GPUs
     'a6000': {'tdp': 300.0, 'tflops': 38.7, 'memory_gb': 48},
     'a5000': {'tdp': 230.0, 'tflops': 27.8, 'memory_gb': 24},
     'rtx 6000': {'tdp': 300.0, 'tflops': 40.0, 'memory_gb': 48},
     
-    # AMD
+    # AMD GPUs
     'mi100': {'tdp': 300.0, 'tflops': 46.1, 'memory_gb': 32},
     'mi210': {'tdp': 300.0, 'tflops': 45.3, 'memory_gb': 64},
     'mi250': {'tdp': 500.0, 'tflops': 90.5, 'memory_gb': 128},
     'mi300': {'tdp': 750.0, 'tflops': 163.0, 'memory_gb': 192},
     
-    # Google TPU
+    # Google TPUs
     'tpu v3': {'tdp': 450.0, 'tflops': 123.0, 'memory_gb': 16},
     'tpu v4': {'tdp': 450.0, 'tflops': 275.0, 'memory_gb': 32},
 }
 
 
-def get_device_name(is_cuda: bool) -> Optional[str]:
-    """Get device name."""
-    if not is_cuda or not TORCH_AVAILABLE:
+def detect_device_name(use_cuda: bool) -> Optional[str]:
+    """
+    Get the device name.
+    
+    Args:
+        use_cuda: Whether using CUDA
+        
+    Returns:
+        Device name string or None
+    """
+    if not use_cuda or not TORCH_AVAILABLE:
         return None
     
     try:
@@ -67,18 +81,18 @@ def get_device_name(is_cuda: bool) -> Optional[str]:
     return None
 
 
-def get_tdp(is_cuda: bool) -> float:
+def detect_tdp(use_cuda: bool) -> float:
     """
     Auto-detect TDP based on device.
     
     Args:
-        is_cuda: Whether using CUDA
+        use_cuda: Whether using CUDA
         
     Returns:
         TDP in watts
     """
-    if not is_cuda:
-        return 15.0  # CPU default
+    if not use_cuda:
+        return 15.0
     
     if not TORCH_AVAILABLE or not torch.cuda.is_available():
         logger.warning("CUDA not available, using default TDP")
@@ -101,17 +115,17 @@ def get_tdp(is_cuda: bool) -> float:
         return 250.0
 
 
-def get_peak_tflops(is_cuda: bool) -> float:
+def detect_peak_tflops(use_cuda: bool) -> float:
     """
     Auto-detect peak TFLOPs based on device.
     
     Args:
-        is_cuda: Whether using CUDA
+        use_cuda: Whether using CUDA
         
     Returns:
         Peak TFLOPs (FP16)
     """
-    if not is_cuda:
+    if not use_cuda:
         return 0.0
     
     if not TORCH_AVAILABLE or not torch.cuda.is_available():
@@ -133,26 +147,26 @@ def get_peak_tflops(is_cuda: bool) -> float:
         return 8.1
 
 
-def get_device_specs(is_cuda: bool) -> Dict[str, any]:
+def get_device_specs(use_cuda: bool) -> Dict[str, any]:
     """
     Get comprehensive device specifications.
     
     Args:
-        is_cuda: Whether using CUDA
+        use_cuda: Whether using CUDA
         
     Returns:
         Dictionary with device specs
     """
     specs = {
-        'device_type': 'cuda' if is_cuda else 'cpu',
+        'device_type': 'cuda' if use_cuda else 'cpu',
         'device_name': None,
-        'tdp_watts': get_tdp(is_cuda),
-        'peak_tflops': get_peak_tflops(is_cuda),
+        'tdp_watts': detect_tdp(use_cuda),
+        'peak_tflops': detect_peak_tflops(use_cuda),
         'memory_gb': None,
         'compute_capability': None
     }
     
-    if is_cuda and TORCH_AVAILABLE and torch.cuda.is_available():
+    if use_cuda and TORCH_AVAILABLE and torch.cuda.is_available():
         try:
             specs['device_name'] = torch.cuda.get_device_name(0)
             
@@ -160,6 +174,7 @@ def get_device_specs(is_cuda: bool) -> Dict[str, any]:
             specs['memory_gb'] = props.total_memory / (1024**3)
             specs['compute_capability'] = f"{props.major}.{props.minor}"
             
+            # Try to get from database for more accurate memory
             gpu_name = specs['device_name'].lower()
             for gpu_key, gpu_specs in GPU_SPECS.items():
                 if gpu_key in gpu_name:
@@ -170,29 +185,3 @@ def get_device_specs(is_cuda: bool) -> Dict[str, any]:
             logger.warning(f"Failed to get device properties: {e}")
     
     return specs
-
-
-def print_device_info(is_cuda: bool):
-    """Print detailed device information."""
-    specs = get_device_specs(is_cuda)
-    
-    logger.info("="*50)
-    logger.info("Device Information")
-    logger.info("="*50)
-    logger.info(f"Type: {specs['device_type'].upper()}")
-    
-    if specs['device_name']:
-        logger.info(f"Name: {specs['device_name']}")
-    
-    if specs['memory_gb']:
-        logger.info(f"Memory: {specs['memory_gb']:.1f} GB")
-    
-    if specs['compute_capability']:
-        logger.info(f"Compute Capability: {specs['compute_capability']}")
-    
-    logger.info(f"TDP: {specs['tdp_watts']:.1f} W")
-    
-    if specs['peak_tflops'] > 0:
-        logger.info(f"Peak TFLOPs (FP16): {specs['peak_tflops']:.1f}")
-    
-    logger.info("="*50)
