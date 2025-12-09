@@ -14,6 +14,7 @@ from models.model_interface import ModelInterface
 from quality.perplexity import measure_perplexity, compare_perplexity
 from quality.lm_eval import (
     run_reasoning_suite,
+    run_rag_suite,
     run_mmlu,
     run_truthfulqa,
     run_gsm8k,
@@ -44,6 +45,13 @@ class QualityResults:
     openbookqa_acc: Optional[float] = None
     boolq_acc: Optional[float] = None
     
+    # RAG tasks (if run)
+    squad_acc: Optional[float] = None
+    nq_open_acc: Optional[float] = None
+    triviaqa_acc: Optional[float] = None
+    drop_acc: Optional[float] = None
+    quac_acc: Optional[float] = None
+    
     # MMLU (if run)
     mmlu_acc: Optional[float] = None
     
@@ -70,7 +78,8 @@ class QualityBenchmark:
     Measures:
     - Perplexity on WikiText or custom dataset
     - Standard reasoning tasks (via lm-evaluation-harness)
-    - MMLU knowledge benchmark
+    - RAG-focused tasks (SQuAD, NaturalQuestions, TriviaQA, DROP, QuAC)
+    - MMLU knowledge benchmark (optional, disabled by default)
     - Optional: TruthfulQA, GSM8K, and other tasks
     """
     
@@ -166,6 +175,41 @@ class QualityBenchmark:
             limit=limit
         )
     
+    def run_rag_tasks(
+        self,
+        output_dir: Path,
+        num_fewshot: int = 0,
+        batch_size: int = 1,
+        device: str = "cuda:0",
+        limit: Optional[int] = None
+    ) -> Dict[str, Dict[str, float]]:
+        """
+        Run RAG-focused task suite.
+        
+        These tasks test reading comprehension, retrieval, and context 
+        understanding which are critical for RAG applications.
+        
+        Args:
+            output_dir: Directory to save results
+            num_fewshot: Number of few-shot examples
+            batch_size: Batch size for evaluation
+            device: Device to use
+            limit: Limit examples per task (for testing)
+            
+        Returns:
+            Dictionary with RAG task results
+        """
+        logger.info("Running RAG-Focused Tasks")
+        
+        return run_rag_suite(
+            self.model_path,
+            output_dir,
+            num_fewshot=num_fewshot,
+            batch_size=batch_size,
+            device=device,
+            limit=limit
+        )
+    
     def run_mmlu_benchmark(
         self,
         output_dir: Path,
@@ -205,6 +249,7 @@ class QualityBenchmark:
         perplexity_config: str = "wikitext-2-raw-v1",
         perplexity_samples: int = 100,
         include_reasoning: bool = True,
+        include_rag_tasks: bool = True,
         include_mmlu: bool = False,
         include_truthfulqa: bool = False,
         include_gsm8k: bool = False,
@@ -223,7 +268,8 @@ class QualityBenchmark:
             perplexity_config: Dataset configuration
             perplexity_samples: Number of samples for perplexity
             include_reasoning: Whether to run reasoning tasks
-            include_mmlu: Whether to run MMLU
+            include_rag_tasks: Whether to run RAG-focused tasks (SQuAD, NQ, etc.)
+            include_mmlu: Whether to run MMLU (default: False)
             include_truthfulqa: Whether to run TruthfulQA
             include_gsm8k: Whether to run GSM8K
             num_fewshot: Number of few-shot examples
@@ -286,9 +332,24 @@ class QualityBenchmark:
             self._extract_reasoning_metrics(results, reasoning_results)
             self._save_json(reasoning_results, output_dir / "reasoning_tasks.json")
         
-        # 3. MMLU
+        # 3. RAG-focused tasks
+        if include_rag_tasks:
+            logger.info("\n[3] RAG-Focused Tasks")
+            rag_results = self.run_rag_tasks(
+                output_dir,
+                num_fewshot=num_fewshot,
+                batch_size=batch_size,
+                device=device,
+                limit=limit
+            )
+            
+            # Extract metrics
+            self._extract_rag_metrics(results, rag_results)
+            self._save_json(rag_results, output_dir / "rag_tasks.json")
+        
+        # 4. MMLU (optional, disabled by default)
         if include_mmlu:
-            logger.info("\n[3] MMLU Benchmark")
+            logger.info("\n[4] MMLU Benchmark")
             mmlu_results = run_mmlu(
                 self.model_path,
                 output_dir,
@@ -301,9 +362,9 @@ class QualityBenchmark:
             results.mmlu_acc = self._extract_metric(mmlu_results, 'mmlu', 'acc')
             self._save_json(mmlu_results, output_dir / "mmlu.json")
         
-        # 4. TruthfulQA
+        # 5. TruthfulQA
         if include_truthfulqa:
-            logger.info("\n[4] TruthfulQA")
+            logger.info("\n[5] TruthfulQA")
             truthfulqa_results = run_truthfulqa(
                 self.model_path,
                 output_dir,
@@ -315,9 +376,9 @@ class QualityBenchmark:
             results.truthfulqa_acc = self._extract_metric(truthfulqa_results, 'truthfulqa', 'acc')
             self._save_json(truthfulqa_results, output_dir / "truthfulqa.json")
         
-        # 5. GSM8K
+        # 6. GSM8K
         if include_gsm8k:
-            logger.info("\n[5] GSM8K")
+            logger.info("\n[6] GSM8K")
             gsm8k_results = run_gsm8k(
                 self.model_path,
                 output_dir,
@@ -355,6 +416,18 @@ class QualityBenchmark:
         results.openbookqa_acc = self._extract_metric(reasoning_results, 'openbookqa', 'acc')
         results.boolq_acc = self._extract_metric(reasoning_results, 'boolq', 'acc')
     
+    def _extract_rag_metrics(
+        self,
+        results: QualityResults,
+        rag_results: Dict[str, Dict[str, float]]
+    ) -> None:
+        """Extract RAG task metrics into QualityResults."""
+        results.squad_acc = self._extract_metric(rag_results, 'squad', 'acc')
+        results.nq_open_acc = self._extract_metric(rag_results, 'nq_open', 'acc')
+        results.triviaqa_acc = self._extract_metric(rag_results, 'triviaqa', 'acc')
+        results.drop_acc = self._extract_metric(rag_results, 'drop', 'acc')
+        results.quac_acc = self._extract_metric(rag_results, 'quac', 'acc')
+    
     def _extract_metric(
         self,
         results: Dict[str, Dict[str, float]],
@@ -383,7 +456,9 @@ class QualityBenchmark:
     
     def _print_summary(self, results: QualityResults) -> None:
         """Print summary of results."""
+        print("\n" + "="*60)
         print("QUALITY RESULTS SUMMARY")
+        print("="*60)
         
         print(f"\nPerplexity:")
         print(f"  {results.perplexity:.2f} on {results.perplexity_dataset}")
@@ -403,6 +478,20 @@ class QualityBenchmark:
             if results.arc_challenge_acc:
                 print(f"  ARC-Challenge: {results.arc_challenge_acc*100:.1f}%")
         
+        if any([results.squad_acc, results.nq_open_acc, results.triviaqa_acc, 
+                results.drop_acc, results.quac_acc]):
+            print(f"\nRAG-Focused Tasks:")
+            if results.squad_acc:
+                print(f"  SQuAD: {results.squad_acc*100:.1f}%")
+            if results.nq_open_acc:
+                print(f"  Natural Questions: {results.nq_open_acc*100:.1f}%")
+            if results.triviaqa_acc:
+                print(f"  TriviaQA: {results.triviaqa_acc*100:.1f}%")
+            if results.drop_acc:
+                print(f"  DROP: {results.drop_acc*100:.1f}%")
+            if results.quac_acc:
+                print(f"  QuAC: {results.quac_acc*100:.1f}%")
+        
         if results.mmlu_acc:
             print(f"\nMMLU: {results.mmlu_acc*100:.1f}%")
         
@@ -412,3 +501,4 @@ class QualityBenchmark:
         if results.gsm8k_acc:
             print(f"\nGSM8K: {results.gsm8k_acc*100:.1f}%")
         
+        print("\n" + "="*60)

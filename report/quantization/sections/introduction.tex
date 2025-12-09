@@ -1,0 +1,55 @@
+% Updated introduction.tex to ensure consistency with six methods and emphasize RAG focus with novel metrics
+\section{Introduction}
+
+The democratization of Large Language Models (LLMs) represents a transformative shift in artificial intelligence accessibility. Models such as Mistral-7B \cite{jiang2023mistral}, with their balance of capability and efficiency, exemplify the potential for deploying sophisticated reasoning systems beyond cloud infrastructure. However, the transition from datacenter-grade hardware to consumer and edge devices—such as the NVIDIA T4 and RTX series GPUs—confronts a fundamental bottleneck: memory bandwidth and capacity constraints.
+
+A typical 7-billion parameter model in half-precision (FP16) format requires approximately 14GB of Video Random Access Memory (VRAM) for weights alone, consuming nearly the entire capacity of a 16GB GPU and leaving minimal headroom for the dynamic memory allocations essential during inference. The Key-Value (KV) cache, which grows linearly with sequence length, further exacerbates this constraint. For a context window of 4096 tokens, the KV cache alone demands an additional ~1GB of memory, making longer-context applications infeasible without compression.
+
+Post-Training Quantization (PTQ) techniques offer a compelling solution by reducing numerical precision without the computational overhead of retraining. Methods such as GPTQ \cite{frantar2023gptq}, AWQ \cite{lin2023awq}, and NormalFloat 4-bit (NF4) \cite{dettmers2023qlora} theoretically achieve 3.5-4$\times$ compression ratios, reducing model footprints to approximately 3.5-4GB. However, quantization introduces non-uniform degradation patterns across different capabilities—a phenomenon inadequately captured by aggregate metrics like perplexity or average benchmark scores.
+
+\subsection{Research Gaps and Motivation}
+
+Current quantization literature exhibits three critical limitations that motivate this investigation:
+
+\paragraph{Incomplete Understanding of Task-Specific Sensitivity}
+
+Existing evaluations predominantly rely on perplexity measurements and broad benchmark suites (e.g., MMLU, HellaSwag), which provide aggregate performance indicators but obscure differential sensitivities across task categories. Mathematical reasoning, for instance, may degrade more severely than factual recall due to quantization-induced precision loss in arithmetic operations. Code generation may suffer disproportionately from syntactic errors that small quantization perturbations introduce. Without granular, capability-specific evaluation, practitioners lack guidance on which compression methods best preserve the capabilities most relevant to their deployment scenarios.
+
+\paragraph{Hardware-Software Co-optimization Neglect}
+
+Quantization methods are often evaluated in hardware-agnostic settings, assuming universal kernel support and optimal implementations. This assumption breaks down in practice: quantization schemes optimized for Ampere architecture (e.g., INT4 tensor cores) may experience severe performance degradation on older Turing GPUs (e.g., Tesla T4), which lack native low-precision arithmetic support and rely on software emulation. The interaction between quantization algorithm design and actual hardware capabilities remains underexplored, yet critically determines real-world deployment viability.
+
+\paragraph{Limited Retrieval-Augmented Generation (RAG) Analysis}
+
+RAG systems, which augment language models with external knowledge retrieval, represent a dominant deployment paradigm for domain-specific applications. However, quantization's impact on RAG workflows—specifically on context adherence, multi-hop reasoning across retrieved documents, and faithfulness to source material—remains largely uncharacterized. The compound effects of compressing both the retrieval mechanism (through embedding quantization) and the generation model (through weight quantization) require systematic investigation, particularly through novel metrics like attention preservation, context degradation, and attention drift.
+
+\subsection{Research Contributions}
+
+This work addresses these gaps through a comprehensive evaluation framework that examines six state-of-the-art quantization methods across three analytical dimensions:
+
+\paragraph{Diverse Quantization Paradigms} We evaluate methods spanning fundamentally different compression principles:
+\begin{itemize}
+    \item \textbf{Data-type innovations (NF4)}: Information-theoretically optimal representations for normal distributions
+    \item \textbf{Hessian-based optimization (GPTQ)}: Second-order curvature-aware quantization minimizing reconstruction error
+    \item \textbf{Activation-aware weighting (AWQ)}: Salience-based protection of critical weights identified through activation magnitudes
+    \item \textbf{Rotation-based outlier redistribution (QuaRot)}: Hadamard transformations to smooth activation distributions
+    \item \textbf{Statistical adaptivity (HQQ)}: Zero-shot quantization without calibration data
+    \item \textbf{Memory hierarchy optimization (KVQuant)}: Specialized compression for attention KV caches
+\end{itemize}
+
+This breadth enables systematic comparison of orthogonal design philosophies rather than incremental algorithmic variations.
+
+\paragraph{Multi-Dimensional Evaluation Protocol} We assess compressed models across:
+\begin{itemize}
+    \item \textbf{Computational efficiency}: Latency (TTFT, decode time), throughput, memory footprint, energy consumption, and Model FLOPs Utilization (MFU)
+    \item \textbf{Task-specific performance}: Granular evaluation across mathematical reasoning (GSM8K), commonsense reasoning (HellaSwag, ARC), world knowledge (MMLU), and code generation (HumanEval)
+    \item \textbf{RAG capabilities}: Novel metrics including attention preservation (precision@1 and rank of relevant documents), context degradation (accuracy slope over increasing lengths), and attention drift (stability during generation)
+\end{itemize}
+
+\paragraph{Hardware-Aware Deployment Analysis} All experiments are conducted on a single NVIDIA Tesla T4 GPU (16GB VRAM), representative of edge deployment scenarios. This constraint reveals critical insights about algorithm-hardware compatibility: methods requiring specialized kernel support (e.g., structured sparsity, INT4 tensor cores) may underperform distribution-based approaches (e.g., NF4) that gracefully degrade to software implementations on older architectures.
+
+Our findings demonstrate that quantization method selection must account for deployment context. For mathematical reasoning preservation, Hessian-based methods (GPTQ) minimize precision-sensitive degradation. For memory-constrained RAG applications, KV cache quantization (KVQuant) provides orthogonal compression benefits beyond weight quantization alone. For hardware compatibility on Turing-generation GPUs, distribution-based methods (NF4, HQQ) avoid kernel fallback penalties that plague methods assuming Ampere-specific optimizations.
+
+\subsection{Paper Organization}
+
+The remainder of this paper proceeds as follows: Section II surveys related work in quantization methods, organizing techniques by underlying compression principles rather than chronological development. Section III details our experimental methodology, including quantization configurations, evaluation protocols, and RAG pipeline design with novel attention-based metrics. Section IV presents comprehensive results across efficiency, quality, and RAG dimensions. Section V discusses implications for deployment strategy and identifies optimal method selection criteria. Section VI concludes with future research directions.

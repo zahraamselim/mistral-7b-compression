@@ -203,6 +203,60 @@ def run_reasoning_suite(
     )
 
 
+def run_rag_suite(
+    model_path: str,
+    output_dir: Path,
+    num_fewshot: int = 0,
+    batch_size: int = 1,
+    device: str = "cuda:0",
+    limit: Optional[int] = None
+) -> Dict[str, Dict[str, float]]:
+    """
+    Run RAG-focused task suite from lm-evaluation-harness.
+    
+    These tasks test reading comprehension, retrieval, and context understanding
+    which are critical for RAG applications.
+    
+    Tasks:
+    - SQuAD: Reading comprehension from Wikipedia passages
+    - NaturalQuestions: Open-domain QA requiring retrieval
+    - TriviaQA: Question answering with evidence documents
+    - DROP: Discrete reasoning over paragraphs (math + reading)
+    - QuAC: Question answering in conversational context
+    
+    Args:
+        model_path: Path to model or HuggingFace model ID
+        output_dir: Directory to save results
+        num_fewshot: Number of few-shot examples
+        batch_size: Batch size for evaluation
+        device: Device to use
+        limit: Limit number of examples per task
+        
+    Returns:
+        Dictionary with RAG task results
+    """
+    tasks = [
+        "squad",           # Reading comprehension
+        "nq_open",         # Natural Questions (open-domain)
+        "triviaqa",        # Trivia QA with evidence
+        "drop",            # Discrete reasoning over paragraphs
+        "quac"             # Question answering in context
+    ]
+    
+    logger.info("Running RAG-focused task suite")
+    logger.info("These tasks test reading comprehension and context understanding")
+    
+    return run_lm_eval_tasks(
+        model_path=model_path,
+        tasks=tasks,
+        output_dir=output_dir,
+        num_fewshot=num_fewshot,
+        batch_size=batch_size,
+        device=device,
+        limit=limit
+    )
+
+
 def run_mmlu(
     model_path: str,
     output_dir: Path,

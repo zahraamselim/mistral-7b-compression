@@ -1,0 +1,391 @@
+\section{Discussion}
+
+\subsection{Hardware-Algorithm Compatibility as Primary Determinant}
+
+\subsubsection{Kernel Dependency Impact}
+
+Our results reveal that hardware-algorithm compatibility dominates practical performance far more than theoretical compression ratios. [Discuss specific findings about GPTQ/HQQ fallback on T4 vs. NF4/AWQ stability]
+
+\textbf{Key Finding:} [Fill in observation about throughput differences despite identical 4-bit compression]
+
+\textbf{Hypothesis:} GPTQ and HQQ rely on INT4 tensor cores and optimized GEMM kernels introduced in Ampere architecture (compute capability 8.0+). The Tesla T4 (Turing, compute capability 7.5) lacks these specialized operations, causing fallback to inefficient FP16 emulation paths that negate quantization benefits.
+
+\textbf{Evidence:} [Reference specific metrics from efficiency tables showing 10-18Ã— slowdown]
+
+\textbf{Implications for Practitioners:}
+\begin{itemize}
+\item For Turing-generation hardware (T4, RTX 20-series), distribution-based quantization (NF4) is not just preferable but the \textit{only viable option}
+\item Kernel-dependent methods should be reserved for Ampere+ architectures where specialized INT4 operations are available
+\item Hardware specification must be the first consideration when selecting quantization strategies, superseding theoretical compression ratios
+\end{itemize}
+
+\subsubsection{Architecture-Specific Optimization}
+
+[Discuss why NF4 performs better on T4 - likely due to its reliance on standard FP16 operations rather than specialized kernels]
+
+\subsection{Task-Dependent Quantization Sensitivity}
+
+\subsubsection{Differential Impact Across Domains}
+
+Our evaluation reveals striking heterogeneity in how quantization affects different cognitive capabilities:
+
+\paragraph{Preserved Capabilities}
+\begin{itemize}
+\item \textbf{Knowledge Retrieval:} [Discuss ARC-Easy/Challenge results showing minimal degradation]
+\item \textbf{Commonsense Reasoning:} [Analyze HellaSwag robustness]
+\item \textbf{Code Generation:} [Explain HumanEval stability]
+\end{itemize}
+
+\paragraph{Degraded Capabilities}
+\begin{itemize}
+\item \textbf{Mathematical Reasoning:} [Discuss GSM8K showing 25\% drop - explain why multi-step arithmetic is vulnerable]
+\end{itemize}
+
+\textbf{Mechanistic Hypothesis:} Quantization appears to affect \textit{deep reasoning chains} more severely than \textit{pattern matching} or \textit{retrieval-based} tasks. Mathematical problem-solving requires maintaining precise intermediate states across multiple reasoning steps, while knowledge retrieval and commonsense reasoning rely more on learned associations that may be more robust to precision loss.
+
+\subsubsection{Implications for Application Design}
+
+\begin{itemize}
+\item For knowledge-intensive RAG applications (document QA, fact retrieval), aggressive 4-bit quantization is viable with minimal quality loss
+\item For reasoning-heavy applications (mathematical tutoring, logical problem-solving), either:
+  \begin{itemize}
+  \item Use higher precision (FP16 or conservative 4-bit with careful method selection)
+  \item Employ hybrid precision strategies (discussed below)
+  \item Implement post-quantization fine-tuning on reasoning tasks
+  \end{itemize}
+\item Code generation appears surprisingly robust, suggesting that programming tasks rely more on learned patterns than arithmetic precision
+\end{itemize}
+
+\subsection{The NF4 vs. AWQ Trade-off}
+
+\subsubsection{Marginal Efficiency Gains}
+
+AWQ demonstrates [X\%] better throughput and [Y\%] lower energy consumption compared to NF4. [Fill in specific numbers from results]
+
+\textbf{However,} this efficiency advantage comes at the cost of:
+\begin{itemize}
+\item Higher perplexity degradation ([X\%] vs [Y\%])
+\item Potentially lower task accuracy ([specific tasks where AWQ underperforms])
+\item [Any RAG-specific degradation observed]
+\end{itemize}
+
+\subsubsection{When to Choose AWQ}
+
+AWQ may be preferable in scenarios where:
+\begin{enumerate}
+\item \textbf{Latency is Critical:} Applications requiring sub-[X]ms response times where the [Y\%] speedup is meaningful
+\item \textbf{Energy Budget is Constrained:} Battery-powered edge devices where [Z] mJ/token reduction significantly extends operation time
+\item \textbf{Perplexity Degradation is Acceptable:} Tasks where the [X\%] perplexity increase does not materially impact user experience
+\item \textbf{Simple Retrieval Tasks:} RAG applications focused on straightforward fact extraction rather than complex reasoning
+\end{enumerate}
+
+\subsubsection{General Recommendation: NF4}
+
+For general-purpose deployment, NF4 provides superior balance:
+\begin{itemize}
+\item More stable performance across diverse tasks
+\item Better perplexity preservation ([X\%] vs [Y\%])
+\item Comparable RAG performance
+\item Universal hardware compatibility
+\item Only [Z\%] efficiency penalty
+\end{itemize}
+
+The [Z\%] efficiency cost is a worthwhile trade for [X\%] better quality preservation in most production scenarios.
+
+\subsection{RAG-Specific Insights}
+
+\subsubsection{Context Grounding Under Quantization}
+
+[Analyze context adherence results]
+
+\textbf{Key Finding:} [Discuss whether quantization increases hallucination rate]
+
+\textbf{Surprising Result:} [If applicable, note if quantized models show better/worse context precision than expected]
+
+\textbf{Practical Implication:} [Discuss whether quantized models are safe for RAG applications where faithfulness is critical]
+
+\subsubsection{Numerical Precision Preservation}
+
+[Analyze numerical accuracy results]
+
+\textbf{Critical for:}
+\begin{itemize}
+\item Financial document QA
+\item Medical report analysis
+\item Scientific literature retrieval
+\item Legal document review
+\end{itemize}
+
+\textbf{Finding:} [Discuss whether quantization corrupts exact numerical extraction]
+
+\subsubsection{Multi-Hop Reasoning Degradation}
+
+[Analyze multi-hop results]
+
+\textbf{Hypothesis:} Complex reasoning requiring synthesis across multiple context pieces may be more vulnerable to quantization because:
+\begin{enumerate}
+\item Requires maintaining multiple entity references simultaneously
+\item Involves chaining logical steps that accumulate precision errors
+\item Demands stronger attention weights that may be affected by quantization
+\end{enumerate}
+
+\textbf{Mitigation Strategies:}
+\begin{itemize}
+\item [Suggest approaches based on results]
+\end{itemize}
+
+\subsubsection{Context Window Effects}
+
+[Analyze position degradation, long context, and distractor results]
+
+\textbf{Position Bias:} [Discuss if quantization exacerbates "lost in the middle" phenomenon]
+
+\textbf{Length Scaling:} [Analyze if quantization affects long-context utilization]
+
+\textbf{Noise Robustness:} [Discuss distractor resistance]
+
+\subsubsection{Instruction Following}
+
+[Analyze constraint adherence and format compliance]
+
+\textbf{Finding:} [Discuss whether quantization affects ability to follow specific constraints]
+
+\textbf{Implication:} [Discuss reliability for production RAG systems requiring structured outputs]
+
+\subsection{Aggressive Quantization Analysis (2-bit and 3-bit)}
+
+\subsubsection{GPTQ Bit-Width Progression}
+
+[Analyze the 4-bit â†' 3-bit â†' 2-bit degradation curve]
+
+\textbf{Compression vs. Quality Trade-off:}
+\begin{itemize}
+\item 4-bit: [X]Ã— compression, [Y\%] quality loss
+\item 3-bit: [X]Ã— compression, [Y\%] quality loss
+\item 2-bit: [X]Ã— compression, [Y\%] quality loss
+\end{itemize}
+
+\textbf{Viability Assessment:}
+\begin{itemize}
+\item \textbf{2-bit:} [Evaluate if usable for any practical application]
+\item \textbf{3-bit:} [Discuss sweet spot analysis - worth the extra compression over 4-bit?]
+\end{itemize}
+
+\subsubsection{Failure Modes at Extreme Quantization}
+
+[Discuss specific failure patterns observed at 2-bit and 3-bit]
+
+\textbf{Task Collapse:} [Which tasks become unusable first?]
+
+\textbf{RAG Reliability:} [At what bit-width does RAG performance become unacceptable?]
+
+\subsection{Perplexity as Quality Proxy}
+
+\subsubsection{Correlation Analysis}
+
+[Compare perplexity rankings with task performance rankings]
+
+\textbf{Finding:} Perplexity shows [strong/weak/moderate] correlation with downstream task performance ([correlation coefficient if calculated])
+
+\textbf{Discrepancies:} [Identify cases where low perplexity doesn't translate to task accuracy]
+
+\subsubsection{Limitations of Perplexity}
+
+Our results confirm that perplexity alone is insufficient for evaluating quantized models because:
+\begin{itemize}
+\item [Specific examples from results]
+\item Does not capture task-specific degradation patterns
+\item May not reflect RAG-critical capabilities like context grounding
+\item Can mask differential sensitivity across domains
+\end{itemize}
+
+\textbf{Recommendation:} Always supplement perplexity with task-specific and application-specific evaluation.
+
+\subsection{Deployment Decision Framework}
+
+Based on our comprehensive evaluation, we propose the following decision framework:
+
+\subsubsection{Hardware Compatibility First}
+
+\begin{table}[ht]
+\centering
+\caption{Hardware-Based Method Selection}
+\begin{adjustbox}{max width=\columnwidth}
+\small
+\begin{tabular}{lp{6cm}}
+\toprule
+\textbf{Hardware} & \textbf{Recommended Method} \\
+\midrule
+Turing (T4, RTX 20xx) & NF4 (only viable 4-bit option) \\
+Ampere (A100, RTX 30xx) & Test AWQ and GPTQ; choose based on workload \\
+Ada (RTX 40xx) & AWQ or GPTQ for maximum efficiency \\
+Hopper (H100) & All methods viable; optimize for workload \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsubsection{Application-Specific Guidance}
+
+\begin{table}[ht]
+\centering
+\caption{Application-Based Method Selection}
+\begin{adjustbox}{max width=\columnwidth}
+\small
+\begin{tabular}{lp{6cm}}
+\toprule
+\textbf{Application Type} & \textbf{Recommendation} \\
+\midrule
+Document QA (simple) & Any 4-bit method; prioritize efficiency \\
+Mathematical tutoring & NF4 + fine-tuning or FP16 for critical steps \\
+Code generation & Any 4-bit method; appears robust \\
+Multi-hop reasoning & NF4 with higher quality preservation \\
+Numerical extraction & Test carefully; consider hybrid precision \\
+Long-context retrieval & Any 4-bit; monitor position bias \\
+Structured output generation & Test instruction following; NF4 safest \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsubsection{Optimization Priority}
+
+\begin{table}[ht]
+\centering
+\caption{Priority-Based Method Selection}
+\begin{adjustbox}{max width=\columnwidth}
+\small
+\begin{tabular}{lp{6cm}}
+\toprule
+\textbf{Priority} & \textbf{Recommendation} \\
+\midrule
+Maximum throughput & AWQ (if hardware supports) \\
+Maximum compression & GPTQ 2/3-bit (evaluate quality carefully) \\
+Best quality preservation & NF4 \\
+Energy efficiency & AWQ (marginal gains) \\
+General-purpose deployment & NF4 (best balance) \\
+Production reliability & NF4 (hardware-agnostic) \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\subsection{Hybrid Precision Strategies}
+
+Given the differential task sensitivity observed, we propose hybrid precision architectures:
+
+\subsubsection{Layer-Selective Quantization}
+
+\begin{itemize}
+\item \textbf{Preserve in FP16:} Early attention layers (input processing), final output layers
+\item \textbf{Aggressive quantization (4-bit):} Middle feedforward layers (pattern matching)
+\item \textbf{Rationale:} [Explain based on where degradation is most severe]
+\end{itemize}
+
+\subsubsection{Task-Adaptive Precision}
+
+\begin{itemize}
+\item \textbf{Route to FP16:} Mathematical reasoning queries
+\item \textbf{Route to 4-bit:} Factual retrieval, commonsense reasoning
+\item \textbf{Implementation:} Lightweight classifier to detect query type
+\end{itemize}
+
+\subsubsection{Dynamic Precision Scaling}
+
+\begin{itemize}
+\item Start with 4-bit for efficiency
+\item If uncertainty exceeds threshold, re-run critical steps in FP16
+\item Balances efficiency with quality assurance
+\end{itemize}
+
+\subsection{Limitations and Future Work}
+
+\subsubsection{Study Limitations}
+
+\begin{enumerate}
+\item \textbf{Single Model:} Evaluation focused on Mistral-7B; patterns may differ for other architectures
+\item \textbf{Single Hardware:} Tesla T4 results may not generalize to all edge devices
+\item \textbf{Synthetic RAG Tasks:} Some RAG evaluations use constructed datasets rather than real-world data
+\item \textbf{Limited Bit Widths:} Did not explore mixed-precision or sub-2-bit quantization
+\item \textbf{No Fine-Tuning:} Evaluated only zero-shot quantization without post-quantization adaptation
+\end{enumerate}
+
+\subsubsection{Future Research Directions}
+
+\paragraph{Expanded Model Coverage}
+\begin{itemize}
+\item Evaluate Llama 3, Phi, Gemma model families
+\item Compare 7B vs. 13B vs. 70B parameter scaling
+\item Assess specialized models (code, math, multilingual)
+\end{itemize}
+
+\paragraph{Hardware Diversity}
+\begin{itemize}
+\item Mobile processors (Snapdragon, Apple Silicon)
+\item AMD GPUs (ROCm compatibility)
+\item Intel GPUs (Arc series)
+\item NPUs and ASICs (Coral, Hailo)
+\end{itemize}
+
+\paragraph{Advanced Quantization Techniques}
+\begin{itemize}
+\item Quantization-aware fine-tuning (QAT)
+\item Mixed-precision strategies
+\item Dynamic quantization
+\item Outlier-aware methods (SpQR, OWQ)
+\item Sub-2-bit extreme quantization
+\end{itemize}
+
+\paragraph{RAG System Integration}
+\begin{itemize}
+\item End-to-end RAG pipeline evaluation (retriever + LLM)
+\item Real-world document corpus testing
+\item Multi-turn conversation evaluation
+\item Embedding model quantization impact
+\item Vector database integration overhead
+\end{itemize}
+
+\paragraph{Production Deployment Studies}
+\begin{itemize}
+\item Long-running stability testing
+\item Multi-user concurrent request handling
+\item Model switching overhead (FP16 â†" 4-bit)
+\item Thermal throttling under sustained load
+\item Battery life impact on mobile devices
+\end{itemize}
+
+\paragraph{Theoretical Understanding}
+\begin{itemize}
+\item Why does mathematical reasoning degrade more?
+\item What causes hardware-specific fallback behaviors?
+\item Can we predict task sensitivity from model architecture?
+\item Optimal bit allocation across layers
+\end{itemize}
+
+\subsection{Broader Implications}
+
+\subsubsection{Democratization of LLMs}
+
+Effective quantization enables:
+\begin{itemize}
+\item Deployment on consumer hardware (<\$500 GPUs)
+\item Local inference without cloud dependencies
+\item Privacy-preserving on-device processing
+\item Reduced operational costs for startups
+\end{itemize}
+
+\subsubsection{Environmental Impact}
+
+[Calculate and discuss potential carbon footprint reduction from efficient quantization deployment]
+
+\subsubsection{Research Methodology}
+
+This study demonstrates the necessity of:
+\begin{itemize}
+\item Hardware-aware evaluation
+\item Task-specific metrics beyond perplexity
+\item Application-focused benchmarking (RAG)
+\item Comprehensive efficiency profiling
+\end{itemize}
+
+These principles should guide future model compression research.

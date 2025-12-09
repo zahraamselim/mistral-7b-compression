@@ -1,0 +1,144 @@
+% Updated related_work.tex - no major changes needed for coherence, as it already covers the methods consistently
+\section{Related Work}
+
+Quantization for large language models has emerged as a critical research area, with techniques spanning diverse compression principles. We organize this survey by underlying methodology rather than chronological development, highlighting how different approaches address the fundamental trade-off between compression ratio and capability preservation.
+
+\subsection{Curvature-Based Optimization Methods}
+
+These methods leverage second-order information about the loss surface to identify optimal quantization parameters that minimize reconstruction error.
+
+\paragraph{Hessian-Guided Quantization}
+
+\textbf{GPTQ} \cite{frantar2023gptq} pioneered practical Hessian-based quantization for billion-parameter models through layer-wise optimization with inverse Hessian approximations. The method formulates quantization as minimizing $\|WX - \hat{W}X\|_2^2$ where $W$ is the original weight matrix and $\hat{W}$ is quantized, using a greedy coordinate descent approach that propagates quantization errors to subsequent weights via $w_{q'} \leftarrow w_{q'} - \delta_q \cdot \frac{H_{qq'}}{H_{qq}}$. This Optimal Brain Quantization (OBQ) strategy enables 3-4 bit quantization with minimal perplexity degradation.
+
+\textbf{QuIP} \cite{chee2023quip} extends this framework to 2-bit precision through adaptive rounding and incoherence processing, applying randomized Hadamard transforms before quantization to reduce weight correlations. \textbf{QuIP\#} further improves this approach with fine-tuned incoherence preprocessing, achieving state-of-the-art 2-bit performance.
+
+\textbf{OPTQ} variants including \textbf{GPTAQ} and \textbf{MR-GPTQ} introduce mixed-precision strategies, allocating higher precision to layers identified as sensitive through Hessian eigenvalue analysis. \textbf{OPQ} (Outlier-Preserved Quantization) combines Hessian guidance with explicit outlier handling, storing high-magnitude weights in elevated precision.
+
+\textbf{AutoRound} employs iterative reconstruction with adaptive rounding, optimizing quantization parameters per-layer through gradient descent on reconstruction error. Unlike GPTQ's one-shot approach, AutoRound refines parameters across multiple iterations, often improving upon GPTQ with minimal computational overhead.
+
+\paragraph{Curvature Approximations}
+
+Several methods approximate Hessian computation to reduce overhead. \textbf{QUAD} uses diagonal Hessian approximations, trading accuracy for speed. \textbf{FPTQ} (Fast Post-Training Quantization) employs block-wise Hessian estimation, processing weight submatrices independently. \textbf{ResQ} introduces residual quantization, iteratively quantizing reconstruction errors to achieve finer effective precision.
+
+\subsection{Activation-Aware and Salience-Based Methods}
+
+These approaches identify and protect critical weights based on activation statistics or gradient information, recognizing that uniform quantization degrades performance by treating all parameters equally.
+
+\paragraph{Salience-Based Weight Protection}
+
+\textbf{AWQ} (Activation-aware Weight Quantization) \cite{lin2023awq} observes that 1\% of weights disproportionately impact model outputs when weighted by activation magnitudes. By applying per-channel scaling factors $s = (\text{mean}(|X|_{\alpha}))^{\alpha}$ where $X$ represents activations, AWQ protects salient weights while aggressively quantizing less-critical parameters. This salience-based approach demonstrates superior preservation of reasoning capabilities compared to reconstruction-based methods.
+
+\textbf{OWQ} (Outlier-Aware Weight Quantization) extends this principle by explicitly identifying weights sensitive to activation outliers, applying mixed-precision storage where sensitivity exceeds thresholds. \textbf{SpQR} (Sparse-Quantized Representation) uses L2 error as a sensitivity metric, storing the top-k sensitive weights in higher precision while quantizing the remainder.
+
+\textbf{SqueezeLLM} \cite{kim2023squeezellm} introduces sensitivity-based weight clustering via k-means, grouping weights by importance scores and allocating precision budgets per cluster. This enables non-uniform quantization that concentrates bits where they most impact model quality.
+
+\textbf{WUSH} (Weight-Update Salience Heuristic) tracks weight update magnitudes during fine-tuning as a proxy for importance, protecting high-update weights during subsequent quantization. \textbf{AdpQ} (Adaptive Precision Quantization) dynamically adjusts per-layer precision based on activation variance, allocating more bits to layers with high variance.
+
+\paragraph{Gradient-Based Importance}
+
+\textbf{XQuant} leverages gradient information to identify critical weight columns, applying column-wise mixed precision. \textbf{GQSA} (Gradient-Quantization Sensitivity Analysis) computes sensitivity scores as $\nabla_W \mathcal{L}$, protecting high-gradient regions. \textbf{EWQ} (Error-Weighted Quantization) uses backpropagated errors to guide precision allocation, iteratively refining quantization to minimize task-specific loss.
+
+\subsection{Outlier Redistribution and Smoothing}
+
+Activation outliers—extreme values that occur in specific channels—pose significant challenges for quantization, as they force large quantization ranges that waste representation capacity. These methods address outliers through transformation or redistribution rather than preservation.
+
+\paragraph{Rotation-Based Approaches}
+
+\textbf{QuaRot} applies fixed Hadamard rotation matrices $H$ to weight matrices before quantization, transforming $W \rightarrow HWH^T$, which redistributes outliers across channels while preserving the mathematical equivalence through inverse rotations during inference. This approach achieves 4-bit quantization competitive with 16-bit baselines by homogenizing activation distributions.
+
+\textbf{SpinQuant} extends rotation methods with learnable orthogonal transformations optimized to maximize quantization friendliness, formulated as $\min_R \|Q(RW) - RW\|$ subject to $RR^T = I$. By learning rotation matrices rather than using fixed transforms, SpinQuant adapts to model-specific outlier patterns.
+
+\textbf{ButterflyQuant} employs structured butterfly matrices for efficient rotation, reducing the $O(n^2)$ rotation cost to $O(n \log n)$ while maintaining outlier smoothing effectiveness.
+
+\paragraph{Channel-Wise Smoothing}
+
+\textbf{SmoothQuant} \cite{xiao2023smoothquant} migrates quantization difficulty from activations to weights through per-channel scaling: $Y = (X \text{diag}(s)^{-1}) \cdot (\text{diag}(s)W)$, where scaling factors $s$ balance difficulty. This reduces outlier impact without architectural changes.
+
+\textbf{Outlier Suppression+} \cite{wei2022outlier} suppresses outliers through activation clipping and shifting. \textbf{CliP} combines clipping with progressive quantization, gradually reducing precision while monitoring error.
+
+\textbf{RepQ} (Representation Quantization) normalizes activations to unit variance before quantization, redistributing dynamic range. \textbf{Outlier Token Suppression} identifies and suppresses outlier-causing tokens during inference.
+
+\subsection{Mixed-Precision and Heterogeneous Quantization}
+
+These methods allocate variable precision across model components, recognizing that uniform bit-width sacrifices efficiency.
+
+\paragraph{Layer-Wise Precision Allocation}
+
+\textbf{MixPrecision} dynamically assigns precision based on layer sensitivity, measured by signal-to-quantization-noise ratio (SQNR). Layers with high SQNR tolerate lower precision.
+
+\textbf{LLM.int8()} \cite{dettmers2022llmint8} uses INT8 for regular weights and FP16 for outlier features identified by vector norms exceeding thresholds.
+
+\textbf{FlexiQuant} allows arbitrary bit-width combinations per layer, optimized via search algorithms. \textbf{MPQ} (Multi-Precision Quantization) groups layers by type (attention vs. feed-forward) for precision assignment.
+
+\paragraph{Component-Specific Strategies}
+
+\textbf{Token-wise Quantization} applies per-token scaling, adapting to varying activation distributions across sequences. \textbf{Group-wise Quantization} partitions weights into groups with shared scaling factors, balancing granularity and overhead.
+
+\textbf{CQ} (Channel Quantization) applies different precision to different attention head groups, allocating higher bits to heads responsible for long-range dependencies.
+
+\subsection{KV Cache Compression}
+
+The Key-Value cache in Transformer attention grows linearly with sequence length, dominating memory consumption for long-context applications. KV cache quantization provides orthogonal compression beyond weight quantization.
+
+\paragraph{Per-Channel and Per-Token Strategies}
+
+\textbf{KVQuant} introduces separate quantization strategies for keys and values: per-channel quantization for keys (which remain relatively stable across tokens) and per-token quantization for values (which vary significantly). Additionally, KVQuant preserves \textit{attention sinks}—initial tokens that accumulate disproportionate attention—in full precision to maintain attention distribution fidelity.
+
+\textbf{KIVI} (KV Cache In-place Inference) implements 2-bit KV cache quantization with asymmetric quantization schemes, achieving 4$\times$ KV cache compression. By quantizing in-place during generation, KIVI minimizes memory overhead and enables million-token contexts on consumer hardware.
+
+\textbf{AsymKV} applies asymmetric quantization to keys and values separately, recognizing their different statistical properties. \textbf{AQUA-KV} (Adaptive Quantization for KV Cache) adjusts quantization granularity based on sequence length, using coarse quantization for long contexts and fine quantization for short contexts.
+
+\paragraph{Attention-Aware KV Compression}
+
+\textbf{IntactKV} preserves high-attention keys and values in elevated precision, dynamically identifying important cache entries based on cumulative attention scores. \textbf{WKVQuant} applies cross-block reconstruction regularization, ensuring that quantization errors in one layer's KV cache don't compound in subsequent layers.
+
+\textbf{TEQ} (Token-Efficient Quantization) combines KV cache quantization with token pruning, removing low-attention tokens from the cache entirely.
+
+\subsection{Quantization-Aware Training and Fine-Tuning}
+
+While post-training quantization requires no retraining, quantization-aware training (QAT) can further reduce degradation by adapting model parameters to low-precision representations.
+
+\paragraph{Full QAT Methods}
+
+\textbf{LLM-QAT} implements standard QAT through knowledge distillation from full-precision teachers, training quantized models to mimic teacher outputs. \textbf{EfficientQAT} reduces QAT cost through progressive quantization, starting with high precision and gradually reducing bit-widths during training.
+
+\textbf{BitNet} and \textbf{BiLLM} explore 1-bit weight quantization with QAT, representing weights as $\{-1, +1\}$. \textbf{PB-LLM} (Partially Binarized LLM) applies 1-bit quantization selectively, binarizing only low-variance weight blocks.
+
+\paragraph{Parameter-Efficient QAT}
+
+\textbf{QLoRA} \cite{dettmers2023qlora} combines NF4 quantization with Low-Rank Adaptation (LoRA), training low-rank adapters on top of frozen quantized weights. This enables fine-tuning 65B models on single GPUs by limiting trainable parameters to <1\% of total model size.
+
+\textbf{QA-LoRA} extends this with quantization-aware LoRA initialization, optimizing adapter ranks and placement based on quantization sensitivity. \textbf{LoftQ} iteratively refines LoRA decomposition and quantization parameters jointly. \textbf{PRILoRA} introduces precision-incremental LoRA, gradually reducing precision during adaptation. \textbf{IR-QLoRA} combines importance reweighting with QLoRA for improved preservation of critical capabilities.
+
+\textbf{PEQA} (Parameter-Efficient Quantization Adaptation) applies adapter modules specifically at quantization-sensitive layers, concentrating trainable parameters where they most impact quality recovery.
+
+\subsection{Specialized Domains and Formats}
+
+\paragraph{Code-Specific Quantization}
+
+\textbf{EETQ} (Efficient Embedding and Tokenizer Quantization) addresses quantization for code models, where exact token matching is critical. \textbf{MoFQ} (Mode-Focused Quantization) recognizes that code token distributions are multimodal and designs quantization schemes respecting mode boundaries.
+
+\paragraph{Tensor Format Innovations}
+
+\textbf{GGUF} formats (including \textbf{GGUF-Q} and \textbf{GGUF-IQ}) provide portable quantized model representations supporting mixed precision and efficient memory-mapped inference. These formats enable deployment across diverse hardware without recompilation.
+
+\textbf{torchao} and \textbf{Quanto} provide PyTorch-native quantization APIs, integrating seamlessly with existing training pipelines. \textbf{QServe} offers optimized serving infrastructure for quantized models with dynamic batching and request scheduling.
+
+\subsection{Emerging Directions}
+
+Recent work explores frontiers including:
+
+\textbf{Ultra-Low Precision}: \textbf{INT2.1}, \textbf{ZeroQuant-4+2}, and \textbf{VPTQ} (Variable Precision Tensor Quantization) push toward sub-2-bit quantization through aggressive outlier handling and specialized data types.
+
+\textbf{Learnable Quantization Functions}: \textbf{SGD Weight Rounding}, \textbf{MagR} (Magnitude-Aware Rounding), and \textbf{FlexRound} optimize rounding functions rather than using fixed round-to-nearest.
+
+\textbf{Norm-Based Methods}: \textbf{Norm Tweaking}, \textbf{FrameQuant}, and \textbf{AffineQuant} manipulate layer normalization statistics to create quantization-friendly activation distributions.
+
+\textbf{Distribution Matching}: \textbf{KurTail} matches quantized weight distributions to target kurtosis values, \textbf{DecoupleQ} separates magnitude and sign quantization, \textbf{DuQuant} applies dual-domain quantization in both spatial and frequency domains.
+
+\subsection{Summary and Positioning}
+
+This survey reveals that quantization research has progressed from uniform precision reduction to sophisticated, heterogeneous compression strategies that account for weight salience, activation statistics, hardware constraints, and task-specific requirements. However, systematic comparison across diverse quantization paradigms under controlled conditions remains limited, particularly for RAG applications where context-dependence introduces additional complexity.
+
+Our work fills this gap by evaluating six representative methods spanning orthogonal design principles (NF4, GPTQ, AWQ, QuaRot, HQQ, KVQuant) under unified experimental conditions on standardized hardware (Tesla T4), with particular attention to RAG scenarios underexplored in prior literature. We use standard calibration datasets for all methods requiring calibration (e.g., GPTQ, AWQ), without task-specific or RAG-optimized calibration.

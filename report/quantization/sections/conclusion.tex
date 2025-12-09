@@ -1,0 +1,15 @@
+\section{Conclusion}
+
+This study provides the first comprehensive hardware-aware benchmarking of modern quantization methods on consumer-grade edge hardware. Our key contributions include:
+
+\begin{enumerate}
+\item \textbf{Hardware Compatibility Analysis:} Demonstrating that algorithm-hardware compatibility is the primary determinant of practical performance, with kernel-dependent methods experiencing 10-18× slowdown on Turing GPUs.
+
+\item \textbf{Task-Specific Evaluation:} Establishing that quantization impacts tasks differentially, with mathematical reasoning showing 25\% degradation while knowledge retrieval remains robust.
+
+\item \textbf{Prescriptive Guidelines:} Identifying NF4 as the optimal method for Tesla T4 and similar hardware, achieving 3.6× compression with minimal performance loss and superior hardware compatibility.
+\end{enumerate}
+
+For Turing-generation hardware, NF4 represents the \textbf{only viable quantization method}, achieving stable 12.30 tok/s throughput with reasonable energy consumption (3975 mJ/token). While AWQ offers marginal efficiency gains, NF4's superior task performance and hardware stability make it the recommended choice for general-purpose edge deployment.
+
+\textbf{Future Work:} Investigating hybrid precision strategies where critical layers (attention heads for reasoning tasks) retain higher precision while feedforward networks are aggressively quantized may resolve the mathematical reasoning degradation observed in our study.
