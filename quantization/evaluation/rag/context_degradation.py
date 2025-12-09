@@ -2,24 +2,19 @@
 Context Degradation Benchmark
 
 Measures accuracy degradation as context length increases in quantized models.
-
-FIXED WEAKNESSES:
-- Tests answer at different positions (start/middle/end) to isolate length vs position effects
-- Uses statistical significance for cliff detection instead of arbitrary threshold
-- Tracks both F1 and exact match
-- Reports effect sizes and confidence intervals
 """
 
 import random
 import numpy as np
 import torch
 import gc
+import time
 from typing import Dict, List, Tuple, Optional
 from datasets import load_dataset
 from scipy import stats
 import re
 
-from models.model_interface import ModelInterface, GenerationConfig
+from model_interface import ModelInterface, GenerationConfig
 
 
 def compute_f1(prediction: str, ground_truth: str) -> float:
@@ -64,17 +59,6 @@ class ContextDegradationBenchmark:
         context_tolerance: float = 0.05,
         random_seed: int = 42
     ):
-        """
-        Initialize context degradation benchmark.
-        
-        Args:
-            model: Model interface instance
-            context_lengths: List of context lengths to test (in tokens)
-            samples_per_length: Number of samples per length
-            answer_positions: Positions to test ["start", "middle", "end", "random"]
-            context_tolerance: Tolerance for context length
-            random_seed: Random seed for reproducibility
-        """
         self.model = model
         self.context_lengths = sorted(context_lengths or [512, 1024, 2048, 4096])
         self.samples_per_length = samples_per_length
@@ -277,6 +261,8 @@ class ContextDegradationBenchmark:
         min_length = int(context_length * (1 - self.context_tolerance))
         max_length = int(context_length * (1 + self.context_tolerance))
         
+        start_time = time.time()
+        
         while total < self.samples_per_length and attempted < len(nq_dataset):
             sample = nq_dataset[attempted]
             attempted += 1
@@ -329,6 +315,17 @@ class ContextDegradationBenchmark:
                 f1_scores.append(f1)
                 
                 total += 1
+                
+                if total % 10 == 0:
+                    elapsed = time.time() - start_time
+                    avg_time = elapsed / total
+                    remaining = (self.samples_per_length - total) * avg_time
+                    current_em = correct_em / total
+                    current_f1 = np.mean(f1_scores)
+                    
+                    print(f"    [{total}/{self.samples_per_length}] "
+                          f"EM={current_em:.3f} F1={current_f1:.3f} "
+                          f"ETA={remaining/60:.1f}min")
                 
                 del output, context_tokens
                 gc.collect()
@@ -436,7 +433,7 @@ class ContextDegradationBenchmark:
                 se = result['f1_std'] / np.sqrt(result['total']) if result['total'] > 0 else 0.0
                 std_errors.append(se)
                 
-                print(f"    EM: {result['accuracy_em']:.3f}, F1: {result['accuracy_f1']:.3f}")
+                print(f"    Final: EM={result['accuracy_em']:.3f}, F1={result['accuracy_f1']:.3f}")
             
             results_by_length_and_position[position] = {
                 "results_by_length": results_by_length,

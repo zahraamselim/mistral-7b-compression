@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, Optional
 from datetime import datetime
 
-from models.model_interface import ModelInterface
+from model_interface import ModelInterface
 from rag.attention_preservation import AttentionPreservationBenchmark
 from rag.context_degradation import ContextDegradationBenchmark
 from rag.attention_drift import AttentionDriftBenchmark

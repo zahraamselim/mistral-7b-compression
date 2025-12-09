@@ -13,7 +13,7 @@ from contextlib import contextmanager
 import torch
 import numpy as np
 
-from models.model_interface import ModelInterface, GenerationConfig
+from model_interface import ModelInterface, GenerationConfig
 
 logger = logging.getLogger(__name__)
 

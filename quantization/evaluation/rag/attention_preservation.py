@@ -3,24 +3,19 @@ Attention Preservation Benchmark
 
 Measures whether quantized models preserve attention to relevant documents in 
 multi-document retrieval scenarios.
-
-FIXED WEAKNESSES:
-- Added answer accuracy tracking (exact match + F1 score)
-- Correlates attention metrics with answer quality
-- Tests multiple aggregation strategies
-- Distinguishes correct-with-attention vs correct-without-attention
 """
 
 import random
 import numpy as np
 import torch
 import gc
+import time
 from typing import Dict, List, Tuple, Optional
 from datasets import load_dataset
 from rank_bm25 import BM25Okapi
 import re
 
-from models.model_interface import ModelInterface, GenerationConfig
+from model_interface import ModelInterface, GenerationConfig
 
 
 def compute_f1(prediction: str, ground_truth: str) -> float:
@@ -77,18 +72,6 @@ class AttentionPreservationBenchmark:
         test_aggregation_strategies: bool = False,
         random_seed: int = 42
     ):
-        """
-        Initialize attention preservation benchmark.
-        
-        Args:
-            model: Model interface instance
-            num_samples: Number of test samples
-            num_documents: Number of documents per test (1 relevant + rest distractors)
-            max_doc_tokens: Maximum tokens per document
-            layers_to_analyze: Which layers to analyze (None = middle 50%)
-            test_aggregation_strategies: Test multiple aggregation methods
-            random_seed: Random seed for reproducibility
-        """
         self.model = model
         self.num_samples = num_samples
         self.num_documents = num_documents
@@ -293,19 +276,7 @@ class AttentionPreservationBenchmark:
         num_generated: int,
         aggregation_strategy: str = "middle_50"
     ) -> np.ndarray:
-        """
-        Aggregate attention weights to document level.
-        
-        Args:
-            attentions: Tuple of attention tensors from FINAL generation step
-            input_ids: Input token IDs [1, seq_len]
-            doc_marker_ids: Token IDs that mark document boundaries
-            num_generated: Number of generated tokens
-            aggregation_strategy: "middle_50", "all_layers", "last_layer"
-            
-        Returns:
-            Array of per-document attention scores [num_docs]
-        """
+        """Aggregate attention weights to document level."""
         doc_spans = self._get_document_token_spans(input_ids, doc_marker_ids)
         
         model_info = self.model.get_model_info()
@@ -432,6 +403,9 @@ class AttentionPreservationBenchmark:
         
         successful = 0
         attempted = 0
+        start_time = time.time()
+        
+        print(f"\nStarting evaluation loop (target: {self.num_samples} samples)...")
         
         while successful < self.num_samples and attempted < len(nq_dataset):
             sample = nq_dataset[attempted]
@@ -475,8 +449,12 @@ class AttentionPreservationBenchmark:
             )
             
             try:
+                sample_start = time.time()
+                
                 inputs = self.model.encode(prompt, max_length=2048)
                 output = self.model.generate(prompt, config, return_attentions=True)
+                
+                sample_time = time.time() - sample_start
                 
                 generated_text = output.generated_text
                 
@@ -542,6 +520,19 @@ class AttentionPreservationBenchmark:
                                     aggregation_results[strategy]["rank"].append(rank_alt)
                         
                         successful += 1
+                        
+                        if successful % 10 == 0:
+                            elapsed = time.time() - start_time
+                            avg_time = elapsed / successful
+                            remaining = (self.num_samples - successful) * avg_time
+                            current_precision = np.mean(precision_at_1)
+                            current_f1 = np.mean(f1_scores)
+                            
+                            print(f"[{successful}/{self.num_samples}] "
+                                  f"Prec@1={current_precision:.3f} F1={current_f1:.3f} "
+                                  f"Time={sample_time:.1f}s "
+                                  f"ETA={remaining/60:.1f}min "
+                                  f"(Attempted {attempted})")
                 
                 del inputs, output
                 gc.collect()
@@ -550,17 +541,17 @@ class AttentionPreservationBenchmark:
                 
             except RuntimeError as e:
                 if "out of memory" in str(e):
+                    print(f"[{successful}/{self.num_samples}] OOM at attempt {attempted}, clearing memory...")
                     gc.collect()
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
                     continue
                 else:
                     continue
-            except Exception:
+            except Exception as e:
+                if successful % 10 == 0:
+                    print(f"[{successful}/{self.num_samples}] Error at attempt {attempted}: {type(e).__name__}")
                 continue
-            
-            if successful % 50 == 0 and successful > 0:
-                print(f"Progress: {successful}/{self.num_samples}")
         
         if len(precision_at_1) == 0:
             raise ValueError("No successful evaluations completed")
@@ -642,10 +633,12 @@ class AttentionPreservationBenchmark:
                 for strategy, data in aggregation_results.items()
             }
         
+        total_time = time.time() - start_time
+        print(f"\nCompleted in {total_time/60:.1f} minutes")
         print(f"Precision@1: {precision_mean:.3f} [{precision_ci[0]:.3f}, {precision_ci[1]:.3f}]")
         print(f"Mean rank: {rank_mean:.2f}, Gini: {gini_mean:.3f}")
         print(f"Answer quality: EM={em_mean:.3f}, F1={f1_mean:.3f}")
         print(f"Attention-quality correlation: r={attention_quality_correlation.get('precision_vs_f1_pearson_r', 0):.3f}, p={attention_quality_correlation.get('precision_vs_f1_pearson_p', 1):.3f}")
-        print(f"Success: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
+        print(f"Success rate: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
         
         return results

@@ -11,7 +11,7 @@ from typing import List, Dict
 import torch
 import numpy as np
 
-from models.model_interface import ModelInterface, GenerationConfig
+from model_interface import ModelInterface, GenerationConfig
 from efficiency.latency import inference_mode
 
 logger = logging.getLogger(__name__)

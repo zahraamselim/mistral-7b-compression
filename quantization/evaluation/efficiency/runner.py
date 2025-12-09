@@ -9,7 +9,7 @@ from typing import List, Optional, Dict, Any
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
-from models.model_interface import ModelInterface
+from model_interface import ModelInterface
 from efficiency.latency import measure_latency, measure_ttft, measure_prefill_decode
 from efficiency.throughput import measure_throughput
 from efficiency.batch import measure_batch_latency, find_optimal_batch_size

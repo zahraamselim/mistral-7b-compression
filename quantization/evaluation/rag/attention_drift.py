@@ -2,24 +2,19 @@
 Attention Drift Benchmark
 
 Measures attention stability during generation in quantized models.
-
-FIXED WEAKNESSES:
-- Validates that drift correlates with answer quality
-- Tracks drift separately for correct vs incorrect answers
-- Tests if drift magnitude predicts errors
-- Provides justification for when drift is good vs bad
 """
 
 import random
 import numpy as np
 import torch
 import gc
+import time
 from typing import Dict, List, Tuple, Optional
 from collections import defaultdict
 from datasets import load_dataset
 import re
 
-from models.model_interface import ModelInterface, GenerationConfig
+from model_interface import ModelInterface, GenerationConfig
 
 
 def compute_f1(prediction: str, ground_truth: str) -> float:
@@ -63,17 +58,6 @@ class AttentionDriftBenchmark:
         layers_to_analyze: Optional[List[int]] = None,
         random_seed: int = 42
     ):
-        """
-        Initialize attention drift benchmark.
-        
-        Args:
-            model: Model interface instance
-            num_samples: Number of test samples
-            generation_positions: Token positions to measure attention
-            num_documents: Number of documents (1 relevant + rest distractors)
-            layers_to_analyze: Which layers to analyze (None = middle 50%)
-            random_seed: Random seed for reproducibility
-        """
         self.model = model
         self.num_samples = num_samples
         self.generation_positions = sorted(generation_positions or [1, 5, 10, 20, 40])
@@ -325,6 +309,9 @@ class AttentionDriftBenchmark:
         
         successful = 0
         attempted = 0
+        start_time = time.time()
+        
+        print(f"\nStarting evaluation loop (target: {self.num_samples} samples)...")
         
         while successful < self.num_samples and attempted < len(queries):
             sample = queries[attempted]
@@ -365,8 +352,12 @@ class AttentionDriftBenchmark:
             prompt = f"Question: {query}\n\n{docs_text}\n\nAnswer:"
             
             try:
+                sample_start = time.time()
+                
                 inputs = self.model.encode(prompt, max_length=2048)
                 output = self.model.generate(prompt, config, return_attentions=True)
+                
+                sample_time = time.time() - sample_start
                 
                 generated_text = output.generated_text
                 f1 = max([compute_f1(generated_text, ans) for ans in answers])
@@ -434,6 +425,19 @@ class AttentionDriftBenchmark:
                         drift_when_wrong.append(mean_drift)
                     
                     successful += 1
+                    
+                    if successful % 10 == 0:
+                        elapsed = time.time() - start_time
+                        avg_time = elapsed / successful
+                        remaining = (self.num_samples - successful) * avg_time
+                        current_drift = np.mean(drift_scores)
+                        current_f1 = np.mean(f1_scores)
+                        
+                        print(f"[{successful}/{self.num_samples}] "
+                              f"Drift={current_drift:.4f} F1={current_f1:.3f} "
+                              f"Time={sample_time:.1f}s "
+                              f"ETA={remaining/60:.1f}min "
+                              f"(Attempted {attempted})")
                 
                 del inputs, output, attention_sequence
                 gc.collect()
@@ -442,17 +446,17 @@ class AttentionDriftBenchmark:
                 
             except RuntimeError as e:
                 if "out of memory" in str(e):
+                    print(f"[{successful}/{self.num_samples}] OOM at attempt {attempted}, clearing memory...")
                     gc.collect()
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
                     continue
                 else:
                     continue
-            except Exception:
+            except Exception as e:
+                if successful % 10 == 0:
+                    print(f"[{successful}/{self.num_samples}] Error at attempt {attempted}: {type(e).__name__}")
                 continue
-            
-            if successful % 30 == 0 and successful > 0:
-                print(f"Progress: {successful}/{self.num_samples}")
         
         if len(drift_scores) == 0:
             raise ValueError("No successful evaluations completed")
@@ -531,9 +535,11 @@ class AttentionDriftBenchmark:
             }
         }
         
+        total_time = time.time() - start_time
+        print(f"\nCompleted in {total_time/60:.1f} minutes")
         print(f"Mean drift: {mean_drift:.4f} [{mean_drift_ci[0]:.4f}, {mean_drift_ci[1]:.4f}]")
         print(f"Drift when correct: {drift_by_correctness['drift_when_correct_mean']:.4f}, when wrong: {drift_by_correctness['drift_when_wrong_mean']:.4f}")
         print(f"Drift-quality correlation: r={drift_quality_correlation.get('drift_vs_f1_pearson_r', 0):.3f}, p={drift_quality_correlation.get('drift_vs_f1_pearson_p', 1):.3f}")
-        print(f"Success: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
+        print(f"Success rate: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
         
         return results

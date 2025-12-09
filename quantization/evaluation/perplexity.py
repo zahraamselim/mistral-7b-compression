@@ -1,7 +1,7 @@
 """
 Perplexity measurement utilities.
 
-Measures perplexity on standard text datasets (WikiText, C4, etc.).
+Standalone module for measuring perplexity on standard text datasets (WikiText, C4, etc.).
 """
 
 import logging
@@ -10,26 +10,20 @@ import torch
 from typing import Dict, Optional
 from datasets import load_dataset
 
-from models.model_interface import ModelInterface
-
 logger = logging.getLogger(__name__)
 
 
 def measure_perplexity(
-    model: ModelInterface,
+    model,
     dataset_name: str = "wikitext",
     dataset_config: str = "wikitext-2-raw-v1",
     split: str = "test",
     max_samples: int = 100,
     max_length: int = 512,
-    min_text_length: int = 100,
-    stride: int = 512
+    min_text_length: int = 100
 ) -> Dict[str, float]:
     """
     Calculate perplexity on a text dataset.
-    
-    Uses sliding window approach for long texts to accurately
-    measure perplexity across the entire evaluation set.
     
     Args:
         model: ModelInterface instance
@@ -39,7 +33,6 @@ def measure_perplexity(
         max_samples: Maximum number of samples to evaluate
         max_length: Maximum sequence length
         min_text_length: Minimum text length to include
-        stride: Stride for sliding window (set equal to max_length for no overlap)
         
     Returns:
         Dictionary with perplexity and metadata:
@@ -55,7 +48,6 @@ def measure_perplexity(
     logger.info(f"  Max samples: {max_samples}")
     logger.info(f"  Max length: {max_length}")
     
-    # Load dataset
     try:
         dataset = load_dataset(dataset_name, dataset_config, split=split)
         logger.info(f"Loaded {len(dataset)} samples")
@@ -63,7 +55,6 @@ def measure_perplexity(
         logger.error(f"Failed to load dataset: {e}")
         raise
     
-    # Filter short texts
     dataset = dataset.filter(lambda x: len(x.get("text", "")) > min_text_length)
     logger.info(f"After filtering: {len(dataset)} samples")
     
@@ -83,17 +74,14 @@ def measure_perplexity(
             continue
         
         try:
-            # Encode and get actual token count
             inputs = model.encode(text, max_length=max_length)
             
-            # Calculate loss directly
             with torch.no_grad():
                 outputs = model.model(**inputs, labels=inputs["input_ids"])
                 loss = outputs.loss.item()
             
-            # Get actual number of tokens (excluding padding)
             attention_mask = inputs.get('attention_mask', torch.ones_like(inputs['input_ids']))
-            num_tokens = attention_mask.sum().item() - 1  # Exclude first token
+            num_tokens = attention_mask.sum().item() - 1
             
             if num_tokens > 0:
                 total_loss += loss * num_tokens
@@ -133,57 +121,6 @@ def measure_perplexity(
     logger.info(f"  Total tokens: {total_tokens:,}")
     
     return results
-
-
-def measure_perplexity_sliding_window(
-    model: ModelInterface,
-    text: str,
-    max_length: int = 512,
-    stride: int = 256
-) -> float:
-    """
-    Calculate perplexity using sliding window for long texts.
-    
-    This provides more accurate perplexity for texts longer than max_length
-    by evaluating overlapping windows.
-    
-    Args:
-        model: ModelInterface instance
-        text: Input text
-        max_length: Maximum sequence length per window
-        stride: Stride between windows
-        
-    Returns:
-        Perplexity score
-    """
-    encodings = model.encode(text, max_length=None)
-    
-    seq_len = encodings['input_ids'].size(1)
-    
-    nlls = []
-    prev_end_loc = 0
-    
-    for begin_loc in range(0, seq_len, stride):
-        end_loc = min(begin_loc + max_length, seq_len)
-        trg_len = end_loc - prev_end_loc
-        
-        input_ids = encodings['input_ids'][:, begin_loc:end_loc]
-        target_ids = input_ids.clone()
-        target_ids[:, :-trg_len] = -100
-        
-        with torch.no_grad():
-            outputs = model.model(input_ids, labels=target_ids)
-            neg_log_likelihood = outputs.loss * trg_len
-        
-        nlls.append(neg_log_likelihood)
-        
-        prev_end_loc = end_loc
-        if end_loc == seq_len:
-            break
-    
-    ppl = torch.exp(torch.stack(nlls).sum() / end_loc)
-    
-    return float(ppl)
 
 
 def compare_perplexity(

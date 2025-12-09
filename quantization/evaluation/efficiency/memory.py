@@ -9,7 +9,7 @@ from typing import Dict, Tuple, Optional
 
 import torch
 
-from models.model_interface import ModelInterface
+from model_interface import ModelInterface
 
 logger = logging.getLogger(__name__)
 

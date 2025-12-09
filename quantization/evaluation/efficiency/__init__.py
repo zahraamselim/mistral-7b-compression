@@ -1,9 +1,5 @@
 """
 Efficiency evaluation module.
-
-Provides comprehensive efficiency benchmarking for language models including
-latency, throughput, memory, energy, and batch inference measurements.
-Optimized for quantization evaluation, RAG systems, and edge deployment.
 """
 
 from .runner import EfficiencyBenchmark, EfficiencyResults
