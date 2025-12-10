@@ -1,0 +1,294 @@
+{
+  "experiment_info": {
+    "base_model": "mistralai/Mistral-7B-v0.1",
+    "focus": "RAG performance evaluation on quantized models",
+    "primary_metrics": [
+      "attention_preservation",
+      "context_degradation",
+      "attention_drift",
+      "reading_comprehension_accuracy",
+      "model_efficiency"
+    ],
+    "evaluation_components": [
+      "time_performance",
+      "space_performance",
+      "perplexity",
+      "lm_eval_harness",
+      "custom_rag_benchmarks"
+    ]
+  },
+  "performance_benchmarks": {
+    "time_performance": {
+      "description": "Measures latency, TTFT, and throughput",
+      "parameters": {
+        "num_warmup": 3,
+        "num_runs": 10,
+        "max_new_tokens": 128
+      },
+      "metrics": [
+        "latency_ms_per_token",
+        "ttft_ms",
+        "throughput_tokens_per_sec"
+      ],
+      "estimated_time_min": 3
+    },
+    "space_performance": {
+      "description": "Measures model size, memory usage, and efficiency",
+      "parameters": {
+        "batch_size": 1,
+        "sequence_length": 2048,
+        "reset_stats": true
+      },
+      "metrics": [
+        "model_size_gb",
+        "peak_memory_mb",
+        "bits_per_param",
+        "memory_efficiency",
+        "kv_cache_size_mb"
+      ],
+      "estimated_time_min": 1
+    },
+    "perplexity": {
+      "description": "Language modeling capability on standard text",
+      "parameters": {
+        "dataset_name": "wikitext",
+        "dataset_config": "wikitext-2-raw-v1",
+        "split": "test",
+        "max_samples": 100,
+        "max_length": 512
+      },
+      "metrics": ["perplexity", "loss"],
+      "estimated_time_min": 1
+    }
+  },
+  "lm_eval_tasks": {
+    "reasoning": {
+      "description": "Baseline reasoning capabilities",
+      "tasks": [
+        {
+          "name": "hellaswag",
+          "num_fewshot": 0,
+          "description": "Commonsense reasoning"
+        },
+        {
+          "name": "winogrande",
+          "num_fewshot": 0,
+          "description": "Pronoun resolution"
+        },
+        {
+          "name": "piqa",
+          "num_fewshot": 0,
+          "description": "Physical commonsense"
+        },
+        {
+          "name": "arc_easy",
+          "num_fewshot": 0,
+          "description": "Science questions - easy"
+        },
+        {
+          "name": "arc_challenge",
+          "num_fewshot": 0,
+          "description": "Science questions - hard"
+        }
+      ],
+      "weight": 0.3,
+      "estimated_time_min": 15
+    },
+    "rag_core": {
+      "description": "Core RAG tasks - reading comprehension with context",
+      "tasks": [
+        {
+          "name": "squad",
+          "num_fewshot": 0,
+          "description": "Reading comprehension on Wikipedia"
+        },
+        {
+          "name": "squad_v2",
+          "num_fewshot": 0,
+          "description": "SQuAD with unanswerable questions"
+        },
+        {
+          "name": "triviaqa",
+          "num_fewshot": 0,
+          "description": "Trivia with evidence documents"
+        }
+      ],
+      "weight": 1.0,
+      "estimated_time_min": 20
+    },
+    "rag_reasoning": {
+      "description": "RAG with complex reasoning over context",
+      "tasks": [
+        {
+          "name": "drop",
+          "num_fewshot": 3,
+          "description": "Discrete reasoning over passages"
+        },
+        {
+          "name": "race",
+          "num_fewshot": 0,
+          "description": "Reading comprehension from exams"
+        }
+      ],
+      "weight": 0.8,
+      "estimated_time_min": 12
+    },
+    "rag_verification": {
+      "description": "Fact verification from passages",
+      "tasks": [
+        {
+          "name": "boolq",
+          "num_fewshot": 0,
+          "description": "Yes/no questions from passages"
+        }
+      ],
+      "weight": 0.6,
+      "estimated_time_min": 5
+    }
+  },
+  "custom_rag_benchmarks": {
+    "attention_preservation": {
+      "description": "Measures if attention to relevant documents is preserved in multi-document retrieval",
+      "implementation": "AttentionPreservationBenchmark",
+      "speed": "fast",
+      "parameters": {
+        "num_samples": 50,
+        "num_documents": 5
+      },
+      "metrics": [
+        "attention_precision_at_1",
+        "attention_rank_mean",
+        "attention_rank_median",
+        "attention_concentration_gini",
+        "exact_match_accuracy",
+        "f1_score_mean",
+        "attention_quality_correlation"
+      ],
+      "methodology": {
+        "dataset": "Natural Questions with Wikipedia",
+        "distractor_selection": "BM25 semantic similarity",
+        "layers_analyzed": "middle_50_percent",
+        "attention_aggregation": "final_step_document_level"
+      },
+      "estimated_time_min": 15
+    },
+    "context_degradation": {
+      "description": "Measures accuracy degradation as context length increases",
+      "implementation": "ContextDegradationBenchmark",
+      "speed": "fast",
+      "parameters": {
+        "samples_per_length": 30,
+        "context_lengths": [512, 2048, 4096],
+        "answer_positions": ["middle"]
+      },
+      "metrics": [
+        "accuracy_em_by_length",
+        "accuracy_f1_by_length",
+        "degradation_slope_per_1k_tokens",
+        "r_squared",
+        "cliff_point_length",
+        "position_effects"
+      ],
+      "methodology": {
+        "dataset": "Natural Questions with Wikipedia",
+        "context_construction": "token_level_pretokenized",
+        "answer_embedding": "natural_passages",
+        "cliff_detection": "statistical_significance_with_effect_size"
+      },
+      "estimated_time_min": 20
+    },
+    "attention_drift": {
+      "description": "Measures attention stability during generation",
+      "implementation": "AttentionDriftBenchmark",
+      "speed": "fast",
+      "parameters": {
+        "num_samples": 50,
+        "generation_positions": [1, 5, 20],
+        "num_documents": 5
+      },
+      "metrics": [
+        "mean_drift",
+        "max_drift_mean",
+        "drift_from_relevant_document",
+        "drift_by_generation_position",
+        "drift_quality_correlation",
+        "drift_when_correct_vs_wrong"
+      ],
+      "methodology": {
+        "dataset": "Natural Questions with Wikipedia",
+        "drift_measurement": "L1_distance_document_level",
+        "layers_analyzed": "middle_50_percent",
+        "attention_aggregation": "per_step_no_double_counting"
+      },
+      "estimated_time_min": 20
+    }
+  },
+  "evaluation_protocol": {
+    "execution_order": [
+      "time_performance",
+      "space_performance",
+      "perplexity",
+      "lm_eval_reasoning",
+      "lm_eval_rag_core",
+      "lm_eval_rag_reasoning",
+      "lm_eval_rag_verification",
+      "attention_preservation",
+      "context_degradation",
+      "attention_drift"
+    ],
+    "comparison_metrics": {
+      "primary": [
+        "attention_precision_at_1",
+        "context_degradation_slope",
+        "attention_drift_mean",
+        "exact_match_accuracy",
+        "f1_score"
+      ],
+      "secondary": [
+        "perplexity",
+        "latency_ms_per_token",
+        "throughput_tokens_per_sec",
+        "model_size_gb",
+        "peak_memory_mb"
+      ],
+      "efficiency_metrics": [
+        "memory_efficiency",
+        "bits_per_param",
+        "compression_ratio"
+      ]
+    },
+    "degradation_thresholds": {
+      "acceptable": 0.05,
+      "concerning": 0.1,
+      "critical": 0.15
+    },
+    "estimated_total_time_min": 60
+  },
+  "datasets": {
+    "natural_questions": {
+      "source": "nq_open",
+      "split": "validation",
+      "used_by": [
+        "attention_preservation",
+        "context_degradation",
+        "attention_drift"
+      ]
+    },
+    "wikipedia": {
+      "source": "wikimedia/wikipedia",
+      "config": "20231101.en",
+      "fallback": "wikipedia/20220301.simple",
+      "used_by": [
+        "attention_preservation",
+        "context_degradation",
+        "attention_drift"
+      ]
+    },
+    "wikitext": {
+      "source": "wikitext",
+      "config": "wikitext-2-raw-v1",
+      "split": "test",
+      "used_by": ["perplexity"]
+    }
+  }
+}
