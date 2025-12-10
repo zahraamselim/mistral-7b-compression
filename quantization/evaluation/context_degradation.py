@@ -1,12 +1,14 @@
 """
-Context Degradation Benchmark
+Context Degradation Benchmark - OPTIMIZED
 
 Measures accuracy degradation as context length increases in quantized models.
 
-Speed Levels:
-  - FAST: 30 samples/length, 3 lengths, middle only (~15-20 min)
-  - STANDARD: 50 samples/length, 3 lengths, middle only (~25-35 min)
-  - FULL: 100 samples/length, 4 lengths, all positions (~90-120 min)
+Optimizations:
+- Pre-tokenize Wikipedia chunks once
+- Cache tokenized passages
+- Faster context building with pre-tokenized chunks
+- Batch compatible operations
+- Progress indicators every 5 samples
 """
 
 import random
@@ -111,7 +113,7 @@ class ContextDegradationBenchmark:
         print("Loading Natural Questions...")
         nq_dataset = load_dataset("nq_open", split="validation")
         
-        print("Loading and pre-tokenizing Wikipedia...")
+        print("Loading and pre-tokenizing Wikipedia (this takes ~2-3 min)...")
         try:
             wiki_dataset = load_dataset(
                 "wikimedia/wikipedia",
@@ -121,13 +123,17 @@ class ContextDegradationBenchmark:
             )
             
             tokenized_chunks = []
-            for i, sample in enumerate(wiki_dataset):
-                if i >= 1000:
+            doc_count = 0
+            
+            for sample in wiki_dataset:
+                if doc_count >= 500:
                     break
                 
                 text = sample.get('text', '')
                 if len(text) < 200:
                     continue
+                
+                doc_count += 1
                 
                 sentences = re.split(r'[.!?]+\s+', text)
                 
@@ -150,17 +156,20 @@ class ContextDegradationBenchmark:
                     except Exception:
                         continue
                     
-                    if len(tokenized_chunks) >= 5000:
+                    if len(tokenized_chunks) >= 3000:
                         break
                 
-                if len(tokenized_chunks) >= 5000:
+                if len(tokenized_chunks) >= 3000:
                     break
+                
+                if doc_count % 100 == 0:
+                    print(f"  Processed {doc_count} documents, {len(tokenized_chunks)} chunks...")
             
         except Exception as e:
             print(f"Failed to load wikimedia/wikipedia: {e}")
             print("Falling back to simple-wikipedia...")
             
-            wiki_dataset = load_dataset("wikipedia", "20220301.simple", split="train[:1000]")
+            wiki_dataset = load_dataset("wikipedia", "20220301.simple", split="train[:500]")
             tokenized_chunks = []
             
             for sample in wiki_dataset:
@@ -349,7 +358,7 @@ class ContextDegradationBenchmark:
                 
                 total += 1
                 
-                if total % 10 == 0:
+                if total % 5 == 0:
                     elapsed = time.time() - start_time
                     avg_time = elapsed / total
                     remaining = (self.samples_per_length - total) * avg_time
@@ -358,7 +367,8 @@ class ContextDegradationBenchmark:
                     
                     print(f"    [{total}/{self.samples_per_length}] "
                           f"EM={current_em:.3f} F1={current_f1:.3f} "
-                          f"ETA={remaining/60:.1f}min")
+                          f"AvgTime={avg_time:.1f}s ETA={remaining/60:.1f}min "
+                          f"(attempted {attempted})")
                 
                 del output, context_tokens
                 gc.collect()
@@ -527,7 +537,8 @@ class ContextDegradationBenchmark:
                 "context_construction": "token_level_pretokenized",
                 "answer_positions_tested": self.answer_positions,
                 "cliff_detection": "statistical_significance_with_effect_size",
-                "metrics": ["exact_match", "f1_score"]
+                "metrics": ["exact_match", "f1_score"],
+                "optimizations": "pre_tokenized_chunks_cached"
             }
         }
         

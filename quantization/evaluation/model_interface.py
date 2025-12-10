@@ -6,7 +6,7 @@ across different model implementations and quantization methods.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 import torch
 from dataclasses import dataclass
 

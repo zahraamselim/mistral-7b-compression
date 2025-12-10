@@ -1,12 +1,13 @@
 """
-Attention Drift Benchmark
+Attention Drift Benchmark - OPTIMIZED
 
 Measures attention stability during generation in quantized models.
 
-Speed Levels:
-  - FAST: 50 samples, 3 positions, 5 docs (~15-20 min)
-  - STANDARD: 100 samples, 3 positions, 5 docs (~30-40 min)
-  - FULL: 150 samples, 5 positions, 5 docs (~60-80 min)
+Optimizations:
+- Pre-load and cache datasets with indexing
+- Faster passage extraction
+- Progress every 5 samples
+- Better memory management
 """
 
 import random
@@ -102,13 +103,19 @@ class AttentionDriftBenchmark:
         random.seed(random_seed)
         np.random.seed(random_seed)
         torch.manual_seed(random_seed)
+        
+        self.queries = None
+        self.passages = None
+        self.passage_index = None
     
     def _load_datasets(self) -> Tuple[any, List[Dict[str, str]]]:
         """Load Natural Questions dataset with Wikipedia corpus."""
-        print("Loading Natural Questions...")
+        print("Loading datasets...")
+        print("  Loading Natural Questions...")
         queries = load_dataset("nq_open", split="validation")
+        print(f"    Loaded {len(queries)} questions")
         
-        print("Loading Wikipedia corpus...")
+        print("  Loading Wikipedia corpus...")
         try:
             wiki_dataset = load_dataset(
                 "wikimedia/wikipedia",
@@ -119,7 +126,7 @@ class AttentionDriftBenchmark:
             
             passages = []
             for i, sample in enumerate(wiki_dataset):
-                if i >= 800:
+                if i >= 500:
                     break
                 
                 text = sample.get('text', '')
@@ -127,17 +134,21 @@ class AttentionDriftBenchmark:
                 if len(text) > 200:
                     passages.append({
                         'text': text,
-                        'title': title
+                        'title': title,
+                        'text_lower': text.lower()
                     })
+                
+                if i % 100 == 0 and i > 0:
+                    print(f"    Loaded {i} documents...")
             
             if len(passages) < 50:
                 raise RuntimeError("Insufficient Wikipedia passages loaded")
             
         except Exception as e:
-            print(f"Failed to load wikimedia/wikipedia: {e}")
-            print("Falling back to simple-wikipedia...")
+            print(f"    Failed to load wikimedia: {e}")
+            print("    Loading simple Wikipedia...")
             
-            wiki_dataset = load_dataset("wikipedia", "20220301.simple", split="train[:800]")
+            wiki_dataset = load_dataset("wikipedia", "20220301.simple", split="train[:500]")
             passages = []
             for sample in wiki_dataset:
                 text = sample.get('text', '')
@@ -145,33 +156,64 @@ class AttentionDriftBenchmark:
                 if len(text) > 200:
                     passages.append({
                         'text': text,
-                        'title': title
+                        'title': title,
+                        'text_lower': text.lower()
                     })
         
-        print(f"Loaded {len(queries)} queries and {len(passages)} passages")
-        return queries, passages
+        print(f"    Loaded {len(passages)} passages")
+        
+        # Build answer index
+        print("  Building passage index...")
+        passage_index = defaultdict(list)
+        for idx, passage in enumerate(passages):
+            words = passage['text_lower'].split()[:100]
+            for i in range(len(words) - 2):
+                phrase = ' '.join(words[i:i+3])
+                passage_index[phrase].append(idx)
+        
+        print(f"    Indexed {len(passage_index)} phrases")
+        print("Dataset loading complete!\n")
+        
+        return queries, passages, passage_index
     
-    def _extract_relevant_passage(
+    def _extract_relevant_passage_fast(
         self,
-        answer: str,
-        passages: List[Dict[str, str]]
+        answer: str
     ) -> Optional[str]:
-        """Extract passage that naturally contains the answer."""
+        """Fast passage extraction using index."""
         answer_lower = answer.lower()
         
-        for passage in random.sample(passages, min(80, len(passages))):
-            text = passage['text']
-            if answer_lower in text.lower():
-                sentences = re.split(r'[.!?]+\s+', text)
+        # Try index first
+        words = answer_lower.split()
+        if len(words) >= 3:
+            phrase = ' '.join(words[:3])
+            if phrase in self.passage_index:
+                candidates = self.passage_index[phrase]
+                if candidates:
+                    idx = random.choice(candidates[:10])
+                    passage = self.passages[idx]
+                    return self._extract_context(passage['text'], answer_lower)
+        
+        # Fallback to sampling
+        sample_size = min(150, len(self.passages))
+        for passage in random.sample(self.passages, sample_size):
+            if answer_lower in passage['text_lower']:
+                return self._extract_context(passage['text'], answer_lower)
+        
+        return None
+    
+    def _extract_context(self, text: str, answer_lower: str) -> Optional[str]:
+        """Extract context around answer."""
+        sentences = re.split(r'[.!?]+\s+', text)
+        
+        for i, sent in enumerate(sentences):
+            if answer_lower in sent.lower():
+                start = max(0, i - 1)
+                end = min(len(sentences), i + 2)
+                context = '. '.join(sentences[start:end])
                 
-                for i, sent in enumerate(sentences):
-                    if answer_lower in sent.lower():
-                        start = max(0, i - 1)
-                        end = min(len(sentences), i + 2)
-                        context = '. '.join(sentences[start:end])
-                        
-                        if len(context) > 80:
-                            return context
+                if len(context) > 80:
+                    return context
         
         return None
     
@@ -320,7 +362,7 @@ class AttentionDriftBenchmark:
         """Run attention drift benchmark."""
         print(f"Samples: {self.num_samples}, Positions: {self.generation_positions}, Documents: {self.num_documents}")
         
-        queries, passages = self._load_datasets()
+        self.queries, self.passages, self.passage_index = self._load_datasets()
         
         drift_scores = []
         max_drifts = []
@@ -344,12 +386,14 @@ class AttentionDriftBenchmark:
         
         successful = 0
         attempted = 0
+        skipped = 0
         start_time = time.time()
         
         print(f"\nStarting evaluation loop (target: {self.num_samples} samples)...")
+        print("Progress: [successful/target] (attempted) - metrics")
         
-        while successful < self.num_samples and attempted < len(queries):
-            sample = queries[attempted]
+        while successful < self.num_samples and attempted < len(self.queries):
+            sample = self.queries[attempted]
             attempted += 1
             
             query = sample.get('question', '')
@@ -360,12 +404,13 @@ class AttentionDriftBenchmark:
             
             answer = answers[0]
             
-            relevant_passage = self._extract_relevant_passage(answer, passages)
+            relevant_passage = self._extract_relevant_passage_fast(answer)
             if not relevant_passage:
+                skipped += 1
                 continue
             
             distractor_passages = []
-            for passage in random.sample(passages, min(40, len(passages))):
+            for passage in random.sample(self.passages, min(80, len(self.passages))):
                 text = passage['text'][:300]
                 if (answer.lower() not in text.lower() and 
                     text != relevant_passage and
@@ -373,6 +418,7 @@ class AttentionDriftBenchmark:
                     distractor_passages.append(text)
             
             if len(distractor_passages) < self.num_documents - 1:
+                skipped += 1
                 continue
             
             all_docs = [relevant_passage[:400]] + [d[:400] for d in distractor_passages]
@@ -461,18 +507,17 @@ class AttentionDriftBenchmark:
                     
                     successful += 1
                     
-                    if successful % 10 == 0:
+                    if successful % 5 == 0:
                         elapsed = time.time() - start_time
                         avg_time = elapsed / successful
                         remaining = (self.num_samples - successful) * avg_time
                         current_drift = np.mean(drift_scores)
                         current_f1 = np.mean(f1_scores)
                         
-                        print(f"[{successful}/{self.num_samples}] "
+                        print(f"[{successful}/{self.num_samples}] ({attempted}) - "
                               f"Drift={current_drift:.4f} F1={current_f1:.3f} "
-                              f"Time={sample_time:.1f}s "
-                              f"ETA={remaining/60:.1f}min "
-                              f"(Attempted {attempted})")
+                              f"AvgTime={sample_time:.1f}s ETA={remaining/60:.1f}min "
+                              f"Skip={skipped}")
                 
                 del inputs, output, attention_sequence
                 gc.collect()
@@ -481,7 +526,7 @@ class AttentionDriftBenchmark:
                 
             except RuntimeError as e:
                 if "out of memory" in str(e):
-                    print(f"[{successful}/{self.num_samples}] OOM at attempt {attempted}, clearing memory...")
+                    print(f"[{successful}/{self.num_samples}] OOM, clearing memory...")
                     gc.collect()
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
@@ -490,7 +535,7 @@ class AttentionDriftBenchmark:
                     continue
             except Exception as e:
                 if successful % 10 == 0:
-                    print(f"[{successful}/{self.num_samples}] Error at attempt {attempted}: {type(e).__name__}")
+                    print(f"[{successful}/{self.num_samples}] Error: {type(e).__name__}")
                 continue
         
         if len(drift_scores) == 0:
@@ -561,12 +606,14 @@ class AttentionDriftBenchmark:
             "drift_by_correctness": drift_by_correctness,
             "num_samples": len(drift_scores),
             "samples_attempted": attempted,
+            "samples_skipped": skipped,
             "generation_positions": self.generation_positions,
             "methodology": {
                 "drift_measurement": "document_level_not_token_level",
                 "layers_analyzed": "middle_50_percent" if self.layers_to_analyze is None else self.layers_to_analyze,
                 "attention_aggregation": "per_step_no_double_counting",
-                "answer_quality_measured": True
+                "answer_quality_measured": True,
+                "optimizations": "indexed_passages_cached_data"
             }
         }
         
@@ -574,7 +621,7 @@ class AttentionDriftBenchmark:
         print(f"\nCompleted in {total_time/60:.1f} minutes")
         print(f"Mean drift: {mean_drift:.4f} [{mean_drift_ci[0]:.4f}, {mean_drift_ci[1]:.4f}]")
         print(f"Drift when correct: {drift_by_correctness['drift_when_correct_mean']:.4f}, when wrong: {drift_by_correctness['drift_when_wrong_mean']:.4f}")
-        print(f"Drift-quality correlation: r={drift_quality_correlation.get('drift_vs_f1_pearson_r', 0):.3f}, p={drift_quality_correlation.get('drift_vs_f1_pearson_p', 1):.3f}")
+        print(f"Drift-quality correlation: r={drift_quality_correlation.get('drift_vs_f1_pearson_r', 0):.3f}")
         print(f"Success rate: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
         
         return results

@@ -1,13 +1,15 @@
 """
-Attention Preservation Benchmark
+Attention Preservation Benchmark - OPTIMIZED
 
 Measures whether quantized models preserve attention to relevant documents in 
 multi-document retrieval scenarios.
 
-Speed Levels:
-  - FAST: 50 samples, 5 docs (~10-15 min)
-  - STANDARD: 100 samples, 5 docs (~20-30 min)  
-  - FULL: 300 samples, 10 docs (~60-90 min)
+Optimizations:
+- Pre-load and cache datasets
+- Batch tokenization
+- Pre-compute BM25 index
+- Faster passage matching with indexing
+- Reduced dataset loading overhead
 """
 
 import random
@@ -19,6 +21,7 @@ from typing import Dict, List, Tuple, Optional
 from datasets import load_dataset
 from rank_bm25 import BM25Okapi
 import re
+from collections import defaultdict
 
 from model_interface import ModelInterface, GenerationConfig
 
@@ -53,6 +56,93 @@ def compute_exact_match(prediction: str, ground_truths: List[str]) -> bool:
             return True
     
     return False
+
+
+class DatasetCache:
+    """Cache for pre-loaded and indexed datasets."""
+    
+    def __init__(self):
+        self.nq_dataset = None
+        self.wiki_passages = None
+        self.answer_to_passages = None
+        self.bm25_index = None
+        self.bm25_passages = None
+        
+    def load(self, max_wiki_docs: int = 1000):
+        """Load and index all datasets once."""
+        print("Loading and indexing datasets (one-time setup)...")
+        
+        # Load Natural Questions
+        print("  Loading Natural Questions...")
+        self.nq_dataset = load_dataset("nq_open", split="validation")
+        print(f"    Loaded {len(self.nq_dataset)} questions")
+        
+        # Load Wikipedia
+        print("  Loading Wikipedia corpus...")
+        try:
+            wiki_dataset = load_dataset(
+                "wikimedia/wikipedia",
+                "20231101.en",
+                split="train",
+                streaming=True
+            )
+            
+            self.wiki_passages = []
+            for i, sample in enumerate(wiki_dataset):
+                if i >= max_wiki_docs:
+                    break
+                
+                text = sample.get('text', '')
+                title = sample.get('title', '')
+                if len(text) > 200:
+                    self.wiki_passages.append({
+                        'text': text,
+                        'title': title,
+                        'text_lower': text.lower()
+                    })
+                
+                if i % 200 == 0 and i > 0:
+                    print(f"    Loaded {i} documents...")
+            
+        except Exception as e:
+            print(f"    Failed to load wikimedia: {e}")
+            print("    Loading simple Wikipedia...")
+            
+            wiki_dataset = load_dataset("wikipedia", "20220301.simple", split=f"train[:{max_wiki_docs}]")
+            self.wiki_passages = []
+            for sample in wiki_dataset:
+                text = sample.get('text', '')
+                title = sample.get('title', '')
+                if len(text) > 200:
+                    self.wiki_passages.append({
+                        'text': text,
+                        'title': title,
+                        'text_lower': text.lower()
+                    })
+        
+        print(f"    Loaded {len(self.wiki_passages)} passages")
+        
+        # Build answer index
+        print("  Building answer index...")
+        self.answer_to_passages = defaultdict(list)
+        
+        for idx, passage in enumerate(self.wiki_passages):
+            # Extract key phrases (simple approach: first 100 words)
+            words = passage['text_lower'].split()[:100]
+            for i in range(len(words) - 2):
+                phrase = ' '.join(words[i:i+3])
+                self.answer_to_passages[phrase].append(idx)
+        
+        print(f"    Indexed {len(self.answer_to_passages)} phrases")
+        
+        # Build BM25 index
+        print("  Building BM25 index...")
+        self.bm25_passages = [p['text'][:800] for p in self.wiki_passages]
+        tokenized_corpus = [doc.lower().split()[:100] for doc in self.bm25_passages]
+        self.bm25_index = BM25Okapi(tokenized_corpus)
+        print("    BM25 index built")
+        
+        print("Dataset loading complete!\n")
 
 
 class AttentionPreservationBenchmark:
@@ -121,6 +211,7 @@ class AttentionPreservationBenchmark:
         np.random.seed(random_seed)
         torch.manual_seed(random_seed)
         
+        self.dataset_cache = DatasetCache()
         self.power_analysis = self._calculate_statistical_power()
     
     def _calculate_statistical_power(self) -> Dict[str, float]:
@@ -142,125 +233,86 @@ class AttentionPreservationBenchmark:
             "adequate": power >= 0.80
         }
     
-    def _load_datasets(self) -> Tuple[any, List[Dict[str, str]]]:
-        """Load Natural Questions dataset with contexts."""
-        print("Loading Natural Questions...")
-        nq_dataset = load_dataset("nq_open", split="validation")
-        
-        print("Loading Wikipedia corpus...")
-        try:
-            wiki_dataset = load_dataset(
-                "wikimedia/wikipedia",
-                "20231101.en",
-                split="train",
-                streaming=True
-            )
-            
-            wiki_samples = []
-            for i, sample in enumerate(wiki_dataset):
-                if i >= 2000:
-                    break
-                
-                text = sample.get('text', '')
-                title = sample.get('title', '')
-                if len(text) > 200:
-                    wiki_samples.append({
-                        'text': text,
-                        'title': title
-                    })
-            
-            print(f"Loaded {len(wiki_samples)} Wikipedia documents")
-            
-        except Exception as e:
-            print(f"Failed to load wikimedia/wikipedia: {e}")
-            print("Falling back to simple-wikipedia...")
-            
-            wiki_dataset = load_dataset("wikipedia", "20220301.simple", split="train[:2000]")
-            wiki_samples = []
-            for sample in wiki_dataset:
-                text = sample.get('text', '')
-                title = sample.get('title', '')
-                if len(text) > 200:
-                    wiki_samples.append({
-                        'text': text,
-                        'title': title
-                    })
-            print(f"Loaded {len(wiki_samples)} Wikipedia documents")
-        
-        return nq_dataset, wiki_samples
-    
-    def _extract_answer_context(
+    def _extract_answer_context_fast(
         self, 
-        answer: str, 
-        wiki_samples: List[Dict[str, str]]
+        answer: str
     ) -> Optional[str]:
-        """Find Wikipedia passage that naturally contains the answer."""
+        """Fast passage lookup using pre-built index."""
         answer_lower = answer.lower()
         
-        for sample in random.sample(wiki_samples, min(100, len(wiki_samples))):
-            text = sample['text']
-            if answer_lower in text.lower():
-                sentences = re.split(r'[.!?]+', text)
-                
-                for i, sent in enumerate(sentences):
-                    if answer_lower in sent.lower():
-                        start_idx = max(0, i - 1)
-                        end_idx = min(len(sentences), i + 2)
-                        context = '. '.join(sentences[start_idx:end_idx])
-                        
-                        if len(context) > 50:
-                            return context
+        # Try exact phrase matches first
+        words = answer_lower.split()
+        if len(words) >= 3:
+            phrase = ' '.join(words[:3])
+            if phrase in self.dataset_cache.answer_to_passages:
+                candidates = self.dataset_cache.answer_to_passages[phrase]
+                if candidates:
+                    idx = random.choice(candidates[:10])
+                    passage = self.dataset_cache.wiki_passages[idx]
+                    return self._extract_context_from_passage(passage['text'], answer_lower)
+        
+        # Fallback to linear search on subset
+        sample_size = min(200, len(self.dataset_cache.wiki_passages))
+        for passage in random.sample(self.dataset_cache.wiki_passages, sample_size):
+            if answer_lower in passage['text_lower']:
+                return self._extract_context_from_passage(passage['text'], answer_lower)
         
         return None
     
-    def _select_distractors_bm25(
+    def _extract_context_from_passage(self, text: str, answer_lower: str) -> Optional[str]:
+        """Extract context around answer."""
+        sentences = re.split(r'[.!?]+', text)
+        
+        for i, sent in enumerate(sentences):
+            if answer_lower in sent.lower():
+                start_idx = max(0, i - 1)
+                end_idx = min(len(sentences), i + 2)
+                context = '. '.join(sentences[start_idx:end_idx])
+                
+                if len(context) > 50:
+                    return context
+        
+        return None
+    
+    def _select_distractors_bm25_fast(
         self,
         query: str,
         answer: str,
         relevant_doc: str,
-        wiki_samples: List[Dict[str, str]],
         num_distractors: int
     ) -> List[str]:
-        """Select plausible distractors using BM25."""
-        candidate_docs = []
-        candidate_texts = []
-        
+        """Fast BM25 distractor selection using pre-built index."""
         answer_lower = answer.lower()
         
-        for sample in wiki_samples[:500]:
-            text = sample['text'][:800]
-            if (answer_lower not in text.lower() and 
-                text != relevant_doc and
-                len(text) > 100):
-                candidate_docs.append(sample)
-                candidate_texts.append(text)
-        
-        if len(candidate_docs) < num_distractors:
-            return [doc['text'][:400] for doc in random.sample(candidate_docs, min(len(candidate_docs), num_distractors))]
-        
-        tokenized_corpus = [doc.lower().split()[:100] for doc in candidate_texts]
-        bm25 = BM25Okapi(tokenized_corpus)
-        
+        # Get BM25 scores
         query_tokens = query.lower().split()[:20]
-        scores = bm25.get_scores(query_tokens)
+        scores = self.dataset_cache.bm25_index.get_scores(query_tokens)
         
-        top_indices = np.argsort(scores)[::-1][:num_distractors * 2]
+        # Get top candidates excluding answer-containing docs
+        top_indices = np.argsort(scores)[::-1]
         
         selected = []
         for idx in top_indices:
             if len(selected) >= num_distractors:
                 break
-            doc_text = candidate_docs[idx]['text']
             
+            doc_text = self.dataset_cache.bm25_passages[idx]
+            
+            # Skip if contains answer or is the relevant doc
+            if answer_lower in doc_text.lower() or doc_text == relevant_doc:
+                continue
+            
+            # Extract context
             sentences = re.split(r'[.!?]+', doc_text)
             if len(sentences) > 2:
                 context = '. '.join(sentences[:3])
                 selected.append(context)
         
-        while len(selected) < num_distractors and candidate_docs:
-            doc = random.choice(candidate_docs)
-            text = doc['text'][:400]
-            if text not in selected:
+        # Fill remaining with random
+        while len(selected) < num_distractors:
+            idx = random.randint(0, len(self.dataset_cache.wiki_passages) - 1)
+            text = self.dataset_cache.wiki_passages[idx]['text'][:400]
+            if text not in selected and answer_lower not in text.lower():
                 selected.append(text)
         
         return selected[:num_distractors]
@@ -363,8 +415,6 @@ class AttentionPreservationBenchmark:
                                 total_attention += token_attn[start:end].sum()
                 
                 del layer_attn, avg_heads
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
                     
             except Exception:
                 continue
@@ -411,7 +461,8 @@ class AttentionPreservationBenchmark:
         """Run attention preservation benchmark."""
         print(f"Samples: {self.num_samples}, Documents: {self.num_documents}, Power: {self.power_analysis['actual_power']:.3f}")
         
-        nq_dataset, wiki_samples = self._load_datasets()
+        # Load and index datasets once
+        self.dataset_cache.load(max_wiki_docs=1000)
         
         precision_at_1 = []
         attention_ranks = []
@@ -441,12 +492,15 @@ class AttentionPreservationBenchmark:
         
         successful = 0
         attempted = 0
+        skipped_no_context = 0
+        skipped_no_distractors = 0
         start_time = time.time()
         
         print(f"\nStarting evaluation loop (target: {self.num_samples} samples)...")
+        print("Progress: [successful/target] (attempted) - metrics")
         
-        while successful < self.num_samples and attempted < len(nq_dataset):
-            sample = nq_dataset[attempted]
+        while successful < self.num_samples and attempted < len(self.dataset_cache.nq_dataset):
+            sample = self.dataset_cache.nq_dataset[attempted]
             attempted += 1
             
             question = sample.get('question', '')
@@ -457,19 +511,22 @@ class AttentionPreservationBenchmark:
             
             answer = answers[0]
             
-            relevant_doc = self._extract_answer_context(answer, wiki_samples)
+            # Fast context extraction
+            relevant_doc = self._extract_answer_context_fast(answer)
             if not relevant_doc:
+                skipped_no_context += 1
                 continue
             
-            distractor_docs = self._select_distractors_bm25(
+            # Fast distractor selection
+            distractor_docs = self._select_distractors_bm25_fast(
                 question,
                 answer,
                 relevant_doc,
-                wiki_samples,
                 self.num_documents - 1
             )
             
             if len(distractor_docs) < self.num_documents - 1:
+                skipped_no_distractors += 1
                 continue
             
             all_docs = [relevant_doc[:600]] + [d[:600] for d in distractor_docs]
@@ -559,18 +616,17 @@ class AttentionPreservationBenchmark:
                         
                         successful += 1
                         
-                        if successful % 10 == 0:
+                        if successful % 5 == 0:
                             elapsed = time.time() - start_time
                             avg_time = elapsed / successful
                             remaining = (self.num_samples - successful) * avg_time
                             current_precision = np.mean(precision_at_1)
                             current_f1 = np.mean(f1_scores)
                             
-                            print(f"[{successful}/{self.num_samples}] "
+                            print(f"[{successful}/{self.num_samples}] ({attempted}) - "
                                   f"Prec@1={current_precision:.3f} F1={current_f1:.3f} "
-                                  f"Time={sample_time:.1f}s "
-                                  f"ETA={remaining/60:.1f}min "
-                                  f"(Attempted {attempted})")
+                                  f"AvgTime={sample_time:.1f}s ETA={remaining/60:.1f}min "
+                                  f"Skip:ctx={skipped_no_context},dist={skipped_no_distractors}")
                 
                 del inputs, output
                 gc.collect()
@@ -579,7 +635,7 @@ class AttentionPreservationBenchmark:
                 
             except RuntimeError as e:
                 if "out of memory" in str(e):
-                    print(f"[{successful}/{self.num_samples}] OOM at attempt {attempted}, clearing memory...")
+                    print(f"[{successful}/{self.num_samples}] OOM, clearing memory...")
                     gc.collect()
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
@@ -588,7 +644,7 @@ class AttentionPreservationBenchmark:
                     continue
             except Exception as e:
                 if successful % 10 == 0:
-                    print(f"[{successful}/{self.num_samples}] Error at attempt {attempted}: {type(e).__name__}")
+                    print(f"[{successful}/{self.num_samples}] Error: {type(e).__name__}")
                 continue
         
         if len(precision_at_1) == 0:
@@ -653,12 +709,15 @@ class AttentionPreservationBenchmark:
             "attention_by_correctness": attention_by_correctness,
             "num_samples": len(precision_at_1),
             "samples_attempted": attempted,
+            "skipped_no_context": skipped_no_context,
+            "skipped_no_distractors": skipped_no_distractors,
             "power_analysis": self.power_analysis,
             "methodology": {
                 "layers_analyzed": "middle_50_percent" if self.layers_to_analyze is None else self.layers_to_analyze,
                 "attention_aggregation": "final_step_only_no_double_counting",
                 "distractor_selection": "bm25_semantic",
-                "answer_quality_measured": True
+                "answer_quality_measured": True,
+                "optimizations": "pre_indexed_datasets_cached_bm25"
             }
         }
         
@@ -676,7 +735,7 @@ class AttentionPreservationBenchmark:
         print(f"Precision@1: {precision_mean:.3f} [{precision_ci[0]:.3f}, {precision_ci[1]:.3f}]")
         print(f"Mean rank: {rank_mean:.2f}, Gini: {gini_mean:.3f}")
         print(f"Answer quality: EM={em_mean:.3f}, F1={f1_mean:.3f}")
-        print(f"Attention-quality correlation: r={attention_quality_correlation.get('precision_vs_f1_pearson_r', 0):.3f}, p={attention_quality_correlation.get('precision_vs_f1_pearson_p', 1):.3f}")
+        print(f"Attention-quality correlation: r={attention_quality_correlation.get('precision_vs_f1_pearson_r', 0):.3f}")
         print(f"Success rate: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
         
         return results
