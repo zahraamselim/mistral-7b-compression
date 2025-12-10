@@ -19,6 +19,7 @@ class HuggingFaceModel(ModelInterface):
     
     def __init__(self, model_path: str, device: str = "auto"):
         super().__init__(model_path, device)
+        self._model_type = None
     
     def load(self):
         """Load model and tokenizer"""
@@ -34,7 +35,20 @@ class HuggingFaceModel(ModelInterface):
             low_cpu_mem_usage=True
         )
         
+        # Detect model type from model name/config
+        model_name_lower = self.model_path.lower()
+        if "instruct" in model_name_lower or "chat" in model_name_lower:
+            self._model_type = "instruct"
+        else:
+            self._model_type = "base"
+        
         print(f"Model loaded on: {self._model.device}")
+        print(f"Model type detected: {self._model_type}")
+    
+    @property
+    def model_type(self):
+        """Get model type (base or instruct)"""
+        return self._model_type
     
     def generate(self, prompt: str, config: GenerationConfig, return_attentions: bool = False) -> ModelOutput:
         """
@@ -175,11 +189,13 @@ class HuggingFaceModel(ModelInterface):
         
         return {
             "model_path": self.model_path,
+            "model_type": self._model_type,
             "num_layers": config.num_hidden_layers,
             "num_attention_heads": config.num_attention_heads,
             "hidden_size": config.hidden_size,
             "vocab_size": config.vocab_size,
-            "dtype": dtype
+            "dtype": dtype,
+            "device": str(self._model.device)
         }
     
     def get_memory_usage(self) -> Dict[str, float]:

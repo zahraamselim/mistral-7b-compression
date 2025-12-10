@@ -55,6 +55,7 @@ class ModelInterface(ABC):
         self.device = device
         self._model = None
         self._tokenizer = None
+        self._model_type = None
     
     @abstractmethod
     def load(self) -> None:
@@ -166,6 +167,11 @@ class ModelInterface(ABC):
     def model(self):
         """Get model instance"""
         return self._model
+    
+    @property
+    def model_type(self):
+        """Get model type (base or instruct)"""
+        return self._model_type
     
     def __enter__(self):
         """Context manager entry"""

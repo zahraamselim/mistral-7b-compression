@@ -54,7 +54,15 @@ class ExLlamaModel(ModelInterface):
             self._tokenizer
         )
         
+        # Detect model type from model name
+        model_name_lower = self.model_path.lower()
+        if "instruct" in model_name_lower or "chat" in model_name_lower:
+            self._model_type = "instruct"
+        else:
+            self._model_type = "base"
+        
         print(f"Model loaded on: {self.device}")
+        print(f"Model type detected: {self._model_type}")
     
     def generate(self, prompt: str, config: GenerationConfig, return_attentions: bool = False) -> ModelOutput:
         """
@@ -154,6 +162,7 @@ class ExLlamaModel(ModelInterface):
         """Get model configuration info"""
         return {
             "model_path": self.model_path,
+            "model_type": self._model_type,
             "num_layers": self._config.num_hidden_layers,
             "num_attention_heads": self._config.num_attention_heads,
             "hidden_size": self._config.hidden_size,
