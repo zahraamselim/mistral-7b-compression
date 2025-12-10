@@ -1,35 +1,38 @@
 """
-Attention Evaluation Suite - HIGHLY OPTIMIZED
-
-Unified attention analysis for RAG models combining:
-1. Attention Preservation: Focus on relevant documents
-2. Attention Drift: Stability during generation
-
-Key optimizations:
-- Single evaluation loop for both benchmarks
-- Shared dataset loading and indexing
-- Unified document processing
-- Single generation pass captures both metrics
-- Memory-efficient attention extraction
+Simplified Attention Evaluation for RAG Quantization Research
+Resource-efficient implementation focusing on core metrics
 """
 
 import random
 import numpy as np
 import torch
 import gc
-import time
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional
 from datasets import load_dataset
-from rank_bm25 import BM25Okapi
-from scipy.stats import pearsonr, spearmanr, mannwhitneyu
-import re
 from collections import defaultdict
 
 from models.model_interface import ModelInterface, GenerationConfig
 
 
+def convert_to_serializable(obj):
+    """Convert NumPy types to native Python types for JSON serialization."""
+    if isinstance(obj, (np.integer, np.int_, np.int8, np.int16, np.int32, np.int64)):
+        return int(obj)
+    if isinstance(obj, (np.floating, np.float16, np.float32, np.float64)):
+        return float(obj)
+    if isinstance(obj, (np.bool_, np.bool8)):
+        return bool(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, dict):
+        return {key: convert_to_serializable(value) for key, value in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [convert_to_serializable(item) for item in obj]
+    return obj
+
+
 def compute_f1(prediction: str, ground_truth: str) -> float:
-    """Compute F1 score between prediction and ground truth."""
+    """Simple F1 score between prediction and ground truth."""
     pred_tokens = prediction.lower().split()
     truth_tokens = ground_truth.lower().split()
     
@@ -46,480 +49,330 @@ def compute_f1(prediction: str, ground_truth: str) -> float:
     return 2 * (precision * recall) / (precision + recall)
 
 
-def compute_exact_match(prediction: str, ground_truths: List[str]) -> bool:
-    """Check if prediction matches any ground truth."""
-    pred = prediction.lower().strip()
-    return any(gt.lower().strip() in pred or pred in gt.lower().strip() for gt in ground_truths)
-
-
-class DatasetCache:
-    """Shared dataset cache for attention evaluation."""
-    
-    def __init__(self):
-        self.nq_dataset = None
-        self.wiki_passages = None
-        self.answer_index = None
-        self.bm25_index = None
-    
-    def load(self, max_docs: int = 400):
-        """Load and index datasets once."""
-        if self.nq_dataset is not None:
-            return
-        
-        print("Loading datasets...")
-        self.nq_dataset = load_dataset("nq_open", split="validation")
-        print(f"  {len(self.nq_dataset)} questions")
-        
-        try:
-            wiki = load_dataset("wikimedia/wikipedia", "20231101.en", split="train", streaming=True)
-            self.wiki_passages = []
-            for i, s in enumerate(wiki):
-                if i >= max_docs:
-                    break
-                if len(s.get('text', '')) > 200:
-                    self.wiki_passages.append({
-                        'text': s['text'],
-                        'text_lower': s['text'].lower()
-                    })
-                if (i + 1) % 100 == 0:
-                    print(f"  {i + 1} wiki docs...")
-        except Exception:
-            wiki = load_dataset("wikipedia", "20220301.simple", split=f"train[:{max_docs}]")
-            self.wiki_passages = [
-                {'text': s['text'], 'text_lower': s['text'].lower()}
-                for s in wiki if len(s.get('text', '')) > 200
-            ]
-        
-        print(f"  {len(self.wiki_passages)} passages")
-        
-        self.answer_index = defaultdict(list)
-        for idx, p in enumerate(self.wiki_passages):
-            for i in range(len(p['text_lower'].split()[:80]) - 2):
-                phrase = ' '.join(p['text_lower'].split()[i:i+3])
-                self.answer_index[phrase].append(idx)
-        print(f"  {len(self.answer_index)} phrases indexed")
-        
-        corpus = [p['text'][:600].lower().split()[:80] for p in self.wiki_passages]
-        self.bm25_index = BM25Okapi(corpus)
-        print("  BM25 indexed\n")
-
-
 class AttentionEvaluator:
     """
-    Unified attention evaluator capturing both preservation and drift.
-    
-    Single evaluation loop measures:
-    - Preservation: Does attention focus on relevant documents?
-    - Drift: Does attention remain stable during generation?
+    Simplified attention evaluator with minimal memory footprint.
+    Measures:
+    1. Attention Preservation: Does model focus on relevant document?
+    2. Attention Drift: Does attention stay stable during generation?
     """
-    
-    @staticmethod
-    def create_fast(model: ModelInterface):
-        """Fast: 40 samples, 3 generation steps"""
-        return AttentionEvaluator(
-            model, num_samples=40, generation_positions=[1, 5, 20], num_documents=5
-        )
-    
-    @staticmethod
-    def create_standard(model: ModelInterface):
-        """Standard: 80 samples, 3 generation steps"""
-        return AttentionEvaluator(
-            model, num_samples=80, generation_positions=[1, 5, 20], num_documents=5
-        )
     
     def __init__(
         self,
         model: ModelInterface,
-        num_samples: int = 80,
-        generation_positions: List[int] = None,
-        num_documents: int = 5
+        num_samples: int = 50,
+        num_documents: int = 3,
+        max_length: int = 1024
     ):
         self.model = model
-        self.cache = DatasetCache()
         self.num_samples = num_samples
-        self.generation_positions = sorted(generation_positions or [1, 5, 20])
         self.num_documents = num_documents
-        self.num_layers = None
-        self.doc_marker_ids = None
-    
-    def _extract_context(self, answer: str) -> Optional[str]:
-        """Find passage containing answer."""
-        answer_lower = answer.lower()
-        words = answer_lower.split()
+        self.max_length = max_length
         
+    def _load_data(self):
+        """Load minimal dataset."""
+        print("Loading Natural Questions dataset...")
+        self.nq = load_dataset("nq_open", split="validation[:500]")
+        
+        print("Loading Wikipedia passages...")
+        wiki = load_dataset("wikitext", "wikitext-103-v1", split="train")
+        wiki = wiki.filter(lambda x: len(x["text"]) > 300)
+        
+        # Build simple passage index
+        self.passages = []
+        self.answer_map = defaultdict(list)
+        
+        for i, item in enumerate(wiki):
+            if i >= 200:
+                break
+            text = item['text'].strip()
+            if text:
+                self.passages.append(text[:400])
+                words = text.lower().split()[:50]
+                for j in range(len(words) - 2):
+                    phrase = ' '.join(words[j:j+3])
+                    self.answer_map[phrase].append(i)
+        
+        print(f"Loaded {len(self.nq)} questions, {len(self.passages)} passages")
+    
+    def _find_relevant_passage(self, answer: str) -> Optional[str]:
+        """Find passage containing the answer."""
+        answer_lower = answer.lower()
+        
+        # Try phrase matching first
+        words = answer_lower.split()
         if len(words) >= 3:
             phrase = ' '.join(words[:3])
-            if phrase in self.cache.answer_index:
-                candidates = self.cache.answer_index[phrase]
-                if candidates:
-                    passage = self.cache.wiki_passages[random.choice(candidates[:8])]
-                    context = self._extract_sentences(passage['text'], answer_lower)
-                    if context:
-                        return context
+            if phrase in self.answer_map:
+                indices = self.answer_map[phrase]
+                if indices:
+                    return self.passages[random.choice(indices[:5])]
         
-        for p in random.sample(self.cache.wiki_passages, min(80, len(self.cache.wiki_passages))):
-            if answer_lower in p['text_lower']:
-                context = self._extract_sentences(p['text'], answer_lower)
-                if context:
-                    return context
+        # Fallback to substring search
+        for passage in random.sample(self.passages, min(50, len(self.passages))):
+            if answer_lower in passage.lower():
+                return passage
         
         return None
     
-    def _extract_sentences(self, text: str, answer: str) -> Optional[str]:
-        """Extract 2-3 sentences around answer."""
-        sentences = re.split(r'[.!?]+\s+', text)
-        for i, sent in enumerate(sentences):
-            if answer in sent.lower():
-                start = max(0, i - 1)
-                end = min(len(sentences), i + 2)
-                context = '. '.join(sentences[start:end])
-                if len(context) > 50:
-                    return context
-        return None
+    def _select_distractors(self, relevant: str, n: int) -> List[str]:
+        """Select distractor passages."""
+        distractors = []
+        for passage in random.sample(self.passages, min(len(self.passages), n * 3)):
+            if passage != relevant and len(distractors) < n:
+                distractors.append(passage)
+        return distractors[:n]
     
-    def _select_distractors(self, query: str, answer: str, relevant: str) -> List[str]:
-        """BM25-based distractor selection."""
-        scores = self.cache.bm25_index.get_scores(query.lower().split()[:20])
-        top_indices = np.argsort(scores)[::-1]
-        
-        answer_lower = answer.lower()
-        selected = []
-        
-        for idx in top_indices:
-            if len(selected) >= self.num_documents - 1:
-                break
-            text = self.cache.wiki_passages[idx]['text'][:600]
-            if answer_lower not in text.lower() and text != relevant:
-                sentences = re.split(r'[.!?]+', text)
-                if len(sentences) > 2:
-                    selected.append('. '.join(sentences[:3]))
-        
-        while len(selected) < self.num_documents - 1:
-            p = random.choice(self.cache.wiki_passages)
-            text = p['text'][:400]
-            if text not in selected and answer_lower not in text.lower():
-                selected.append(text)
-        
-        return selected[:self.num_documents - 1]
-    
-    def _get_doc_spans(self, tokens: torch.Tensor) -> List[Tuple[int, int]]:
-        """Get token span for each document."""
-        tokens_list = tokens[0].cpu().tolist()
-        spans = []
-        pos = 0
-        
-        for _ in range(self.num_documents):
-            markers = [j for j in range(pos, len(tokens_list)) if tokens_list[j] in self.doc_marker_ids]
-            if len(markers) >= 2:
-                spans.append((markers[0], markers[1]))
-                pos = markers[1]
-            elif len(markers) == 1:
-                spans.append((markers[0], len(tokens_list)))
-                break
-            else:
-                break
-        
-        while len(spans) < self.num_documents:
-            spans.append((0, 0))
-        
-        return spans
-    
-    def _aggregate_attention(
-        self,
-        attentions: Tuple[torch.Tensor],
-        input_ids: torch.Tensor,
-        num_generated: int = 0
-    ) -> Optional[np.ndarray]:
-        """Aggregate token attention to document level."""
-        if not attentions:
+    def _extract_attention(self, attentions, input_ids) -> Optional[np.ndarray]:
+        """
+        Extract document-level attention from model outputs.
+        Uses last layer, averages across heads and tokens.
+        """
+        if not attentions or len(attentions) == 0:
             return None
         
-        spans = self._get_doc_spans(input_ids)
-        start_layer = self.num_layers // 4
-        end_layer = 3 * self.num_layers // 4
-        
-        doc_attn = np.zeros(self.num_documents)
-        total = 0.0
-        
-        for layer_idx in range(start_layer, end_layer):
-            if layer_idx >= len(attentions):
-                continue
+        try:
+            # Get last layer attention
+            last_layer = attentions[-1]
             
-            try:
-                attn = attentions[layer_idx].mean(dim=1).squeeze()
-                
-                if attn.dim() == 1:
-                    token_attn = attn.cpu().numpy()
-                    for doc_idx, (s, e) in enumerate(spans):
-                        if s < e <= len(token_attn):
-                            val = token_attn[s:e].sum()
-                            doc_attn[doc_idx] += val
-                            total += val
-                else:
-                    gen_start = max(0, attn.shape[0] - num_generated) if num_generated > 0 else 0
-                    for t in range(gen_start, attn.shape[0]):
-                        token_attn = attn[t, :].cpu().numpy()
-                        for doc_idx, (s, e) in enumerate(spans):
-                            if s < e <= len(token_attn):
-                                val = token_attn[s:e].sum()
-                                doc_attn[doc_idx] += val
-                                total += val
-                
-                del attn
-            except Exception:
-                continue
+            # Average across heads: [batch, heads, seq, seq] -> [seq, seq]
+            avg_attn = last_layer.mean(dim=1).squeeze()
+            
+            if avg_attn.dim() == 1:
+                # Single sequence
+                token_attn = avg_attn.cpu().numpy()
+            else:
+                # Take attention from last generated token to input
+                token_attn = avg_attn[-1, :].cpu().numpy()
+            
+            # Approximate document boundaries by dividing sequence equally
+            seq_len = len(token_attn)
+            doc_len = seq_len // self.num_documents
+            
+            doc_attn = np.zeros(self.num_documents)
+            for i in range(self.num_documents):
+                start = i * doc_len
+                end = (i + 1) * doc_len if i < self.num_documents - 1 else seq_len
+                doc_attn[i] = token_attn[start:end].sum()
+            
+            # Normalize
+            total = doc_attn.sum()
+            if total > 0:
+                doc_attn = doc_attn / total
+            
+            return doc_attn
         
-        return doc_attn / total if total > 0 else None
+        except Exception as e:
+            print(f"Attention extraction error: {type(e).__name__}")
+            return None
     
-    def _calculate_drift(self, attn1: np.ndarray, attn2: np.ndarray) -> float:
-        """L1 distance between attention distributions."""
-        if attn1.sum() > 0:
-            attn1 = attn1 / attn1.sum()
-        if attn2.sum() > 0:
-            attn2 = attn2 / attn2.sum()
-        return float(np.abs(attn2 - attn1).sum())
-    
-    def run(self) -> Dict[str, any]:
-        """Run unified attention evaluation."""
-        print(f"Unified Attention Evaluation: {self.num_samples} samples\n")
-        
-        self.cache.load()
-        self.num_layers = self.model.get_model_info()['num_layers']
-        self.doc_marker_ids = [self.model.tokenizer.encode("\n\n", add_special_tokens=False)[0]]
+    def _calculate_metrics(
+        self,
+        attention: np.ndarray,
+        answer_idx: int,
+        prev_attention: Optional[np.ndarray]
+    ) -> Dict:
+        """Calculate preservation and drift metrics."""
+        metrics = {}
         
         # Preservation metrics
-        precision_at_1 = []
-        attention_ranks = []
-        attention_gini = []
+        top_idx = np.argmax(attention)
+        metrics['correct_focus'] = 1.0 if top_idx == answer_idx else 0.0
         
-        # Drift metrics
+        # Rank of answer document
+        sorted_indices = np.argsort(attention)[::-1]
+        rank = int(np.where(sorted_indices == answer_idx)[0][0] + 1)
+        metrics['answer_rank'] = rank
+        
+        # Attention on answer document
+        metrics['answer_attention'] = float(attention[answer_idx])
+        
+        # Drift metric (if we have previous attention)
+        if prev_attention is not None:
+            drift = np.abs(attention - prev_attention).sum()
+            metrics['drift'] = float(drift)
+            
+            # Drift specifically on answer document
+            answer_drift = abs(attention[answer_idx] - prev_attention[answer_idx])
+            metrics['answer_drift'] = float(answer_drift)
+        
+        return metrics
+    
+    def run(self) -> Dict:
+        """Run simplified evaluation."""
+        print(f"Running attention evaluation with {self.num_samples} samples")
+        print(f"Documents per sample: {self.num_documents}")
+        print(f"Max length: {self.max_length}\n")
+        
+        self._load_data()
+        
+        # Collect metrics
+        correct_focus_scores = []
+        answer_ranks = []
+        answer_attention_scores = []
         drift_scores = []
-        max_drifts = []
-        drift_from_relevant = []
-        
-        # Quality metrics
-        exact_matches = []
+        answer_drift_scores = []
         f1_scores = []
-        
-        # Correlations
-        attn_when_correct = []
-        attn_when_wrong = []
-        drift_when_correct = []
-        drift_when_wrong = []
-        relevant_drift_when_correct = []
-        relevant_drift_when_wrong = []
-        
-        max_pos = max(self.generation_positions)
-        config = GenerationConfig(max_new_tokens=max_pos, do_sample=False)
         
         successful = 0
         attempted = 0
-        start_time = time.time()
         
-        while successful < self.num_samples and attempted < len(self.cache.nq_dataset):
-            iter_start = time.time()
-            sample = self.cache.nq_dataset[attempted]
+        config = GenerationConfig(max_new_tokens=20, do_sample=False)
+        
+        while successful < self.num_samples and attempted < len(self.nq):
+            sample = self.nq[attempted]
             attempted += 1
             
             question = sample.get('question', '')
             answers = sample.get('answer', [])
             
             if not question or not answers:
-                print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Skip (no Q/A)")
                 continue
             
-            relevant_doc = self._extract_context(answers[0])
-            if not relevant_doc:
-                print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Skip (no context)")
+            # Find relevant passage
+            relevant = self._find_relevant_passage(answers[0])
+            if not relevant:
                 continue
             
-            distractors = self._select_distractors(question, answers[0], relevant_doc)
+            # Get distractors
+            distractors = self._select_distractors(relevant, self.num_documents - 1)
             if len(distractors) < self.num_documents - 1:
-                print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Skip (no distractors)")
                 continue
             
-            all_docs = [relevant_doc[:500]] + [d[:500] for d in distractors]
+            # Shuffle documents
+            all_docs = [relevant] + distractors
             random.shuffle(all_docs)
-            answer_idx = all_docs.index(relevant_doc[:500])
+            answer_idx = all_docs.index(relevant)
             
-            prompt = f"Question: {question}\n\n" + "\n\n".join([
-                f"Document {i+1}: {d}" for i, d in enumerate(all_docs)
-            ]) + "\n\nAnswer:"
+            # Create prompt
+            doc_text = "\n\n".join([
+                f"Document {i+1}: {doc}" 
+                for i, doc in enumerate(all_docs)
+            ])
+            prompt = f"Question: {question}\n\n{doc_text}\n\nAnswer:"
+            
+            # Truncate if needed
+            tokens = self.model.tokenizer.encode(prompt)
+            if len(tokens) > self.max_length:
+                prompt = self.model.tokenizer.decode(tokens[:self.max_length])
             
             try:
-                inputs = self.model.encode(prompt, max_length=2048)
+                # Generate with attention tracking
                 output = self.model.generate(prompt, config, return_attentions=True)
                 
-                # Quality metrics
-                em = compute_exact_match(output.generated_text, answers)
+                if not output.attentions:
+                    continue
+                
+                # Extract attention at two points for drift measurement
+                inputs = self.model.encode(prompt, max_length=self.max_length)
+                
+                # Initial attention (after prompt)
+                initial_attn = self._extract_attention(
+                    output.attentions[:1], 
+                    inputs['input_ids']
+                )
+                
+                # Final attention (after generation)
+                final_attn = self._extract_attention(
+                    output.attentions[-1:],
+                    inputs['input_ids']
+                )
+                
+                if initial_attn is None or final_attn is None:
+                    continue
+                
+                # Calculate metrics
+                metrics = self._calculate_metrics(final_attn, answer_idx, initial_attn)
+                
+                # Quality metric
                 f1 = max([compute_f1(output.generated_text, ans) for ans in answers])
-                exact_matches.append(1.0 if em else 0.0)
+                
+                # Store results
+                correct_focus_scores.append(metrics['correct_focus'])
+                answer_ranks.append(metrics['answer_rank'])
+                answer_attention_scores.append(metrics['answer_attention'])
+                if 'drift' in metrics:
+                    drift_scores.append(metrics['drift'])
+                    answer_drift_scores.append(metrics['answer_drift'])
                 f1_scores.append(f1)
-                is_correct = em or f1 > 0.3
-                
-                if not output.attentions or len(output.attentions) < min(self.generation_positions):
-                    print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Skip (no attentions)")
-                    del inputs, output
-                    continue
-                
-                # Extract attention at multiple generation steps
-                attention_sequence = []
-                for pos in self.generation_positions:
-                    if pos > len(output.attentions):
-                        break
-                    doc_attn = self._aggregate_attention(
-                        output.attentions[pos - 1], inputs['input_ids'], pos
-                    )
-                    if doc_attn is not None:
-                        attention_sequence.append(doc_attn)
-                
-                if not attention_sequence:
-                    print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Skip (no valid attention)")
-                    del inputs, output
-                    continue
-                
-                # Preservation metrics (using final attention)
-                final_attn = attention_sequence[-1]
-                top_doc = np.argmax(final_attn)
-                precision_at_1.append(1.0 if top_doc == answer_idx else 0.0)
-                
-                rank = int(np.where(np.argsort(final_attn)[::-1] == answer_idx)[0][0] + 1)
-                attention_ranks.append(rank)
-                
-                sorted_attn = np.sort(final_attn)
-                gini = (2 * np.sum((np.arange(len(sorted_attn)) + 1) * sorted_attn)) / (
-                    len(sorted_attn) * sorted_attn.sum()
-                ) - (len(sorted_attn) + 1) / len(sorted_attn)
-                attention_gini.append(float(gini))
-                
-                relevant_attn = final_attn[answer_idx]
-                if is_correct:
-                    attn_when_correct.append(relevant_attn)
-                else:
-                    attn_when_wrong.append(relevant_attn)
-                
-                # Drift metrics (if multiple steps)
-                if len(attention_sequence) > 1:
-                    drifts = []
-                    for j in range(1, len(attention_sequence)):
-                        drift = self._calculate_drift(attention_sequence[j-1], attention_sequence[j])
-                        drifts.append(drift)
-                        
-                        relevant_drift = abs(
-                            attention_sequence[j][answer_idx] - attention_sequence[j-1][answer_idx]
-                        )
-                        drift_from_relevant.append(float(relevant_drift))
-                        
-                        if is_correct:
-                            relevant_drift_when_correct.append(float(relevant_drift))
-                        else:
-                            relevant_drift_when_wrong.append(float(relevant_drift))
-                    
-                    mean_drift = float(np.mean(drifts))
-                    drift_scores.append(mean_drift)
-                    max_drifts.append(float(np.max(drifts)))
-                    
-                    if is_correct:
-                        drift_when_correct.append(mean_drift)
-                    else:
-                        drift_when_wrong.append(mean_drift)
                 
                 successful += 1
                 
-                iter_time = time.time() - iter_start
-                avg_time = (time.time() - start_time) / successful
-                eta = (self.num_samples - successful) * avg_time
+                if successful % 10 == 0:
+                    print(f"Progress: {successful}/{self.num_samples} "
+                          f"(tried {attempted}) "
+                          f"Precision@1={np.mean(correct_focus_scores):.3f} "
+                          f"F1={np.mean(f1_scores):.3f}")
                 
-                print(f"[{successful}/{self.num_samples}] Attempt {attempted}: "
-                      f"Prec@1={np.mean(precision_at_1):.3f} "
-                      f"Drift={np.mean(drift_scores):.4f if drift_scores else 0:.4f} "
-                      f"F1={np.mean(f1_scores):.3f} "
-                      f"Time={iter_time:.1f}s ETA={eta/60:.1f}min")
-                
-                del inputs, output, attention_sequence
+                # Memory cleanup
+                del output, inputs
                 gc.collect()
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
             
             except RuntimeError as e:
                 if "out of memory" in str(e):
-                    print(f"[{successful}/{self.num_samples}] Attempt {attempted}: OOM")
+                    print(f"OOM at sample {attempted}, cleaning up...")
                     gc.collect()
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
                 continue
             except Exception as e:
-                print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Error ({type(e).__name__})")
+                print(f"Error at sample {attempted}: {type(e).__name__}")
                 continue
         
-        if not precision_at_1:
-            raise ValueError("No successful evaluations")
+        if successful == 0:
+            raise ValueError("No successful evaluations completed")
         
-        # Bootstrap CIs
-        def bootstrap_ci(data):
-            means = [np.mean(np.random.choice(data, len(data), replace=True)) for _ in range(1000)]
-            return float(np.percentile(means, 2.5)), float(np.percentile(means, 97.5))
-        
-        precision_ci = bootstrap_ci(precision_at_1)
-        drift_ci = bootstrap_ci(drift_scores) if drift_scores else (0.0, 0.0)
-        
-        # Correlations
-        preservation_corr = {}
-        if len(precision_at_1) == len(f1_scores):
-            pr, pp = pearsonr(precision_at_1, f1_scores)
-            sr, sp = spearmanr(attention_ranks, f1_scores)
-            preservation_corr = {
-                "precision_vs_f1_pearson_r": float(pr),
-                "precision_vs_f1_pearson_p": float(pp),
-                "rank_vs_f1_spearman_r": float(sr),
-                "rank_vs_f1_spearman_p": float(sp)
-            }
-        
-        drift_corr = {}
-        if drift_scores and len(drift_scores) == len(f1_scores):
-            dr, dp = pearsonr(drift_scores, f1_scores)
-            drift_corr = {
-                "drift_vs_f1_pearson_r": float(dr),
-                "drift_vs_f1_pearson_p": float(dp)
-            }
-        
+        # Compile results
         results = {
             "preservation": {
-                "precision_at_1": float(np.mean(precision_at_1)),
-                "precision_ci_95": precision_ci,
-                "rank_mean": float(np.mean(attention_ranks)),
-                "rank_median": float(np.median(attention_ranks)),
-                "gini_mean": float(np.mean(attention_gini)),
-                "attention_when_correct": float(np.mean(attn_when_correct)) if attn_when_correct else 0.0,
-                "attention_when_wrong": float(np.mean(attn_when_wrong)) if attn_when_wrong else 0.0,
-                "correlation": preservation_corr
+                "precision_at_1": np.mean(correct_focus_scores),
+                "mean_rank": np.mean(answer_ranks),
+                "median_rank": np.median(answer_ranks),
+                "mean_attention_on_answer": np.mean(answer_attention_scores)
             },
             "drift": {
-                "mean_drift": float(np.mean(drift_scores)) if drift_scores else 0.0,
-                "drift_ci_95": drift_ci,
-                "max_drift_mean": float(np.mean(max_drifts)) if max_drifts else 0.0,
-                "drift_from_relevant": float(np.mean(drift_from_relevant)) if drift_from_relevant else 0.0,
-                "drift_when_correct": float(np.mean(drift_when_correct)) if drift_when_correct else 0.0,
-                "drift_when_wrong": float(np.mean(drift_when_wrong)) if drift_when_wrong else 0.0,
-                "relevant_drift_when_correct": float(np.mean(relevant_drift_when_correct)) if relevant_drift_when_correct else 0.0,
-                "relevant_drift_when_wrong": float(np.mean(relevant_drift_when_wrong)) if relevant_drift_when_wrong else 0.0,
-                "correlation": drift_corr
+                "mean_total_drift": np.mean(drift_scores) if drift_scores else 0.0,
+                "mean_answer_drift": np.mean(answer_drift_scores) if answer_drift_scores else 0.0
             },
             "quality": {
-                "exact_match": float(np.mean(exact_matches)),
-                "f1_mean": float(np.mean(f1_scores))
+                "mean_f1": np.mean(f1_scores)
             },
             "metadata": {
-                "num_samples": successful,
-                "samples_attempted": attempted,
-                "generation_positions": self.generation_positions
+                "successful_samples": successful,
+                "attempted_samples": attempted,
+                "num_documents": self.num_documents,
+                "max_length": self.max_length
             }
         }
         
-        total_time = (time.time() - start_time) / 60
-        print(f"\nCompleted in {total_time:.1f} min")
-        print(f"Preservation - Precision@1: {results['preservation']['precision_at_1']:.3f}, Rank: {results['preservation']['rank_mean']:.2f}")
-        print(f"Drift - Mean: {results['drift']['mean_drift']:.4f}, Max: {results['drift']['max_drift_mean']:.4f}")
-        print(f"Quality - EM: {results['quality']['exact_match']:.3f}, F1: {results['quality']['f1_mean']:.3f}\n")
+        # Convert to JSON-serializable types
+        results = convert_to_serializable(results)
+        
+        print(f"\nEvaluation complete:")
+        print(f"Samples: {successful}/{attempted}")
+        print(f"Precision@1: {results['preservation']['precision_at_1']:.3f}")
+        print(f"Mean Rank: {results['preservation']['mean_rank']:.2f}")
+        print(f"Attention Drift: {results['drift']['mean_total_drift']:.4f}")
+        print(f"Answer Drift: {results['drift']['mean_answer_drift']:.4f}")
+        print(f"F1 Score: {results['quality']['mean_f1']:.3f}\n")
         
         return results
+
+
+# Usage
+if __name__ == "__main__":
+    evaluator = SimpleAttentionEvaluator(
+        model=model,
+        num_samples=50,
+        num_documents=3,
+        max_length=1024
+    )
+    
+    results = evaluator.run()
+    
+    # Save results
+    import json
+    with open("attention_results.json", "w") as f:
+        json.dump(results, f, indent=2)
