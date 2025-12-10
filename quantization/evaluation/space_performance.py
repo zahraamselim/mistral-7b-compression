@@ -223,9 +223,7 @@ class SpacePerformanceEvaluator:
         reset_stats: bool = True
     ) -> Dict[str, Any]:
         """Run all space performance benchmarks."""
-        logger.info("=" * 60)
-        logger.info("SPACE PERFORMANCE EVALUATION")
-        logger.info("=" * 60)
+        logger.info("Running space performance evaluation...")
         
         # Reset memory statistics
         if reset_stats:
@@ -270,9 +268,7 @@ class SpacePerformanceEvaluator:
             logger.warning(f"KV cache estimation failed: {e}")
             results['kv_cache_size_mb'] = None
         
-        logger.info("\n" + "=" * 60)
-        logger.info("SPACE PERFORMANCE SUMMARY")
-        logger.info("=" * 60)
+        logger.info("Space performance summary")
         self._print_summary(results)
         
         return results

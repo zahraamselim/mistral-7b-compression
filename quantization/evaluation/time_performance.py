@@ -325,9 +325,7 @@ class TimePerformanceEvaluator:
         max_new_tokens: int = 128
     ) -> Dict[str, Any]:
         """Run all time performance benchmarks."""
-        logger.info("=" * 60)
-        logger.info("TIME PERFORMANCE EVALUATION")
-        logger.info("=" * 60)
+        logger.info("Running time performance evaluation")
         
         results = {}
         
@@ -358,9 +356,7 @@ class TimePerformanceEvaluator:
         )
         results['throughput'] = throughput_results
         
-        logger.info("\n" + "=" * 60)
-        logger.info("TIME PERFORMANCE SUMMARY")
-        logger.info("=" * 60)
+        logger.info("Time performance summary")
         self._print_summary(results)
         
         return results
