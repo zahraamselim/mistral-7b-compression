@@ -2,12 +2,14 @@
   "experiment_info": {
     "base_model": "mistralai/Mistral-7B-v0.1",
     "focus": "RAG performance evaluation on quantized models",
+    "hardware": "Kaggle T4 GPU (16GB VRAM)",
     "primary_metrics": [
       "attention_preservation",
-      "context_degradation",
       "attention_drift",
-      "reading_comprehension_accuracy",
-      "model_efficiency"
+      "context_degradation",
+      "retrieval_quality",
+      "answer_quality",
+      "efficiency"
     ]
   },
   "performance_benchmarks": {
@@ -38,66 +40,225 @@
         "max_samples": 100,
         "max_length": 512
       },
-      "estimated_time_min": 1
+      "estimated_time_min": 2
     }
   },
-  "custom_rag_benchmarks": {
+  "rag_benchmarks": {
     "attention": {
-      "description": "Unified attention evaluation: preservation and drift",
-      "speed": "fast",
+      "description": "Attention preservation and drift during RAG generation",
+      "focus": [
+        "Does model maintain focus on relevant documents?",
+        "How does attention shift during generation?",
+        "Answer quality with multi-document context"
+      ],
       "parameters": {
-        "num_samples": 40,
-        "generation_positions": [1, 5, 20],
-        "num_documents": 5
+        "num_samples": 50,
+        "num_documents": 5,
+        "max_context_length": 512,
+        "generation_length": 20
       },
-      "estimated_time_min": 20
-    },
-    "context": {
-      "description": "Unified context evaluation: degradation and position effects",
-      "speed": "fast",
-      "parameters": {
-        "samples_per_length": 25,
-        "context_lengths": [512, 2048, 4096],
-        "answer_positions": ["middle"]
+      "datasets": ["Natural Questions (Q&A pairs)", "WikiText-103 (passages)"],
+      "metrics": {
+        "preservation": [
+          "precision_at_1",
+          "mean_rank",
+          "attention_on_answer",
+          "attention_concentration"
+        ],
+        "drift": [
+          "total_drift",
+          "answer_drift",
+          "max_drift",
+          "drift_direction"
+        ],
+        "quality": ["exact_match", "f1_score"]
       },
       "estimated_time_min": 15
+    },
+    "context": {
+      "description": "Performance degradation as context length increases",
+      "focus": [
+        "How does accuracy decline with longer contexts?",
+        "Needle-in-haystack: position sensitivity",
+        "Context utilization efficiency"
+      ],
+      "parameters": {
+        "context_lengths": [512, 1024, 2048, 4096],
+        "samples_per_length": 25,
+        "test_positions": ["middle"]
+      },
+      "note": "Set test_positions to ['start', 'middle', 'end'] for full position analysis (3x longer)",
+      "datasets": [
+        "SQuAD v2 (Q&A with context)",
+        "WikiText-103 (filler passages)"
+      ],
+      "metrics": {
+        "by_length": ["accuracy", "f1_score", "samples_completed"],
+        "degradation": ["slope_per_token", "slope_per_1k_tokens", "r_squared"],
+        "by_position": ["mean_f1", "std_f1"]
+      },
+      "estimated_time_min": 12
+    },
+    "retrieval": {
+      "description": "Complete RAG system evaluation: retrieval + generation + efficiency",
+      "focus": [
+        "Retrieval quality: does it find relevant context?",
+        "Answer quality: RAG vs no-RAG comparison",
+        "System efficiency: latency and overhead"
+      ],
+      "parameters": {
+        "compare_no_rag": true,
+        "save_detailed": false,
+        "output_dir": "results/rag"
+      },
+      "note": "Requires RAG pipeline to be set up with indexed documents",
+      "metrics": {
+        "retrieval_quality": [
+          "context_sufficiency",
+          "context_precision",
+          "answer_coverage",
+          "retrieval_score",
+          "retrieval_consistency"
+        ],
+        "answer_quality": [
+          "exact_match",
+          "f1_score",
+          "faithfulness",
+          "rouge_scores"
+        ],
+        "rag_improvement": ["f1_gain", "f1_gain_percent", "em_gain"],
+        "efficiency": ["retrieval_time", "generation_time", "rag_overhead"]
+      },
+      "estimated_time_min": 10
     }
   },
   "lm_eval_tasks": {
     "reasoning": {
-      "description": "Baseline reasoning capabilities",
+      "description": "Baseline reasoning capabilities without context",
       "tasks": ["hellaswag", "winogrande", "piqa", "arc_easy", "arc_challenge"],
       "num_fewshot": 0,
+      "focus": "Tests if quantization preserves basic reasoning ability",
       "estimated_time_min": 15
     },
     "rag_core": {
       "description": "Core RAG tasks - reading comprehension with context",
       "tasks": ["squad", "triviaqa"],
       "num_fewshot": 0,
+      "focus": "Direct test of RAG performance on standard benchmarks",
       "estimated_time_min": 20
     },
     "rag_reasoning": {
       "description": "RAG with complex reasoning over context",
       "tasks": ["drop", "race"],
       "num_fewshot": 3,
+      "focus": "Tests ability to reason over retrieved information",
       "estimated_time_min": 12
     },
     "rag_verification": {
       "description": "Fact verification from passages",
       "tasks": ["boolq"],
       "num_fewshot": 0,
+      "focus": "Tests faithfulness to retrieved context",
       "estimated_time_min": 5
     }
   },
+  "rag_pipeline_config": {
+    "document_processing": {
+      "remove_headers": true,
+      "remove_citations": true,
+      "extract_sections": false
+    },
+    "chunking": {
+      "strategy": "semantic",
+      "chunk_size": 512,
+      "chunk_overlap": 50,
+      "min_chunk_size": 100
+    },
+    "embedding": {
+      "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+      "batch_size": 32,
+      "normalize": true,
+      "device": "cuda"
+    },
+    "vector_store": {
+      "collection_name": "rag_documents",
+      "persist_directory": null
+    },
+    "retrieval": {
+      "top_k": 3,
+      "similarity_threshold": 0.0,
+      "rerank": false,
+      "diversity_penalty": 0.0
+    },
+    "generation": {
+      "max_new_tokens": 128,
+      "temperature": 0.3,
+      "top_p": 0.9,
+      "do_sample": true,
+      "repetition_penalty": 1.15,
+      "use_chat_template": true
+    }
+  },
   "evaluation_protocol": {
-    "execution_order": [
-      "time_performance",
+    "recommended_order": [
       "space_performance",
+      "time_performance",
       "perplexity",
       "attention",
-      "context_degradation",
+      "context",
+      "retrieval",
       "lm_eval_tasks"
     ],
-    "estimated_total_time_min": 60
+    "quick_evaluation": {
+      "description": "Fast evaluation for initial testing",
+      "tasks": ["space_performance", "time_performance", "attention"],
+      "estimated_time_min": 20
+    },
+    "full_evaluation": {
+      "description": "Complete evaluation suite",
+      "tasks": [
+        "space_performance",
+        "time_performance",
+        "perplexity",
+        "attention",
+        "context",
+        "retrieval",
+        "lm_eval_tasks"
+      ],
+      "estimated_time_min": 75
+    },
+    "rag_focused": {
+      "description": "RAG-specific evaluation only",
+      "tasks": ["attention", "context", "retrieval"],
+      "estimated_time_min": 37
+    }
+  },
+  "hardware_constraints": {
+    "gpu": "T4",
+    "vram_gb": 16,
+    "optimization_strategy": [
+      "Single sample processing with immediate cleanup",
+      "Conservative context lengths (512-4096 tokens)",
+      "Batch size 1 for generation",
+      "Aggressive memory management (gc + cuda.empty_cache)",
+      "Short generation lengths (15-20 tokens for tests)"
+    ]
+  },
+  "expected_results": {
+    "attention": {
+      "good_precision_at_1": "> 0.70",
+      "good_mean_rank": "< 2.0",
+      "acceptable_drift": "< 0.15"
+    },
+    "context": {
+      "good_degradation": "< 0.01 per 1K tokens",
+      "moderate_degradation": "0.01-0.05 per 1K tokens",
+      "severe_degradation": "> 0.05 per 1K tokens"
+    },
+    "retrieval": {
+      "good_context_sufficiency": "> 0.80",
+      "good_rag_f1": "> 0.50",
+      "meaningful_rag_gain": "> 0.10"
+    }
   }
 }

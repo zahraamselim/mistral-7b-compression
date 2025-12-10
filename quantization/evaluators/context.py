@@ -1,6 +1,6 @@
 """
-Simplified Context Length Evaluation for RAG Quantization Research
-Resource-efficient implementation with controlled context assembly
+Context Length Evaluation - Optimized for Kaggle T4 (16GB VRAM)
+Measures performance degradation as context length increases
 """
 
 import random
@@ -32,7 +32,7 @@ def convert_to_serializable(obj):
 
 
 def compute_f1(prediction: str, ground_truth: str) -> float:
-    """Simple F1 score."""
+    """Token-level F1 score."""
     pred_tokens = prediction.lower().split()
     truth_tokens = ground_truth.lower().split()
     
@@ -51,92 +51,169 @@ def compute_f1(prediction: str, ground_truth: str) -> float:
 
 class ContextEvaluator:
     """
-    Simplified context length evaluator.
-    Tests performance degradation as context increases.
+    Optimized context length evaluator for Mistral 7B on T4.
+    
+    Measures:
+    - Performance degradation as context increases
+    - Answer position sensitivity (needle in haystack)
+    - Context utilization efficiency
+    
+    Strategy:
+    - Test multiple context lengths (512, 1024, 2048, 4096)
+    - Place answer at different positions (start, middle, end)
+    - Use real Q&A data with controlled filler passages
     """
     
     def __init__(
         self,
         model: ModelInterface,
         context_lengths: List[int] = None,
-        samples_per_length: int = 20
+        samples_per_length: int = 25,
+        test_positions: List[str] = None
     ):
+        """
+        Initialize evaluator.
+        
+        Args:
+            model: ModelInterface instance
+            context_lengths: Context lengths to test
+            samples_per_length: Samples per length
+            test_positions: Answer positions to test ['start', 'middle', 'end']
+        """
         self.model = model
-        self.context_lengths = context_lengths or [512, 1024, 2048]
+        self.context_lengths = context_lengths or [512, 1024, 2048, 4096]
         self.samples_per_length = samples_per_length
+        self.test_positions = test_positions or ['middle']  # Default to middle only
+        
+        self._cleanup()
+    
+    def _cleanup(self):
+        """Aggressive memory cleanup."""
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
     
     def _load_data(self):
         """Load datasets."""
-        print("Loading SQuAD for questions and answers...")
-        self.squad = load_dataset("squad_v2", split="validation[:300]")
+        print("Loading SQuAD for Q&A...")
+        self.squad = load_dataset("squad_v2", split="validation[:500]")
         
-        print("Loading Wikitext for filler passages...")
-        wiki = load_dataset("wikitext", "wikitext-103-v1", split="train")
+        print("Loading WikiText for filler passages...")
+        wiki = load_dataset("wikitext", "wikitext-103-v1", split="train[:2000]")
         self.wiki_passages = [
             item['text'].strip() 
             for item in wiki 
             if len(item['text'].strip()) > 100
-        ][:500]
+        ][:800]
         
-        print(f"Loaded {len(self.squad)} questions, {len(self.wiki_passages)} passages")
+        print(f"Loaded {len(self.squad)} questions, {len(self.wiki_passages)} filler passages")
     
-    def _build_context(
+    def _build_context_at_position(
         self,
+        answer_context: str,
         question: str,
-        context: str,
-        target_length: int
-    ) -> str:
-        """Build context padded to target token length."""
+        target_length: int,
+        position: str = 'middle'
+    ) -> Tuple[str, int]:
+        """
+        Build context with answer at specific position.
         
-        # Start with question and answer context
-        base_text = f"{context}\n\nQuestion: {question}"
-        base_tokens = self.model.tokenizer.encode(base_text)
+        Args:
+            answer_context: Context containing the answer
+            question: Question text
+            target_length: Target token length
+            position: 'start', 'middle', or 'end'
+            
+        Returns:
+            (full_context, answer_position_tokens)
+        """
+        # Tokenize answer context
+        answer_tokens = self.model.tokenizer.encode(answer_context)
+        answer_length = len(answer_tokens)
         
-        if len(base_tokens) >= target_length:
-            # Truncate if too long
-            truncated = self.model.tokenizer.decode(base_tokens[:target_length])
-            return truncated
+        if answer_length >= target_length:
+            # Answer context is already long enough
+            truncated = self.model.tokenizer.decode(answer_tokens[:target_length])
+            return truncated, 0
         
-        # Add filler passages until we reach target length
-        filler_parts = [base_text]
-        current_length = len(base_tokens)
+        # Calculate filler needed
+        tokens_needed = target_length - answer_length
         
-        available_passages = random.sample(
-            self.wiki_passages, 
-            min(50, len(self.wiki_passages))
+        # Determine position
+        if position == 'start':
+            before_tokens = 0
+            after_tokens = tokens_needed
+        elif position == 'end':
+            before_tokens = tokens_needed
+            after_tokens = 0
+        else:  # middle
+            before_tokens = tokens_needed // 2
+            after_tokens = tokens_needed - before_tokens
+        
+        # Build filler sections
+        before_filler = self._build_filler(before_tokens) if before_tokens > 0 else ""
+        after_filler = self._build_filler(after_tokens) if after_tokens > 0 else ""
+        
+        # Combine
+        parts = []
+        if before_filler:
+            parts.append(before_filler)
+        parts.append(answer_context)
+        if after_filler:
+            parts.append(after_filler)
+        
+        combined = "\n\n".join(parts) + f"\n\nQuestion: {question}\nAnswer:"
+        
+        # Verify and truncate to exact length
+        final_tokens = self.model.tokenizer.encode(combined)[:target_length]
+        final_context = self.model.tokenizer.decode(final_tokens, skip_special_tokens=True)
+        
+        return final_context, before_tokens
+    
+    def _build_filler(self, num_tokens: int) -> str:
+        """Build filler text of approximately num_tokens length."""
+        if num_tokens <= 0:
+            return ""
+        
+        filler_parts = []
+        current_tokens = 0
+        
+        available = random.sample(
+            self.wiki_passages,
+            min(len(self.wiki_passages), num_tokens // 50 + 10)
         )
         
-        for passage in available_passages:
-            if current_length >= target_length:
+        for passage in available:
+            if current_tokens >= num_tokens:
                 break
             
-            # Limit passage length
-            passage_tokens = self.model.tokenizer.encode(passage)[:200]
-            
-            if current_length + len(passage_tokens) <= target_length:
-                filler_parts.append(passage)
-                current_length += len(passage_tokens)
+            # Limit each passage
+            passage_tokens = self.model.tokenizer.encode(passage)[:150]
+            filler_parts.append(self.model.tokenizer.decode(passage_tokens))
+            current_tokens += len(passage_tokens)
         
-        combined = "\n\n".join(filler_parts) + "\n\nAnswer:"
-        
-        # Final truncation to exact length
-        final_tokens = self.model.tokenizer.encode(combined)[:target_length]
-        return self.model.tokenizer.decode(final_tokens, skip_special_tokens=True)
+        return "\n\n".join(filler_parts)
     
     def _evaluate_at_length(
         self,
         context_length: int,
+        position: str,
         config: GenerationConfig
     ) -> Dict:
-        """Evaluate at specific context length."""
-        print(f"\nEvaluating at {context_length} tokens...")
+        """Evaluate at specific context length and position."""
+        print(f"\n  Testing at {context_length} tokens (answer at {position})...")
         
-        correct = 0
-        f1_scores = []
-        total = 0
+        results = {
+            'correct': 0,
+            'f1_scores': [],
+            'total': 0,
+            'oom_count': 0,
+            'avg_answer_position': []
+        }
         
         for sample in self.squad:
-            if total >= self.samples_per_length:
+            if results['total'] >= self.samples_per_length:
                 break
             
             question = sample.get('question', '')
@@ -147,134 +224,193 @@ class ContextEvaluator:
                 continue
             
             try:
-                # Build context at target length
-                full_context = self._build_context(question, context, context_length)
+                # Build context at target length with answer at position
+                full_context, answer_pos = self._build_context_at_position(
+                    context, question, context_length, position
+                )
                 
-                # Verify length is close to target
+                # Verify length
                 actual_length = len(self.model.tokenizer.encode(full_context))
-                if actual_length < context_length * 0.9:
+                if actual_length < context_length * 0.85:  # Too short
                     continue
                 
                 # Generate answer
                 output = self.model.generate(full_context, config)
                 
-                # Check correctness
-                response = output.generated_text.lower()
+                # Evaluate
+                response = output.generated_text.lower().strip()
                 answer_lower = answers[0].lower()
                 
                 if answer_lower in response:
-                    correct += 1
+                    results['correct'] += 1
                 
                 f1 = max([compute_f1(output.generated_text, ans) for ans in answers])
-                f1_scores.append(f1)
+                results['f1_scores'].append(f1)
+                results['avg_answer_position'].append(answer_pos)
+                results['total'] += 1
                 
-                total += 1
+                # Progress
+                if results['total'] % 5 == 0:
+                    acc = results['correct'] / results['total']
+                    avg_f1 = np.mean(results['f1_scores'])
+                    print(f"    Progress: {results['total']}/{self.samples_per_length} | "
+                          f"Acc: {acc:.3f} | F1: {avg_f1:.3f}")
                 
-                if total % 5 == 0:
-                    print(f"  Progress: {total}/{self.samples_per_length} "
-                          f"Accuracy={correct/total:.3f} "
-                          f"F1={np.mean(f1_scores):.3f}")
-                
-                # Memory cleanup
+                # Cleanup
                 del output
-                gc.collect()
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
+                if results['total'] % 5 == 0:
+                    self._cleanup()
             
             except RuntimeError as e:
-                if "out of memory" in str(e):
-                    print(f"  OOM at length {context_length}, stopping this length")
-                    gc.collect()
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
+                if "out of memory" in str(e).lower():
+                    results['oom_count'] += 1
+                    print(f"    OOM at {context_length} tokens, stopping this configuration")
+                    self._cleanup()
                     break
                 continue
-            except Exception as e:
-                print(f"  Error: {type(e).__name__}")
+            except Exception:
                 continue
         
-        accuracy = correct / total if total > 0 else 0.0
-        mean_f1 = np.mean(f1_scores) if f1_scores else 0.0
+        # Calculate metrics
+        accuracy = results['correct'] / results['total'] if results['total'] > 0 else 0.0
+        mean_f1 = np.mean(results['f1_scores']) if results['f1_scores'] else 0.0
         
-        print(f"  Final: Accuracy={accuracy:.3f}, F1={mean_f1:.3f}, Samples={total}")
+        print(f"    Results: Acc={accuracy:.3f}, F1={mean_f1:.3f}, "
+              f"Samples={results['total']}, OOM={results['oom_count']}")
         
         return {
-            "accuracy": accuracy,
-            "f1": mean_f1,
-            "num_samples": total
+            'accuracy': accuracy,
+            'f1': mean_f1,
+            'num_samples': results['total'],
+            'oom_count': results['oom_count'],
+            'answer_position': position
         }
     
     def run(self) -> Dict:
-        """Run context evaluation across all lengths."""
-        print(f"Context Evaluation: {len(self.context_lengths)} lengths")
-        print(f"Samples per length: {self.samples_per_length}\n")
+        """Run context evaluation."""
+        print(f"Context lengths: {self.context_lengths}")
+        print(f"Samples per length: {self.samples_per_length}")
+        print(f"Answer positions: {self.test_positions}")
+        
+        if torch.cuda.is_available():
+            print(f"GPU: {torch.cuda.get_device_name(0)}")
+            print(f"Initial VRAM: {torch.cuda.memory_allocated()/1024**3:.2f} GB")
+        print()
         
         self._load_data()
         
-        config = GenerationConfig(max_new_tokens=15, do_sample=False)
+        config = GenerationConfig(max_new_tokens=20, do_sample=False)
         
+        # Storage for results
         results_by_length = {}
-        accuracies = []
-        f1_scores = []
+        results_by_position = {}
         
+        all_f1_scores = []
+        all_lengths = []
+        
+        # Test each length and position
         for length in self.context_lengths:
-            result = self._evaluate_at_length(length, config)
+            results_by_length[str(length)] = {}
             
-            results_by_length[str(length)] = result
-            accuracies.append(result['accuracy'])
-            f1_scores.append(result['f1'])
+            for position in self.test_positions:
+                result = self._evaluate_at_length(length, position, config)
+                
+                results_by_length[str(length)][position] = result
+                
+                # Track for regression
+                all_lengths.append(length)
+                all_f1_scores.append(result['f1'])
+                
+                # Track by position
+                if position not in results_by_position:
+                    results_by_position[position] = []
+                results_by_position[position].append({
+                    'length': length,
+                    'f1': result['f1'],
+                    'accuracy': result['accuracy']
+                })
         
-        # Calculate degradation slope
+        # Calculate degradation metrics
         slope = 0.0
         r_squared = 0.0
         
-        if len(f1_scores) >= 2:
-            lengths_array = np.array(self.context_lengths)
-            f1_array = np.array(f1_scores)
+        if len(all_f1_scores) >= 2:
+            lengths_array = np.array(all_lengths)
+            f1_array = np.array(all_f1_scores)
             
             slope, intercept, r_value, p_value, std_err = stats.linregress(
                 lengths_array, f1_array
             )
             r_squared = r_value ** 2
             
-            print(f"\nRegression Analysis:")
+            print(f"\nDegradation Analysis:")
             print(f"  Slope: {slope:.6f} per token")
-            print(f"  Slope per 1K tokens: {slope * 1000:.6f}")
+            print(f"  Slope per 1K tokens: {slope * 1000:.4f}")
             print(f"  R-squared: {r_squared:.3f}")
+        
+        # Position analysis
+        position_summary = {}
+        for position, data in results_by_position.items():
+            f1_values = [d['f1'] for d in data]
+            position_summary[position] = {
+                'mean_f1': float(np.mean(f1_values)),
+                'std_f1': float(np.std(f1_values)),
+                'min_f1': float(np.min(f1_values)),
+                'max_f1': float(np.max(f1_values))
+            }
         
         results = {
             "by_length": results_by_length,
-            "regression": {
-                "slope": slope,
+            "by_position": position_summary,
+            "degradation": {
+                "slope_per_token": slope,
                 "slope_per_1k_tokens": slope * 1000,
-                "r_squared": r_squared
+                "r_squared": r_squared,
+                "interpretation": self._interpret_slope(slope * 1000)
             },
             "metadata": {
                 "context_lengths": self.context_lengths,
-                "samples_per_length": self.samples_per_length
+                "samples_per_length": self.samples_per_length,
+                "positions_tested": self.test_positions
             }
         }
         
-        # Convert to JSON-serializable
         results = convert_to_serializable(results)
         
-        print(f"\nContext evaluation complete")
-        print(f"Degradation slope: {results['regression']['slope_per_1k_tokens']:.6f} per 1K tokens\n")
+        # Print summary
+        self._print_summary(results)
         
         return results
-
-
-# Usage
-if __name__ == "__main__":
-    evaluator = SimpleContextEvaluator(
-        model=model,
-        context_lengths=[512, 1024, 2048],
-        samples_per_length=20
-    )
     
-    results = evaluator.run()
+    def _interpret_slope(self, slope_per_1k: float) -> str:
+        """Interpret degradation slope."""
+        if abs(slope_per_1k) < 0.001:
+            return "negligible"
+        elif abs(slope_per_1k) < 0.01:
+            return "minimal"
+        elif abs(slope_per_1k) < 0.05:
+            return "moderate"
+        else:
+            return "significant"
     
-    # Save results
-    import json
-    with open("context_results.json", "w") as f:
-        json.dump(results, f, indent=2)
+    def _print_summary(self, results: Dict):
+        """Print formatted results."""
+        print("\nPERFORMANCE BY LENGTH:")
+        for length, data in results['by_length'].items():
+            print(f"  {length} tokens:")
+            for position, metrics in data.items():
+                print(f"    {position}: F1={metrics['f1']:.3f}, "
+                      f"Acc={metrics['accuracy']:.3f}, "
+                      f"N={metrics['num_samples']}")
+        
+        if results['by_position']:
+            print("\nPERFORMANCE BY POSITION:")
+            for position, stats in results['by_position'].items():
+                print(f"  {position}: mean={stats['mean_f1']:.3f}, "
+                      f"std={stats['std_f1']:.3f}")
+        
+        print("\nDEGRADATION ANALYSIS:")
+        deg = results['degradation']
+        print(f"  Slope: {deg['slope_per_1k_tokens']:.4f} per 1K tokens")
+        print(f"  R²: {deg['r_squared']:.3f}")
+        print(f"  Interpretation: {deg['interpretation']}")
