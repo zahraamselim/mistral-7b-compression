@@ -3,6 +3,11 @@ Attention Preservation Benchmark
 
 Measures whether quantized models preserve attention to relevant documents in 
 multi-document retrieval scenarios.
+
+Speed Levels:
+  - FAST: 50 samples, 5 docs (~10-15 min)
+  - STANDARD: 100 samples, 5 docs (~20-30 min)  
+  - FULL: 300 samples, 10 docs (~60-90 min)
 """
 
 import random
@@ -62,11 +67,44 @@ class AttentionPreservationBenchmark:
         - Attention-Accuracy Correlation: Does attention predict correctness?
     """
     
+    @staticmethod
+    def create_fast(model: ModelInterface):
+        """Create FAST benchmark: 50 samples, 5 docs (~10-15 min)"""
+        return AttentionPreservationBenchmark(
+            model=model,
+            num_samples=50,
+            num_documents=5,
+            max_doc_tokens=128,
+            test_aggregation_strategies=False
+        )
+    
+    @staticmethod
+    def create_standard(model: ModelInterface):
+        """Create STANDARD benchmark: 100 samples, 5 docs (~20-30 min)"""
+        return AttentionPreservationBenchmark(
+            model=model,
+            num_samples=100,
+            num_documents=5,
+            max_doc_tokens=128,
+            test_aggregation_strategies=False
+        )
+    
+    @staticmethod
+    def create_full(model: ModelInterface):
+        """Create FULL benchmark: 300 samples, 10 docs (~60-90 min)"""
+        return AttentionPreservationBenchmark(
+            model=model,
+            num_samples=300,
+            num_documents=10,
+            max_doc_tokens=128,
+            test_aggregation_strategies=True
+        )
+    
     def __init__(
         self,
         model: ModelInterface,
-        num_samples: int = 300,
-        num_documents: int = 10,
+        num_samples: int = 100,
+        num_documents: int = 5,
         max_doc_tokens: int = 128,
         layers_to_analyze: Optional[List[int]] = None,
         test_aggregation_strategies: bool = False,

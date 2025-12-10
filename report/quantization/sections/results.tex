@@ -1,607 +1,529 @@
 \section{Results}
 
-This section presents empirical results across three evaluation dimensions: computational efficiency (Section \ref{sec:efficiency}), task performance quality (Section \ref{sec:quality}), and RAG-specific capabilities (Section \ref{sec:rag}). All measurements are conducted on NVIDIA Tesla T4 (16GB VRAM) using Mistral-7B-v0.1 as the base model with standard quantization configurations (no calibration-aware optimization).
+This section presents empirical results across three evaluation dimensions: computational efficiency (Section \ref{sec:efficiency}), task performance quality (Section \ref{sec:quality}), and RAG-specific capabilities (Section \ref{sec:rag}). All measurements are conducted on NVIDIA Tesla T4 (16GB VRAM) using Mistral-7B-v0.1 as the base model.
 
 \subsection{Computational Efficiency Analysis}
 \label{sec:efficiency}
 
-\subsubsection{Latency Characterization}
-
-Table \ref{tab:latency_detailed} presents comprehensive latency measurements across all quantization methods, decomposed into prefill (prompt processing) and decode (autoregressive generation) phases.
+\subsubsection{Latency Metrics}
 
 \begin{table}[H]
 \centering
 \caption{Latency measurements across quantization methods}
-\label{tab:latency_detailed}
+\label{tab:latency_methods}
 \small
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Method} & \textbf{TTFT} & \textbf{Decode} & \textbf{Prefill} & \textbf{Total} & \textbf{Speedup} \\
- & \textbf{(ms)} & \textbf{(ms/tok)} & \textbf{(ms)} & \textbf{(ms)} & \textbf{vs FP16} \\
+\textbf{Method} & \textbf{Latency} & \textbf{TTFT} & \textbf{Prefill} & \textbf{Decode} & \textbf{Speedup} \\
+ & \textbf{(ms/tok)} & \textbf{(ms)} & \textbf{(ms)} & \textbf{(ms/tok)} & \textbf{vs FP16} \\
 \midrule
 FP16 & & & & & 1.00$\times$ \\
 NF4 & & & & & \\
 GPTQ & & & & & \\
 AWQ & & & & & \\
-QuaRot & & & & & \\
 HQQ & & & & & \\
-KVQuant & & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{Throughput and Memory Efficiency}
-
-Table \ref{tab:throughput_memory} characterizes sustained generation rates and memory consumption patterns.
-
 \begin{table}[H]
 \centering
-\caption{Throughput and memory utilization}
-\label{tab:throughput_memory}
+\caption{Latency measurements: GPTQ calibration dataset comparison}
+\label{tab:latency_calibration}
 \small
-\begin{tabular}{lcccccc}
+\begin{tabular}{lccccc}
 \toprule
-\textbf{Method} & \textbf{Throughput} & \textbf{Model} & \textbf{Peak} & \textbf{Bits/} & \textbf{Memory} & \textbf{Compression} \\
- & \textbf{(tok/s)} & \textbf{Size (GB)} & \textbf{VRAM (MB)} & \textbf{Param} & \textbf{Efficiency} & \textbf{Ratio} \\
+\textbf{Calibration} & \textbf{Latency} & \textbf{TTFT} & \textbf{Prefill} & \textbf{Decode} & \textbf{Speedup} \\
+\textbf{Dataset} & \textbf{(ms/tok)} & \textbf{(ms)} & \textbf{(ms)} & \textbf{(ms/tok)} & \textbf{vs FP16} \\
 \midrule
-FP16 & & 13.49 & & 16.0 & & 1.00$\times$ \\
-NF4 & & & & 4.0 & & \\
-GPTQ & & & & 4.0 & & \\
-AWQ & & & & 4.0 & & \\
-QuaRot & & & & 4.0 & & \\
-HQQ & & & & 4.0 & & \\
-KVQuant & & & & 16.0* & & \\
+GPTQ-WikiText & & & & & \\
+GPTQ-RAG & & & & & \\
 \bottomrule
-\multicolumn{7}{l}{\footnotesize *KVQuant quantizes KV cache, not weights}
 \end{tabular}
 \end{table}
 
-\subsubsection{Computational Efficiency Metrics}
-
-Table \ref{tab:compute_efficiency} presents Model FLOPs Utilization and energy consumption estimates, revealing how effectively each method exploits available hardware capacity.
+\subsubsection{Memory and Compression}
 
 \begin{table}[H]
 \centering
-\caption{Computational efficiency and energy consumption}
-\label{tab:compute_efficiency}
+\caption{Memory utilization and compression metrics}
+\label{tab:memory_methods}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Method} & \textbf{Model Size} & \textbf{Peak Memory} & \textbf{Bits/} & \textbf{Compression} & \textbf{Memory} \\
+ & \textbf{(GB)} & \textbf{(MB)} & \textbf{Param} & \textbf{Ratio} & \textbf{Efficiency} \\
+\midrule
+FP16 & 13.49 & & 16.0 & 1.00$\times$ & \\
+NF4 & & & 4.0 & & \\
+GPTQ & & & 4.0 & & \\
+AWQ & & & 4.0 & & \\
+HQQ & & & 4.0 & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Memory utilization: GPTQ calibration dataset comparison}
+\label{tab:memory_calibration}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Calibration} & \textbf{Model Size} & \textbf{Peak Memory} & \textbf{Bits/} & \textbf{Compression} & \textbf{Memory} \\
+\textbf{Dataset} & \textbf{(GB)} & \textbf{(MB)} & \textbf{Param} & \textbf{Ratio} & \textbf{Efficiency} \\
+\midrule
+GPTQ-WikiText & & & 4.0 & & \\
+GPTQ-RAG & & & 4.0 & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Throughput}
+
+\begin{table}[H]
+\centering
+\caption{Generation throughput across quantization methods}
+\label{tab:throughput_methods}
 \small
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Method} & \textbf{FLOPs/tok} & \textbf{MFU} & \textbf{Energy} & \textbf{Energy} \\
- & \textbf{(GFLOPs)} & \textbf{(\%)} & \textbf{(mJ/tok)} & \textbf{Efficiency} \\
+\textbf{Method} & \textbf{Throughput} & \textbf{Total Tokens} & \textbf{Total Time} & \textbf{Throughput} \\
+ & \textbf{(tok/s)} & \textbf{Generated} & \textbf{(s)} & \textbf{vs FP16} \\
 \midrule
 FP16 & & & & 1.00$\times$ \\
 NF4 & & & & \\
 GPTQ & & & & \\
 AWQ & & & & \\
-QuaRot & & & & \\
 HQQ & & & & \\
-KVQuant & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\subsubsection{KV Cache Memory Analysis}
-
-For methods with explicit KV cache management, Table \ref{tab:kv_cache_analysis} estimates cache sizes at different sequence lengths, demonstrating memory scaling behavior.
 
 \begin{table}[H]
 \centering
-\caption{KV cache memory requirements by sequence length}
-\label{tab:kv_cache_analysis}
+\caption{Generation throughput: GPTQ calibration dataset comparison}
+\label{tab:throughput_calibration}
 \small
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Method} & \textbf{1K tokens} & \textbf{2K tokens} & \textbf{4K tokens} & \textbf{8K tokens} \\
- & \textbf{(MB)} & \textbf{(MB)} & \textbf{(MB)} & \textbf{(MB)} \\
+\textbf{Calibration} & \textbf{Throughput} & \textbf{Total Tokens} & \textbf{Total Time} & \textbf{Throughput} \\
+\textbf{Dataset} & \textbf{(tok/s)} & \textbf{Generated} & \textbf{(s)} & \textbf{vs FP16} \\
 \midrule
-FP16 & & & & \\
-NF4 & & & & \\
-GPTQ & & & & \\
-AWQ & & & & \\
-QuaRot & & & & \\
-HQQ & & & & \\
-KVQuant & & & & \\
+GPTQ-WikiText & & & & \\
+GPTQ-RAG & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{Batch Throughput Scaling}
-
-Table \ref{tab:batch_throughput} examines throughput scaling across batch sizes, critical for understanding deployment capacity in production scenarios.
+\subsubsection{Batch Inference Scaling}
 
 \begin{table}[H]
 \centering
-\caption{Batch throughput scaling (tokens/second)}
-\label{tab:batch_throughput}
+\caption{Batch throughput scaling (samples/second)}
+\label{tab:batch_methods}
 \small
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccccc}
 \toprule
-\textbf{Method} & \textbf{Batch=1} & \textbf{Batch=2} & \textbf{Batch=4} & \textbf{Batch=8} \\
+\textbf{Method} & \textbf{Batch=1} & \textbf{Batch=2} & \textbf{Batch=4} & \textbf{Batch=8} & \textbf{Optimal} & \textbf{Optimal} & \textbf{Scaling} \\
+ & & & & & \textbf{Batch} & \textbf{Throughput} & \textbf{Efficiency} \\
 \midrule
-FP16 & & & & \\
-NF4 & & & & \\
-GPTQ & & & & \\
-AWQ & & & & \\
-QuaRot & & & & \\
-HQQ & & & & \\
-KVQuant & & & & \\
+FP16 & & & & & & & \\
+NF4 & & & & & & & \\
+GPTQ & & & & & & & \\
+AWQ & & & & & & & \\
+HQQ & & & & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{Efficiency Summary and Pareto Analysis}
-
-Table \ref{tab:efficiency_summary} consolidates key efficiency metrics for direct comparison.
-
-\begin{table*}[H]
+\begin{table}[H]
 \centering
-\caption{Consolidated efficiency metrics summary}
-\label{tab:efficiency_summary}
+\caption{Batch throughput scaling: GPTQ calibration dataset comparison}
+\label{tab:batch_calibration}
 \small
-\begin{tabular}{lcccccccc}
+\begin{tabular}{lccccccc}
 \toprule
-\textbf{Method} & \textbf{Latency} & \textbf{Throughput} & \textbf{TTFT} & \textbf{Memory} & \textbf{Model} & \textbf{MFU} & \textbf{Energy} & \textbf{Overall} \\
- & \textbf{(ms/tok)} & \textbf{(tok/s)} & \textbf{(ms)} & \textbf{(MB)} & \textbf{(GB)} & \textbf{(\%)} & \textbf{(mJ/tok)} & \textbf{Rank} \\
+\textbf{Calibration} & \textbf{Batch=1} & \textbf{Batch=2} & \textbf{Batch=4} & \textbf{Batch=8} & \textbf{Optimal} & \textbf{Optimal} & \textbf{Scaling} \\
+\textbf{Dataset} & & & & & \textbf{Batch} & \textbf{Throughput} & \textbf{Efficiency} \\
 \midrule
-FP16 & & & & & 13.49 & & & \\
-NF4 & & & & & & & & \\
-GPTQ & & & & & & & & \\
-AWQ & & & & & & & & \\
-QuaRot & & & & & & & & \\
-HQQ & & & & & & & & \\
-KVQuant & & & & & & & & \\
+GPTQ-WikiText & & & & & & & \\
+GPTQ-RAG & & & & & & & \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
+
+\subsubsection{Energy Consumption}
+
+\begin{table}[H]
+\centering
+\caption{Energy consumption estimates}
+\label{tab:energy_methods}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Method} & \textbf{Energy/Token} & \textbf{TDP} & \textbf{Energy} & \textbf{Est. Cost} \\
+ & \textbf{(mJ)} & \textbf{(W)} & \textbf{Efficiency vs FP16} & \textbf{(\$/1M tokens)} \\
+\midrule
+FP16 & & 70 & 1.00$\times$ & \\
+NF4 & & 70 & & \\
+GPTQ & & 70 & & \\
+AWQ & & 70 & & \\
+HQQ & & 70 & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Energy consumption: GPTQ calibration dataset comparison}
+\label{tab:energy_calibration}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Calibration} & \textbf{Energy/Token} & \textbf{TDP} & \textbf{Energy} & \textbf{Est. Cost} \\
+\textbf{Dataset} & \textbf{(mJ)} & \textbf{(W)} & \textbf{Efficiency vs FP16} & \textbf{(\$/1M tokens)} \\
+\midrule
+GPTQ-WikiText & & 70 & & \\
+GPTQ-RAG & & 70 & & \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Task Performance Analysis}
 \label{sec:quality}
 
 \subsubsection{Language Modeling: Perplexity}
 
-Table \ref{tab:perplexity} presents perplexity measurements on WikiText-2, a foundational metric for assessing language modeling quality under compression.
-
 \begin{table}[H]
 \centering
-\caption{Perplexity on WikiText-2 test set (100 samples)}
-\label{tab:perplexity}
+\caption{Perplexity on WikiText-2 test set}
+\label{tab:perplexity_methods}
 \small
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Method} & \textbf{Perplexity} & \textbf{Loss} & \textbf{Increase} & \textbf{Degradation} \\
- & & & \textbf{(abs)} & \textbf{(\%)} \\
+\textbf{Method} & \textbf{Perplexity} & \textbf{Loss} & \textbf{Delta PPL} & \textbf{Degradation} \\
+ & & & \textbf{vs FP16} & \textbf{(\%)} \\
 \midrule
-FP16 & 12.79 & & 0.00 & 0.00\% \\
+FP16 & & & 0.00 & 0.0\% \\
 NF4 & & & & \\
 GPTQ & & & & \\
 AWQ & & & & \\
-QuaRot & & & & \\
 HQQ & & & & \\
-KVQuant & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{Commonsense Reasoning}
+\begin{table}[H]
+\centering
+\caption{Perplexity: GPTQ calibration dataset comparison}
+\label{tab:perplexity_calibration}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Calibration} & \textbf{Perplexity} & \textbf{Loss} & \textbf{Delta PPL} & \textbf{Degradation} \\
+\textbf{Dataset} & & & \textbf{vs FP16} & \textbf{(\%)} \\
+\midrule
+GPTQ-WikiText & & & & \\
+GPTQ-RAG & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Table \ref{tab:commonsense} evaluates performance on commonsense reasoning benchmarks requiring world knowledge and intuitive understanding.
+\subsubsection{Reasoning Tasks}
 
 \begin{table}[H]
 \centering
-\caption{Commonsense reasoning performance (0-shot)}
-\label{tab:commonsense}
+\caption{Reasoning benchmark performance (0-shot)}
+\label{tab:reasoning_methods}
+\small
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Method} & \textbf{Hella-} & \textbf{Wino-} & \textbf{PIQA} & \textbf{ARC-} & \textbf{ARC-} & \textbf{Bool} & \textbf{Avg} \\
+ & \textbf{Swag} & \textbf{Grande} & & \textbf{Easy} & \textbf{Chal.} & \textbf{Q} & \\
+\midrule
+FP16 & & & & & & & \\
+NF4 & & & & & & & \\
+GPTQ & & & & & & & \\
+AWQ & & & & & & & \\
+HQQ & & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Reasoning benchmarks: GPTQ calibration dataset comparison}
+\label{tab:reasoning_calibration}
+\small
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Calibration} & \textbf{Hella-} & \textbf{Wino-} & \textbf{PIQA} & \textbf{ARC-} & \textbf{ARC-} & \textbf{Bool} & \textbf{Avg} \\
+\textbf{Dataset} & \textbf{Swag} & \textbf{Grande} & & \textbf{Easy} & \textbf{Chal.} & \textbf{Q} & \\
+\midrule
+GPTQ-WikiText & & & & & & & \\
+GPTQ-RAG & & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Knowledge and Mathematical Reasoning}
+
+\begin{table}[H]
+\centering
+\caption{Knowledge and mathematical reasoning performance}
+\label{tab:knowledge_math_methods}
 \small
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Method} & \textbf{HellaSwag} & \textbf{ARC-Easy} & \textbf{ARC-Challenge} & \textbf{Average} & \textbf{Degradation} \\
- & \textbf{(acc\_norm)} & \textbf{(acc\_norm)} & \textbf{(acc\_norm)} & & \textbf{vs FP16} \\
+\textbf{Method} & \textbf{MMLU} & \textbf{GSM8K} & \textbf{TruthfulQA} & \textbf{Avg} & \textbf{Avg Deg.} \\
+ & \textbf{(5-shot)} & \textbf{(5-shot)} & \textbf{(0-shot)} & & \textbf{(\%)} \\
 \midrule
-FP16 & 0.720 & 0.760 & 0.580 & 0.687 & 0.00\% \\
+FP16 & & & & & 0.0\% \\
 NF4 & & & & & \\
 GPTQ & & & & & \\
 AWQ & & & & & \\
-QuaRot & & & & & \\
 HQQ & & & & & \\
-KVQuant & & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{Mathematical Reasoning}
-
-Table \ref{tab:math_reasoning} assesses preservation of multi-step mathematical reasoning capabilities, often the most sensitive to quantization.
-
 \begin{table}[H]
 \centering
-\caption{Mathematical reasoning performance on GSM8K (8-shot)}
-\label{tab:math_reasoning}
+\caption{Knowledge and math: GPTQ calibration dataset comparison}
+\label{tab:knowledge_math_calibration}
 \small
-\begin{tabular}{lccc}
+\begin{tabular}{lccccc}
 \toprule
-\textbf{Method} & \textbf{Accuracy} & \textbf{Absolute} & \textbf{Relative} \\
- & \textbf{(exact match)} & \textbf{Drop} & \textbf{Degradation} \\
+\textbf{Calibration} & \textbf{MMLU} & \textbf{GSM8K} & \textbf{TruthfulQA} & \textbf{Avg} & \textbf{Avg Deg.} \\
+\textbf{Dataset} & \textbf{(5-shot)} & \textbf{(5-shot)} & \textbf{(0-shot)} & & \textbf{(\%)} \\
 \midrule
-FP16 & 0.360 & 0.000 & 0.0\% \\
-NF4 & & & \\
-GPTQ & & & \\
-AWQ & & & \\
-QuaRot & & & \\
-HQQ & & & \\
-KVQuant & & & \\
+GPTQ-WikiText & & & & & \\
+GPTQ-RAG & & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{World Knowledge}
-
-Table \ref{tab:world_knowledge} evaluates factual knowledge retention across 57 academic domains via MMLU.
+\subsubsection{RAG-Focused Reading Comprehension}
 
 \begin{table}[H]
 \centering
-\caption{World knowledge evaluation on MMLU (5-shot)}
-\label{tab:world_knowledge}
-\small
-\begin{tabular}{lccc}
-\toprule
-\textbf{Method} & \textbf{Accuracy} & \textbf{Absolute} & \textbf{Relative} \\
- & & \textbf{Drop} & \textbf{Degradation} \\
-\midrule
-FP16 & 1.000 & 0.000 & 0.0\% \\
-NF4 & & & \\
-GPTQ & & & \\
-AWQ & & & \\
-QuaRot & & & \\
-HQQ & & & \\
-KVQuant & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Code Generation}
-
-Table \ref{tab:code_generation} measures code synthesis quality via functional correctness on HumanEval.
-
-\begin{table}[H]
-\centering
-\caption{Code generation performance on HumanEval (0-shot)}
-\label{tab:code_generation}
-\small
-\begin{tabular}{lccc}
-\toprule
-\textbf{Method} & \textbf{Pass@1} & \textbf{Absolute} & \textbf{Relative} \\
- & & \textbf{Change} & \textbf{Change} \\
-\midrule
-FP16 & 0.050 & 0.000 & 0.0\% \\
-NF4 & & & \\
-GPTQ & & & \\
-AWQ & & & \\
-QuaRot & & & \\
-HQQ & & & \\
-KVQuant & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Cross-Task Performance Summary}
-
-Table \ref{tab:task_summary} provides consolidated task performance with overall rankings.
-
-\begin{table*}[H]
-\centering
-\caption{Comprehensive task performance summary}
-\label{tab:task_summary}
-\footnotesize
-\begin{tabular}{lcccccccc}
-\toprule
-\textbf{Method} & \textbf{Perplexity} & \textbf{Commonsense} & \textbf{Math} & \textbf{Knowledge} & \textbf{Code} & \textbf{Average} & \textbf{Avg Deg.} & \textbf{Quality} \\
- & \textit{(↓)} & \textbf{Avg} & \textbf{(GSM8K)} & \textbf{(MMLU)} & \textbf{(HumanEval)} & \textbf{Accuracy} & \textbf{(\%)} & \textbf{Rank} \\
-\midrule
-FP16 & 12.79 & 0.687 & 0.360 & 1.000 & 0.050 & 0.524 & 0.0\% & 1 \\
-NF4 & & & & & & & & \\
-GPTQ & & & & & & & & \\
-AWQ & & & & & & & & \\
-QuaRot & & & & & & & & \\
-HQQ & & & & & & & & \\
-KVQuant & & & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-\subsubsection{Task-Specific Sensitivity Analysis}
-
-Table \ref{tab:sensitivity_analysis} identifies which task categories exhibit highest and lowest sensitivity to quantization.
-
-\begin{table}[H]
-\centering
-\caption{Task category sensitivity to quantization}
-\label{tab:sensitivity_analysis}
-\small
-\begin{tabular}{lccc}
-\toprule
-\textbf{Task Category} & \textbf{Mean Degradation} & \textbf{Std Dev} & \textbf{Sensitivity} \\
- & \textbf{(across methods)} & & \textbf{Level} \\
-\midrule
-Mathematical Reasoning & & & \\
-Code Generation & & & \\
-Commonsense Reasoning & & & \\
-World Knowledge & & & \\
-Language Modeling & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{RAG Performance Analysis}
-\label{sec:rag}
-
-\subsubsection{Answer Generation Quality}
-
-Table \ref{tab:rag_answer_quality} evaluates generated answer quality using multiple complementary metrics.
-
-\begin{table}[H]
-\centering
-\caption{RAG answer quality metrics}
-\label{tab:rag_answer_quality}
+\caption{RAG-focused reading comprehension tasks}
+\label{tab:rag_tasks_methods}
 \small
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Method} & \textbf{F1} & \textbf{EM} & \textbf{ROUGE-1} & \textbf{ROUGE-L} & \textbf{BERTScore} & \textbf{Avg} \\
- & & & & & \textbf{F1} & \textbf{Score} \\
+\textbf{Method} & \textbf{SQuAD} & \textbf{NQ-Open} & \textbf{TriviaQA} & \textbf{DROP} & \textbf{QuAC} & \textbf{Avg} \\
 \midrule
 FP16 & & & & & & \\
 NF4 & & & & & & \\
 GPTQ & & & & & & \\
 AWQ & & & & & & \\
-QuaRot & & & & & & \\
 HQQ & & & & & & \\
-KVQuant & & & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{Faithfulness and Relevance}
+\begin{table}[H]
+\centering
+\caption{RAG-focused tasks: GPTQ calibration dataset comparison}
+\label{tab:rag_tasks_calibration}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Calibration} & \textbf{SQuAD} & \textbf{NQ-Open} & \textbf{TriviaQA} & \textbf{DROP} & \textbf{QuAC} & \textbf{Avg} \\
+\textbf{Dataset} & & & & & & \\
+\midrule
+GPTQ-WikiText & & & & & & \\
+GPTQ-RAG & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Table \ref{tab:rag_faithfulness} measures answer adherence to retrieved context and query relevance.
+\subsection{RAG-Specific Performance Analysis}
+\label{sec:rag}
+
+\subsubsection{Attention Preservation}
 
 \begin{table}[H]
 \centering
-\caption{RAG faithfulness and relevance metrics}
-\label{tab:rag_faithfulness}
+\caption{Attention preservation to relevant documents}
+\label{tab:attention_preservation_methods}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Method} & \textbf{Precision} & \textbf{Mean} & \textbf{Median} & \textbf{Gini} & \textbf{EM} & \textbf{F1} \\
+ & \textbf{@1} & \textbf{Rank} & \textbf{Rank} & \textbf{Coeff} & \textbf{Acc} & \textbf{Score} \\
+\midrule
+FP16 & & & & & & \\
+NF4 & & & & & & \\
+GPTQ & & & & & & \\
+AWQ & & & & & & \\
+HQQ & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Attention preservation: GPTQ calibration dataset comparison}
+\label{tab:attention_preservation_calibration}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Calibration} & \textbf{Precision} & \textbf{Mean} & \textbf{Median} & \textbf{Gini} & \textbf{EM} & \textbf{F1} \\
+\textbf{Dataset} & \textbf{@1} & \textbf{Rank} & \textbf{Rank} & \textbf{Coeff} & \textbf{Acc} & \textbf{Score} \\
+\midrule
+GPTQ-WikiText & & & & & & \\
+GPTQ-RAG & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Context Degradation Analysis}
+
+\begin{table}[H]
+\centering
+\caption{Accuracy degradation with increasing context length}
+\label{tab:context_degradation_methods}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Method} & \textbf{Slope per} & \textbf{R-squared} & \textbf{Cliff Point} & \textbf{Signif.} & \textbf{Position} \\
+ & \textbf{1K tokens} & & \textbf{(tokens)} & \textbf{Deg.?} & \textbf{Effect?} \\
+\midrule
+FP16 & & & & & \\
+NF4 & & & & & \\
+GPTQ & & & & & \\
+AWQ & & & & & \\
+HQQ & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Context degradation: GPTQ calibration dataset comparison}
+\label{tab:context_degradation_calibration}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Calibration} & \textbf{Slope per} & \textbf{R-squared} & \textbf{Cliff Point} & \textbf{Signif.} & \textbf{Position} \\
+\textbf{Dataset} & \textbf{1K tokens} & & \textbf{(tokens)} & \textbf{Deg.?} & \textbf{Effect?} \\
+\midrule
+GPTQ-WikiText & & & & & \\
+GPTQ-RAG & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Context Length Breakdown}
+
+\begin{table}[H]
+\centering
+\caption{Accuracy by context length (F1 score)}
+\label{tab:context_length_methods}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Method} & \textbf{512 tok} & \textbf{1024 tok} & \textbf{2048 tok} & \textbf{4096 tok} & \textbf{Degradation} \\
+ & & & & & \textbf{512 to 4096} \\
+\midrule
+FP16 & & & & & \\
+NF4 & & & & & \\
+GPTQ & & & & & \\
+AWQ & & & & & \\
+HQQ & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Context length breakdown: GPTQ calibration comparison}
+\label{tab:context_length_calibration}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Calibration} & \textbf{512 tok} & \textbf{1024 tok} & \textbf{2048 tok} & \textbf{4096 tok} & \textbf{Degradation} \\
+\textbf{Dataset} & & & & & \textbf{512 to 4096} \\
+\midrule
+GPTQ-WikiText & & & & & \\
+GPTQ-RAG & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Attention Drift During Generation}
+
+\begin{table}[H]
+\centering
+\caption{Attention stability during generation}
+\label{tab:attention_drift_methods}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Method} & \textbf{Mean} & \textbf{Max} & \textbf{Drift from} & \textbf{Drift-F1} & \textbf{Drift@} & \textbf{Drift@} \\
+ & \textbf{Drift} & \textbf{Drift} & \textbf{Relevant} & \textbf{Corr (r)} & \textbf{Correct} & \textbf{Wrong} \\
+\midrule
+FP16 & & & & & & \\
+NF4 & & & & & & \\
+GPTQ & & & & & & \\
+AWQ & & & & & & \\
+HQQ & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Attention drift: GPTQ calibration dataset comparison}
+\label{tab:attention_drift_calibration}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Calibration} & \textbf{Mean} & \textbf{Max} & \textbf{Drift from} & \textbf{Drift-F1} & \textbf{Drift@} & \textbf{Drift@} \\
+\textbf{Dataset} & \textbf{Drift} & \textbf{Drift} & \textbf{Relevant} & \textbf{Corr (r)} & \textbf{Correct} & \textbf{Wrong} \\
+\midrule
+GPTQ-WikiText & & & & & & \\
+GPTQ-RAG & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Attention-Quality Correlation Analysis}
+
+\begin{table}[H]
+\centering
+\caption{Correlation between attention metrics and answer quality}
+\label{tab:attention_quality_methods}
 \small
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Method} & \textbf{Faithfulness} & \textbf{Relevance} & \textbf{Avg Answer} & \textbf{Hallucination} \\
- & & & \textbf{Length} & \textbf{Rate} \\
+\textbf{Method} & \textbf{Prec@1 vs F1} & \textbf{Rank vs F1} & \textbf{High Attn} & \textbf{Low Attn} \\
+ & \textbf{(Pearson r)} & \textbf{(Spearman rho)} & \textbf{Correct (\%)} & \textbf{Correct (\%)} \\
 \midrule
 FP16 & & & & \\
 NF4 & & & & \\
 GPTQ & & & & \\
 AWQ & & & & \\
-QuaRot & & & & \\
 HQQ & & & & \\
-KVQuant & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{Retrieval Quality Assessment}
-
-Table \ref{tab:retrieval_quality} characterizes the quality of context retrieval independent of generation.
-
 \begin{table}[H]
 \centering
-\caption{Context retrieval quality metrics}
-\label{tab:retrieval_quality}
+\caption{Attention-quality correlation: GPTQ calibration comparison}
+\label{tab:attention_quality_calibration}
 \small
-\begin{tabular}{lccccc}
+\begin{tabular}{lcccc}
 \toprule
-\textbf{Method} & \textbf{Context} & \textbf{Context} & \textbf{Context} & \textbf{Avg Score} & \textbf{Avg Context} \\
- & \textbf{Sufficiency} & \textbf{Precision} & \textbf{Coverage} & & \textbf{Length (chars)} \\
+\textbf{Calibration} & \textbf{Prec@1 vs F1} & \textbf{Rank vs F1} & \textbf{High Attn} & \textbf{Low Attn} \\
+\textbf{Dataset} & \textbf{(Pearson r)} & \textbf{(Spearman rho)} & \textbf{Correct (\%)} & \textbf{Correct (\%)} \\
 \midrule
-FP16 & & & & & \\
-NF4 & & & & & \\
-GPTQ & & & & & \\
-AWQ & & & & & \\
-QuaRot & & & & & \\
-HQQ & & & & & \\
-KVQuant & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{RAG vs. No-RAG Comparison}
-
-Table \ref{tab:rag_comparison} quantifies the improvement gained from retrieval augmentation versus direct generation.
-
-\begin{table}[H]
-\centering
-\caption{RAG improvement over no-RAG baseline}
-\label{tab:rag_comparison}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Method} & \textbf{No-RAG} & \textbf{RAG} & \textbf{F1} & \textbf{Relative} & \textbf{RAG} \\
- & \textbf{F1} & \textbf{F1} & \textbf{Improvement} & \textbf{Improvement} & \textbf{Benefit} \\
-\midrule
-FP16 & & & & & \\
-NF4 & & & & & \\
-GPTQ & & & & & \\
-AWQ & & & & & \\
-QuaRot & & & & & \\
-HQQ & & & & & \\
-KVQuant & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{RAG Efficiency Metrics}
-
-Table \ref{tab:rag_efficiency} measures computational overhead introduced by retrieval augmentation.
-
-\begin{table}[H]
-\centering
-\caption{RAG computational efficiency}
-\label{tab:rag_efficiency}
-\small
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Method} & \textbf{Retrieval} & \textbf{RAG Gen} & \textbf{No-RAG Gen} & \textbf{RAG} & \textbf{No-RAG} & \textbf{Gen} \\
- & \textbf{Time (ms)} & \textbf{Time (ms)} & \textbf{Time (ms)} & \textbf{Throughput} & \textbf{Throughput} & \textbf{Slowdown} \\
-\midrule
-FP16 & & & & & & \\
-NF4 & & & & & & \\
-GPTQ & & & & & & \\
-AWQ & & & & & & \\
-QuaRot & & & & & & \\
-HQQ & & & & & & \\
-KVQuant & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{RAG Performance Summary}
-
-Table \ref{tab:rag_summary} consolidates RAG metrics into overall scores for direct comparison.
-
-\begin{table*}[H]
-\centering
-\caption{Comprehensive RAG performance summary}
-\label{tab:rag_summary}
-\small
-\begin{tabular}{lcccccccc}
-\toprule
-\textbf{Method} & \textbf{Answer} & \textbf{Faithful-} & \textbf{Retrieval} & \textbf{RAG} & \textbf{RAG} & \textbf{Overall} & \textbf{RAG Deg.} & \textbf{RAG} \\
- & \textbf{Quality} & \textbf{ness} & \textbf{Quality} & \textbf{Improvement} & \textbf{Efficiency} & \textbf{RAG Score} & \textbf{vs FP16} & \textbf{Rank} \\
-\midrule
-FP16 & & & & & & & 0.0\% & 1 \\
-NF4 & & & & & & & & \\
-GPTQ & & & & & & & & \\
-AWQ & & & & & & & & \\
-QuaRot & & & & & & & & \\
-HQQ & & & & & & & & \\
-KVQuant & & & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-\subsection{Comparative Analysis}
-
-\subsubsection{Efficiency-Quality Pareto Frontier}
-
-Table \ref{tab:pareto_analysis} identifies methods that achieve optimal trade-offs between compression efficiency and task performance.
-
-\begin{table}[H]
-\centering
-\caption{Pareto optimality analysis: efficiency vs. quality}
-\label{tab:pareto_analysis}
-\small
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Method} & \textbf{Throughput} & \textbf{Memory} & \textbf{Task} & \textbf{RAG} & \textbf{Pareto} & \textbf{Use} \\
- & \textbf{Rank} & \textbf{Rank} & \textbf{Quality} & \textbf{Quality} & \textbf{Optimal} & \textbf{Case} \\
-\midrule
-FP16 & & & Baseline & Baseline & & \\
-NF4 & & & & & & \\
-GPTQ & & & & & & \\
-AWQ & & & & & & \\
-QuaRot & & & & & & \\
-HQQ & & & & & & \\
-KVQuant & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Method Clustering Analysis}
-
-Table \ref{tab:method_clustering} groups methods by behavioral similarity across all evaluation dimensions.
-
-\begin{table}[H]
-\centering
-\caption{Method clustering by performance characteristics}
-\label{tab:method_clustering}
-\small
-\begin{tabular}{llp{7cm}}
-\toprule
-\textbf{Cluster} & \textbf{Methods} & \textbf{Shared Characteristics} \\
-\midrule
-High Efficiency & & \\
-Balanced & & \\
-Quality-Focused & & \\
-Specialized & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Hardware Compatibility Summary}
-
-Table \ref{tab:hardware_compatibility} documents observed hardware-specific behaviors on Tesla T4 (Turing architecture).
-
-\begin{table}[H]
-\centering
-\caption{Hardware compatibility assessment for Tesla T4}
-\label{tab:hardware_compatibility}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Method} & \textbf{Native} & \textbf{Kernel} & \textbf{Observed} & \textbf{T4} & \textbf{Deployment} \\
- & \textbf{Support} & \textbf{Fallback} & \textbf{Issues} & \textbf{Viable} & \textbf{Notes} \\
-\midrule
-FP16 & & & & & \\
-NF4 & & & & & \\
-GPTQ & & & & & \\
-AWQ & & & & & \\
-QuaRot & & & & & \\
-HQQ & & & & & \\
-KVQuant & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Deployment Decision Framework}
-
-Table \ref{tab:deployment_recommendations} provides actionable guidance for method selection based on deployment priorities.
-
-\begin{table*}[H]
-\centering
-\caption{Method selection recommendations by deployment scenario}
-\label{tab:deployment_recommendations}
-\small
-\begin{tabular}{lp{10cm}l}
-\toprule
-\textbf{Deployment Scenario} & \textbf{Recommended Method} & \textbf{Rationale} \\
-\midrule
-Maximum Quality Preservation & & \\
-Minimum Memory Footprint & & \\
-Maximum Throughput & & \\
-Long-Context RAG (>4K tokens) & & \\
-Hardware-Constrained (Turing GPUs) & & \\
-Zero-Shot Deployment & & \\
-Balanced Performance & & \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-\subsection{Key Findings Summary}
-
-Based on the comprehensive evaluation results, we identify several critical insights:
-
-\begin{table}[H]
-\centering
-\caption{Summary of key findings}
-\label{tab:key_findings}
-\small
-\begin{tabular}{lp{10cm}}
-\toprule
-\textbf{Finding Category} & \textbf{Key Insight} \\
-\midrule
-Best Overall Method & \\
-Lowest Degradation & \\
-Highest Efficiency & \\
-Best for RAG & \\
-Best for Math & \\
-Best for T4 Hardware & \\
-Task Sensitivity Ranking & \\
-Compression-Quality Sweet Spot & \\
+GPTQ-WikiText & & & & \\
+GPTQ-RAG & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}

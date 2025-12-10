@@ -2,6 +2,11 @@
 Context Degradation Benchmark
 
 Measures accuracy degradation as context length increases in quantized models.
+
+Speed Levels:
+  - FAST: 30 samples/length, 3 lengths, middle only (~15-20 min)
+  - STANDARD: 50 samples/length, 3 lengths, middle only (~25-35 min)
+  - FULL: 100 samples/length, 4 lengths, all positions (~90-120 min)
 """
 
 import random
@@ -50,19 +55,49 @@ class ContextDegradationBenchmark:
         - Effect sizes (Cohen's d)
     """
     
+    @staticmethod
+    def create_fast(model: ModelInterface):
+        """Create FAST benchmark: 30 samples/length, 3 lengths, middle only (~15-20 min)"""
+        return ContextDegradationBenchmark(
+            model=model,
+            context_lengths=[512, 2048, 4096],
+            samples_per_length=30,
+            answer_positions=["middle"]
+        )
+    
+    @staticmethod
+    def create_standard(model: ModelInterface):
+        """Create STANDARD benchmark: 50 samples/length, 3 lengths, middle only (~25-35 min)"""
+        return ContextDegradationBenchmark(
+            model=model,
+            context_lengths=[512, 2048, 4096],
+            samples_per_length=50,
+            answer_positions=["middle"]
+        )
+    
+    @staticmethod
+    def create_full(model: ModelInterface):
+        """Create FULL benchmark: 100 samples/length, 4 lengths, all positions (~90-120 min)"""
+        return ContextDegradationBenchmark(
+            model=model,
+            context_lengths=[512, 1024, 2048, 4096],
+            samples_per_length=100,
+            answer_positions=["start", "middle", "end"]
+        )
+    
     def __init__(
         self,
         model: ModelInterface,
         context_lengths: List[int] = None,
-        samples_per_length: int = 100,
+        samples_per_length: int = 50,
         answer_positions: List[str] = None,
         context_tolerance: float = 0.05,
         random_seed: int = 42
     ):
         self.model = model
-        self.context_lengths = sorted(context_lengths or [512, 1024, 2048, 4096])
+        self.context_lengths = sorted(context_lengths or [512, 2048, 4096])
         self.samples_per_length = samples_per_length
-        self.answer_positions = answer_positions or ["start", "middle", "end"]
+        self.answer_positions = answer_positions or ["middle"]
         self.context_tolerance = context_tolerance
         
         random.seed(random_seed)
@@ -190,8 +225,6 @@ class ContextDegradationBenchmark:
             return (0.4, 0.6)
         elif position == "end":
             return (0.85, 1.0)
-        elif position == "random":
-            return (0.2, 0.8)
         else:
             return (0.2, 0.8)
     

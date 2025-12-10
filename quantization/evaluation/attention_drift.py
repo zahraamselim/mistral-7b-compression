@@ -2,6 +2,11 @@
 Attention Drift Benchmark
 
 Measures attention stability during generation in quantized models.
+
+Speed Levels:
+  - FAST: 50 samples, 3 positions, 5 docs (~15-20 min)
+  - STANDARD: 100 samples, 3 positions, 5 docs (~30-40 min)
+  - FULL: 150 samples, 5 positions, 5 docs (~60-80 min)
 """
 
 import random
@@ -49,10 +54,40 @@ class AttentionDriftBenchmark:
         - Drift-quality correlation: Does drift predict answer quality?
     """
     
+    @staticmethod
+    def create_fast(model: ModelInterface):
+        """Create FAST benchmark: 50 samples, 3 positions, 5 docs (~15-20 min)"""
+        return AttentionDriftBenchmark(
+            model=model,
+            num_samples=50,
+            generation_positions=[1, 5, 20],
+            num_documents=5
+        )
+    
+    @staticmethod
+    def create_standard(model: ModelInterface):
+        """Create STANDARD benchmark: 100 samples, 3 positions, 5 docs (~30-40 min)"""
+        return AttentionDriftBenchmark(
+            model=model,
+            num_samples=100,
+            generation_positions=[1, 5, 20],
+            num_documents=5
+        )
+    
+    @staticmethod
+    def create_full(model: ModelInterface):
+        """Create FULL benchmark: 150 samples, 5 positions, 5 docs (~60-80 min)"""
+        return AttentionDriftBenchmark(
+            model=model,
+            num_samples=150,
+            generation_positions=[1, 5, 10, 20, 40],
+            num_documents=5
+        )
+    
     def __init__(
         self,
         model: ModelInterface,
-        num_samples: int = 150,
+        num_samples: int = 100,
         generation_positions: List[int] = None,
         num_documents: int = 5,
         layers_to_analyze: Optional[List[int]] = None,
@@ -60,7 +95,7 @@ class AttentionDriftBenchmark:
     ):
         self.model = model
         self.num_samples = num_samples
-        self.generation_positions = sorted(generation_positions or [1, 5, 10, 20, 40])
+        self.generation_positions = sorted(generation_positions or [1, 5, 20])
         self.num_documents = num_documents
         self.layers_to_analyze = layers_to_analyze
         
