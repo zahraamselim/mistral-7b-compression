@@ -1,26 +1,90 @@
 \section{Methodology}
 
-\subsection{Base Model and Hardware}
+\subsection{Overview}
 
-This study utilizes \textbf{Mistral-7B-v0.1} \cite{jiang2023mistral} as the baseline model, selected for its parameter efficiency and strong performance profile. All experiments are conducted on a single \textbf{NVIDIA Tesla T4 GPU (16GB VRAM)} to simulate realistic edge deployment scenarios. The software environment includes PyTorch 2.x, Transformers 4.x, and quantization-specific libraries (bitsandbytes, AutoGPTQ, AutoAWQ, HQQ).
+This study conducts a comprehensive evaluation of post-training quantization techniques applied to the Mistral-7B model, with particular focus on Retrieval-Augmented Generation (RAG) capabilities. Our experimental protocol follows a two-phase approach: (1) quantize the base model on high-memory hardware, and (2) evaluate compressed models on resource-constrained edge hardware to simulate realistic deployment scenarios. All evaluations assess three dimensions: computational efficiency, general task performance, and RAG-specific capabilities.
+
+\subsection{Hardware and Software Environment}
+
+\subsubsection{Quantization Environment}
+
+Model quantization is performed on cloud-based GPU instances with sufficient memory to load and process the full-precision model:
+
+\begin{itemize}
+    \item \textbf{Platform:} Kaggle
+    \item \textbf{GPU:} NVIDIA Tesla P100 (16GB VRAM)
+    % \item \textbf{Quantization Time:} Approximately 20-25 minutes per model
+    % \item \textbf{Memory Configuration:} GPU: 10GB, CPU: 50GB (with offloading)
+\end{itemize}
+
+The P100 provides sufficient memory bandwidth and compute capacity for the calibration-based quantization algorithms (GPTQ, AWQ), which require multiple forward passes through calibration datasets to compute optimal quantization parameters. This separation of quantization and evaluation environments reflects realistic deployment workflows where model compression is performed once on powerful hardware before deployment to edge devices.
+
+\subsubsection{Evaluation Environment}
+
+All performance evaluations are conducted on edge-class hardware to assess real-world deployment viability:
+
+\begin{itemize}
+    \item \textbf{Platforms:} Kaggle and Google Colab free-tier instances
+    \item \textbf{GPU:} NVIDIA Tesla T4 (16GB VRAM)
+    % \item \textbf{Memory Constraints:} 16GB GPU memory, typical of edge deployment
+    % \item \textbf{Software Stack:}
+    % \begin{itemize}
+    %     \item PyTorch 2.x with CUDA 11.8
+    %     \item Transformers 4.x (HuggingFace)
+    %     \item Quantization libraries: bitsandbytes, AutoGPTQ, AutoAWQ, HQQ
+    %     \item Evaluation framework: lm-evaluation-harness
+    % \end{itemize}
+\end{itemize}
+
+The Tesla T4 GPU represents a common edge deployment target, offering a balance between performance and power efficiency (70W TDP). Its 16GB memory constraint necessitates model compression for serving 7B parameter models, making it an ideal testbed for evaluating quantization effectiveness.
+
+\subsection{Base Model}
+
+We select \textbf{Mistral-7B-v0.1} \cite{jiang2023mistral} as our baseline model for the following reasons:
+
+\begin{itemize}
+    \item \textbf{Architecture:} Modern transformer with Grouped Query Attention (GQA) and Sliding Window Attention (SWA), representative of current LLM designs
+    \item \textbf{Scale:} 7.24 billion parameters—large enough to exhibit quantization challenges while remaining evaluable on edge hardware
+    \item \textbf{Performance:} Strong baseline capabilities across reasoning, knowledge, and generation tasks
+    \item \textbf{Format:} FP16 baseline requiring 13.49 GB storage, necessitating compression for edge deployment
+\end{itemize}
+
+The FP16 baseline model serves as our reference point for all performance comparisons, with measurements conducted under identical evaluation protocols to ensure fair comparison.
 
 \subsection{Compression Techniques}
 
+We evaluate four state-of-the-art post-training quantization (PTQ) methods, all targeting 4-bit precision to achieve approximately 3.6× compression:
+
 \subsubsection{NF4 (NormalFloat 4-bit)}
 
-NF4 utilizes the quantile-based NormalFloat data type, which is information-theoretically optimal for zero-centered normal distributions. Double quantization is employed to further minimize memory footprint by quantizing the quantization constants themselves \cite{dettmers2023qlora}.
+NF4 employs an information-theoretically optimal quantization data type designed for normally distributed weights \cite{dettmers2023qlora}. The method leverages the empirical observation that pre-trained neural network weights follow approximately Gaussian distributions.
+
+\textbf{Technical Approach:}
+
+NF4 constructs a 4-bit data type by quantizing weight distributions into 16 bins positioned at the quantiles of a standard normal distribution $\mathcal{N}(0, 1)$. For a weight $w$ drawn from $\mathcal{N}(0, \sigma^2)$, the quantization maps $w$ to the nearest quantile bin:
+
+\begin{equation}
+\hat{w} = \text{NF4}(w) = \sigma \cdot q_i, \quad \text{where } i = \arg\min_j |w - \sigma \cdot q_j|
+\end{equation}
+
+where $q_i$ are the 16 quantile values: $\{-1.0, -0.6962, -0.5251, ..., 0.5251, 0.6962, 1.0\}$.
+
+\textbf{Double Quantization:}
+
+To further reduce memory overhead, NF4 quantizes the quantization constants (scales $\sigma$) themselves using blockwise FP8 quantization. For a tensor divided into blocks of size 64, each block's scale is stored in 8-bit floating point rather than FP32, reducing quantization metadata by 75\%.
 
 \textbf{Configuration:}
 \begin{itemize}
-\item Quantization type: NF4 (NormalFloat4)
-\item Double quantization: Enabled
-\item Compute dtype: float16
-\item Group size: Per-tensor
+    \item Quantization type: NF4 (16 quantile bins)
+    \item Double quantization: Enabled (FP8 scales)
+    \item Compute dtype: FP16 (dequantized computation)
+    \item Block size: 64 (default bitsandbytes configuration)
+    \item On-the-fly quantization: Model quantized during loading
 \end{itemize}
 
 \textbf{Implementation:}
-\begin{lstlisting}
-from transformers import BitsAndBytesConfig
+\begin{lstlisting}[language=Python, caption={NF4 Quantization Configuration}]
+from transformers import BitsAndBytesConfig, AutoModelForCausalLM
 import torch
 
 nf4_config = BitsAndBytesConfig(
@@ -31,165 +95,140 @@ nf4_config = BitsAndBytesConfig(
 )
 
 model = AutoModelForCausalLM.from_pretrained(
-    "mistralai/Mistral-7B-Instruct-v0.1",
+    "mistralai/Mistral-7B-v0.1",
     quantization_config=nf4_config,
     device_map="auto"
 )
 \end{lstlisting}
 
-\subsubsection{GPTQ}
+\vspace{1em}
 
-GPTQ (Generative Pre-trained Transformer Quantization) is a post-training quantization method that quantizes weights to 2-8 bits while maintaining model quality through layer-wise optimization \cite{frantar2023gptq}.
+\subsubsection{GPTQ (Generative Pre-trained Transformer Quantization)}
 
-\textbf{Method Overview:}
+GPTQ is a layer-wise quantization algorithm that minimizes reconstruction error using second-order information \cite{frantar2023optq}. The method reformulates optimal weight quantization as a series of layerwise least-squares problems.
 
-GPTQ addresses the computational challenges of optimal quantization by reformulating the problem as a series of layer-wise optimizations. For each layer's weight matrix $W \in \mathbb{R}^{d_{out} \times d_{in}}$, GPTQ solves:
+\textbf{Mathematical Formulation:}
 
-\begin{equation}
-\min_{\hat{W}} ||WX - \hat{W}X||_2^2
-\end{equation}
-
-where $W$ is the original weight matrix, $\hat{W}$ is the quantized weight matrix, and $X \in \mathbb{R}^{d_{in} \times n}$ represents calibration inputs with $n$ samples.
-
-The key innovation is the use of approximate second-order information through the Hessian matrix $H = \frac{2}{n}XX^T$. GPTQ employs a greedy coordinate descent approach, quantizing weights column-by-column while adjusting subsequent weights to compensate for quantization error. For each weight $w_q$ being quantized:
+For each layer's weight matrix $\mathbf{W} \in \mathbb{R}^{d_{\text{out}} \times d_{\text{in}}}$, GPTQ solves:
 
 \begin{equation}
-\hat{w}_q = \text{quant}(w_q), \quad \delta_q = w_q - \hat{w}_q
+\min_{\hat{\mathbf{W}}} \|\mathbf{W}\mathbf{X} - \hat{\mathbf{W}}\mathbf{X}\|_F^2
 \end{equation}
 
-The quantization error $\delta_q$ is then propagated to remaining weights:
+where $\mathbf{X} \in \mathbb{R}^{d_{\text{in}} \times n}$ represents $n$ calibration samples, and $\hat{\mathbf{W}}$ is the quantized weight matrix.
+
+GPTQ employs a greedy coordinate descent strategy inspired by Optimal Brain Quantization (OBQ) \cite{frantar2022optimal}, quantizing weights column-by-column while compensating for quantization errors in subsequent weights. The key innovation is using the Hessian matrix $\mathbf{H} = \frac{2}{n}\mathbf{X}\mathbf{X}^T$ to guide error compensation:
 
 \begin{equation}
 w_{q'} \leftarrow w_{q'} - \delta_q \cdot \frac{H_{qq'}}{H_{qq}} \quad \forall q' > q
 \end{equation}
 
-This Optimal Brain Quantization (OBQ)-inspired approach ensures that quantization errors are minimized across the entire weight matrix \cite{frantar2022optimal}.
+where $\delta_q = w_q - \hat{w}_q$ is the quantization error for weight $w_q$.
 
 \textbf{Group-wise Quantization:}
 
-To balance precision and compression, GPTQ applies quantization in groups. Each group of $g$ weights (typically $g=128$) shares quantization parameters (scale $s$ and zero-point $z$):
+GPTQ applies quantization in groups to balance precision and compression. Each group of $g=128$ consecutive weights shares quantization parameters (scale $s$ and zero-point $z$):
 
 \begin{equation}
-\hat{w}_i = \text{round}\left(\frac{w_i}{s}\right) - z, \quad s = \frac{\max(w_g) - \min(w_g)}{2^b - 1}
+\hat{w}_i = \left\lfloor \frac{w_i - z \cdot s}{s} \right\rceil, \quad s = \frac{\max(w_g) - \min(w_g)}{2^b - 1}
 \end{equation}
 
-where $b$ is the number of bits (2, 3, or 4). Smaller group sizes increase accuracy at the cost of additional metadata storage.
+where $b=4$ bits and $\lfloor \cdot \rceil$ denotes rounding to nearest integer.
 
 \textbf{Quantization Process:}
 
-We quantized Mistral-7B-v0.1 at three precision levels (4-bit, 3-bit, and 2-bit) using auto-gptq on a P100 GPU:
+We quantized Mistral-7B-v0.1 using AutoGPTQ on Tesla P100 GPUs:
 
 \begin{itemize}
-\item Base model: mistralai/Mistral-7B-v0.1 (7.24B parameters)
-\item Bits: 2, 3, 4
-\item Group size: 128
-\item Calibration dataset: WikiText-2 (128 samples, max length 512 tokens)
-\item Damping factor: 0.01 (Hessian regularization)
-\item Memory optimization: cache\_examples\_on\_gpu=False
+    \item \textbf{Base model:} mistralai/Mistral-7B-v0.1 (7.24B parameters)
+    \item \textbf{Precision:} 4-bit integer quantization
+    \item \textbf{Group size:} 128 (weights per quantization group)
+    \item \textbf{Calibration dataset:} [To be specified]
+    \item \textbf{Calibration samples:} 128 sequences of maximum length 512 tokens
+    \item \textbf{Damping factor:} 0.01 (Hessian regularization: $\mathbf{H} + \lambda \mathbf{I}$)
+    \item \textbf{Memory optimization:} CPU offloading enabled (cache\_examples\_on\_gpu=False)
+    \item \textbf{Quantization time:} ~22 minutes on P100 GPU
 \end{itemize}
 
 \textbf{Implementation:}
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[language=Python, caption={GPTQ Quantization Process}]
 from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
-from datasets import load_dataset
+from transformers import AutoTokenizer
 
-# Prepare calibration data
-def prepare_calibration_data(tokenizer, n_samples=128, 
-                            max_length=512):
-    dataset = load_dataset("wikitext", "wikitext-2-raw-v1", 
-                          split="train")
-    dataset = dataset.filter(lambda x: len(x["text"]) > 200)
-    
-    examples = []
-    for i in range(min(n_samples, len(dataset))):
-        tokenized = tokenizer(dataset[i]["text"],
-            return_tensors="pt", max_length=max_length,
-            truncation=True, padding=False)
-        examples.append({
-            "input_ids": tokenized["input_ids"],
-            "attention_mask": tokenized["attention_mask"]
-        })
-    return examples
+# Configure quantization
+quant_config = BaseQuantizeConfig(
+    bits=4,
+    group_size=128,
+    desc_act=False,
+    damp_percent=0.01
+)
 
-calibration_data = prepare_calibration_data(tokenizer)
-
-# Quantize model
+# Load model
 model = AutoGPTQForCausalLM.from_pretrained(
     "mistralai/Mistral-7B-v0.1",
-    quantize_config=BaseQuantizeConfig(
-        bits=4, group_size=128, desc_act=False,
-        damp_percent=0.01),
-    max_memory={0: "10GiB", "cpu": "50GiB"})
+    quantize_config=quant_config,
+    max_memory={0: "10GiB", "cpu": "50GiB"}
+)
 
-model.quantize(calibration_data, use_triton=False, 
-    batch_size=1, cache_examples_on_gpu=False)
+# Quantize with calibration data
+model.quantize(
+    calibration_data,
+    use_triton=False,
+    batch_size=1,
+    cache_examples_on_gpu=False
+)
 
-model.save_quantized("./mistral-7b-gptq-4bit", 
-                     use_safetensors=True)
+# Save quantized model
+model.save_quantized(
+    "./mistral-7b-gptq-4bit",
+    use_safetensors=True
+)
 \end{lstlisting}
 
-The quantization process takes approximately 22 minutes per model on a P100 GPU, with memory usage optimized through CPU offloading.
+\textbf{Optimized Inference:}
 
-\textbf{Optimized Inference with ExLlamaV2:}
+For evaluation, we employ ExLlamaV2, an optimized inference engine providing 2-3× speedup through specialized CUDA kernels for GPTQ models. ExLlamaV2 optimizations include custom kernels for 4-bit matrix multiplication, fused attention and MLP operations, and lazy KV cache loading.
 
-For evaluation, we employed ExLlamaV2, an optimized inference engine for GPTQ models that provides 2-3x faster inference through specialized CUDA kernels:
-
-\begin{lstlisting}[language=Python]
-from exllamav2 import (ExLlamaV2, ExLlamaV2Config, 
-                       ExLlamaV2Cache, ExLlamaV2Tokenizer)
-from exllamav2.generator import (ExLlamaV2StreamingGenerator,
-                                 ExLlamaV2Sampler)
-
-# Load with ExLlamaV2
-config = ExLlamaV2Config()
-config.model_dir = "./mistral-7b-gptq-4bit"
-config.prepare()
-config.max_seq_len = 4096
-
-model = ExLlamaV2(config)
-cache = ExLlamaV2Cache(model, lazy=True)
-model.load_autosplit(cache)
-tokenizer = ExLlamaV2Tokenizer(config)
-
-# Generate with optimized kernels
-generator = ExLlamaV2StreamingGenerator(model, cache, 
-                                        tokenizer)
-settings = ExLlamaV2Sampler.Settings()
-settings.temperature = 0.7
-settings.top_p = 0.9
-
-input_ids = tokenizer.encode(prompt)
-generator.begin_stream(input_ids, settings)
-\end{lstlisting}
-
-ExLlamaV2 optimizations include custom CUDA kernels for 2/3/4-bit matrix multiplication, fused attention and MLP operations, and lazy KV cache loading to reduce memory overhead.
-
-\textbf{Theoretical Compression:}
-
-For Mistral-7B with 7.24B parameters, theoretical model sizes are:
-\begin{itemize}
-\item FP16 baseline: $7.24 \times 2 = 14.48$ GB
-\item 4-bit GPTQ: $7.24 \times 0.5 + \text{overhead} \approx 3.62$ GB (4.0x compression)
-\item 3-bit GPTQ: $7.24 \times 0.375 + \text{overhead} \approx 2.72$ GB (5.3x compression)
-\item 2-bit GPTQ: $7.24 \times 0.25 + \text{overhead} \approx 1.81$ GB (8.0x compression)
-\end{itemize}
-
-where overhead includes quantization metadata (scales, zero-points) and unquantized components (embeddings, layer norms).
+\vspace{1em}
 
 \subsubsection{AWQ (Activation-aware Weight Quantization)}
 
-AWQ protects salient weights based on activation magnitudes, preserving the top 1\% most impactful weights with per-channel scaling \cite{lin2023awq}.
+AWQ protects salient weights based on activation magnitudes, preserving model accuracy through selective mixed-precision quantization \cite{lin2023awq}. The method identifies and protects the top 1\% most influential weights while aggressively quantizing the remaining 99\%.
+
+\textbf{Salient Weight Identification:}
+
+AWQ computes per-channel weight importance based on activation statistics. For weight matrix $\mathbf{W}$ and activation matrix $\mathbf{X}$, the importance of channel $c$ is:
+
+\begin{equation}
+s_c = \|\mathbf{W}_{:,c}\|_2 \cdot \|\mathbf{X}_{c,:}\|_2
+\end{equation}
+
+Channels with highest $s_c$ values are retained at higher precision (FP16) while others are quantized to 4-bit.
+
+\textbf{Per-channel Scaling:}
+
+AWQ applies learned per-channel scaling factors to balance activation magnitudes before quantization:
+
+\begin{equation}
+\mathbf{W}' = \mathbf{W} \cdot \text{diag}(\mathbf{s}), \quad \mathbf{X}' = \text{diag}(\mathbf{s}^{-1}) \cdot \mathbf{X}
+\end{equation}
+
+where $\mathbf{s}$ are optimized to minimize quantization error while maintaining $\mathbf{W}'\mathbf{X}' = \mathbf{W}\mathbf{X}$.
 
 \textbf{Configuration:}
 \begin{itemize}
-\item Bits: 4
-\item Group size: 128
-\item Zero point: True
-\item Version: GEMM
+    \item \textbf{Precision:} 4-bit integer weights, FP16 salient weights
+    \item \textbf{Group size:} 128
+    \item \textbf{Zero point:} Enabled (asymmetric quantization)
+    \item \textbf{Version:} GEMM (optimized matrix multiplication kernels)
+    \item \textbf{Salient weight ratio:} 1\% (top channels protected)
 \end{itemize}
 
 \textbf{Implementation:}
-\begin{lstlisting}
+
+We use pre-quantized AWQ models from TheBloke's repository to avoid redundant quantization compute:
+
+\begin{lstlisting}[language=Python, caption={AWQ Model Loading}]
 from awq import AutoAWQForCausalLM
 
 model = AutoAWQForCausalLM.from_quantized(
@@ -199,125 +238,928 @@ model = AutoAWQForCausalLM.from_quantized(
 )
 \end{lstlisting}
 
+\vspace{1em}
+
 \subsubsection{HQQ (Half-Quadratic Quantization)}
 
-HQQ performs fast, calibration-free quantization optimizing a custom loss function with on-the-fly parameter optimization \cite{badri2024hqq}.
+HQQ performs fast, calibration-free quantization by optimizing a custom half-quadratic loss function \cite{badri2024hqq}. Unlike GPTQ and AWQ, HQQ requires no calibration data, making it suitable for rapid quantization without dataset access.
+
+\textbf{Half-Quadratic Optimization:}
+
+HQQ formulates quantization as minimizing:
+
+\begin{equation}
+\mathcal{L}(\mathbf{Q}, \mathbf{s}, \mathbf{z}) = \|\mathbf{W} - \mathbf{s} \odot \mathbf{Q} - \mathbf{z}\|_F^2
+\end{equation}
+
+where $\mathbf{Q}$ are quantized values, $\mathbf{s}$ are scales, $\mathbf{z}$ are zero-points, and $\odot$ denotes element-wise multiplication. The loss is optimized iteratively using a half-quadratic splitting technique that alternates between updating $\mathbf{Q}$ (quantization) and $(\mathbf{s}, \mathbf{z})$ (calibration parameters).
+
+\textbf{Row-wise Quantization:}
+
+HQQ applies quantization along weight matrix rows (axis=1), computing separate scales and zero-points for each output channel:
+
+\begin{equation}
+\hat{\mathbf{W}}_{i,:} = \text{quant}(\mathbf{W}_{i,:}, s_i, z_i) \quad \forall i \in [1, d_{\text{out}}]
+\end{equation}
+
+This per-channel quantization preserves output distribution characteristics while avoiding the computational cost of Hessian-based methods.
 
 \textbf{Configuration:}
 \begin{itemize}
-\item Bits: 4
-\item Group size: 64
-\item Axis: 1 (row-wise)
-\item Compute dtype: float16
+    \item \textbf{Precision:} 4-bit integer
+    \item \textbf{Group size:} 64
+    \item \textbf{Quantization axis:} 1 (row-wise)
+    \item \textbf{Compute dtype:} FP16
+    \item \textbf{Optimization:} On-the-fly during model loading
+    \item \textbf{Calibration:} None required
 \end{itemize}
 
 \textbf{Implementation:}
-\begin{lstlisting}
+\begin{lstlisting}[language=Python, caption={HQQ On-the-fly Quantization}]
 from hqq.models.hf.base import AutoHQQHFModel
 from hqq.core.quantize import BaseQuantizeConfig
+import torch
 
+# Configure quantization
 quant_config = BaseQuantizeConfig(
-    nbits=4, group_size=64, axis=1
+    nbits=4,
+    group_size=64,
+    axis=1  # Row-wise quantization
 )
 
+# Load and quantize model
 model = AutoHQQHFModel.from_pretrained(
-    "mistralai/Mistral-7B-Instruct-v0.1",
+    "mistralai/Mistral-7B-v0.1",
     torch_dtype=torch.float16
 )
+
 model.quantize_model(
-    quant_config=quant_config, device='cuda'
+    quant_config=quant_config,
+    device='cuda'
 )
 \end{lstlisting}
 
-\subsubsection{AutoRound}
+\vspace{1em}
 
-AutoRound employs adaptive quantization with iterative optimization for per-layer parameter tuning.
+\subsubsection{Quantization Summary}
 
-\textbf{Configuration:}
+\begin{table}[H]
+\centering
+\caption{Quantization methods comparison}
+\label{tab:quant_methods_summary}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Method} & \textbf{Calibration} & \textbf{Group Size} & \textbf{Optimization} & \textbf{Quantization} \\
+ & \textbf{Required} & & \textbf{Basis} & \textbf{Time} \\
+\midrule
+NF4 & No & 64 & Information theory & On-the-fly \\
+GPTQ & Yes & 128 & Hessian (2nd-order) & 20-25 min \\
+AWQ & Yes & 128 & Activation-aware & 50-60 min \\
+HQQ & No & 64 & Half-quadratic & On-the-fly \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All methods target 4-bit precision, achieving theoretical compression ratios of 3.6-4.0× relative to FP16 baseline. NF4 and HQQ quantize on-the-fly during model loading, while GPTQ requires offline quantization on P100 GPUs. AWQ uses pre-quantized checkpoints from TheBloke's repository for efficiency.
+
+\subsection{Calibration Dataset}
+
+For methods requiring calibration data (GPTQ and AWQ), we develop a custom RAG-specific calibration dataset that reflects realistic retrieval-augmented generation workloads. Unlike standard calibration approaches that use generic text corpora (e.g., C4, WikiText), our dataset is explicitly structured to match RAG prompt formats and complexity distributions.
+
+\subsubsection{Dataset Construction}
+
+We generate 128 calibration samples following the structured RAG format:
+
+\begin{verbatim}
+[QUERY]: {question}
+[RETRIEVED DOCUMENTS]:
+Document 1: {context_1}
+Document 2: {context_2}
+...
+[ANSWER]: {answer}
+\end{verbatim}
+
+This format mirrors production RAG systems where queries are paired with retrieved documents and expected answers, ensuring quantization parameters are optimized for the actual inference distribution.
+
+\subsubsection{Source Datasets}
+
+Calibration samples are synthesized from three complementary sources:
+
 \begin{itemize}
-\item Bits: 4
-\item Group size: 128
-\item Samples: 64
-\item Iterations: 50
-\item Batch size: 4
-\item Learning rate: 5e-3
+    \item \textbf{SQuAD v2} \cite{rajpurkar2016squad}: Provides high-quality question-answer pairs with clean, focused contexts for short-context samples
+    \item \textbf{HotpotQA} \cite{yang2018hotpotqa}: Supplies multi-hop reasoning examples requiring information synthesis across multiple documents
+    \item \textbf{Wikitext-103} \cite{merity2016pointer}: Contributes general-domain passages as distractor documents and context padding
 \end{itemize}
+
+\subsubsection{Distribution Strategy}
+
+We employ a stratified sampling approach targeting four complexity tiers that represent the operational envelope of RAG systems:
+
+\begin{table}[H]
+\centering
+\caption{RAG calibration dataset distribution}
+\label{tab:calibration_distribution}
+\small
+\begin{tabular}{lcccp{5cm}}
+\toprule
+\textbf{Category} & \textbf{Samples} & \textbf{Percentage} & \textbf{Token Range} & \textbf{Characteristics} \\
+\midrule
+Short-context & 32 & 25\% & 256--512 & Single document, direct extraction \\
+Medium-context & 40 & 31\% & 1024--2048 & 2--3 documents, comparison \\
+Long-context & 32 & 25\% & 3072--4096 & 5--7 documents, synthesis \\
+Multi-hop & 24 & 19\% & Variable & 8--10 documents, complex reasoning \\
+\midrule
+\textbf{Total} & \textbf{128} & \textbf{100\%} & \textbf{256--4096} & \textbf{—} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Short-context Samples (32 samples, 256--512 tokens)}
+
+These samples simulate straightforward retrieval scenarios where a single relevant document contains the answer. We extract question-context-answer triples directly from SQuAD v2, representing the baseline RAG use case of locating information in focused passages.
+
+\paragraph{Medium-context Samples (40 samples, 1024--2048 tokens)}
+
+Medium-context samples introduce multi-document scenarios requiring comparison or selective attention. For each sample, we combine one relevant SQuAD context with 1--2 distractor passages from Wikitext-103, forcing the model to identify and focus on pertinent information among noise.
+
+\paragraph{Long-context Samples (32 samples, 3072--4096 tokens)}
+
+Long-context samples test the model's ability to maintain coherence and extract information from extended contexts. We construct these by:
+\begin{enumerate}
+    \item Selecting multi-hop questions from HotpotQA requiring reasoning across multiple facts
+    \item Combining 5--7 supporting context passages from HotpotQA and Wikitext-103
+    \item Shuffling document order to prevent positional bias
+    \item Padding to target length range with additional Wikipedia passages
+\end{enumerate}
+
+\paragraph{Multi-hop Samples (24 samples, 8--10 documents)}
+
+The most challenging category simulates complex retrieval scenarios requiring multi-step reasoning. We filter HotpotQA for comparison and bridge questions (requiring connecting information across documents), then construct contexts with 8--10 documents including both supporting and distractor passages. These samples stress-test the quantized model's capacity for long-range dependencies and complex inference chains.
+
+\subsubsection{Dataset Statistics}
+
+The resulting calibration dataset exhibits the following statistical properties:
+
+\begin{itemize}
+    \item \textbf{Total samples:} 128
+    \item \textbf{Mean length:} 1,847 tokens (word count approximation)
+    \item \textbf{Median length:} 1,523 tokens
+    \item \textbf{Range:} 256--4,096 tokens
+    \item \textbf{Standard deviation:} 1,124 tokens
+\end{itemize}
+
+Length distribution across bins:
+\begin{itemize}
+    \item $<$512 tokens: 32 samples (25.0\%)
+    \item 512--1K tokens: 15 samples (11.7\%)
+    \item 1K--2K tokens: 41 samples (32.0\%)
+    \item 2K--4K tokens: 32 samples (25.0\%)
+    \item $>$4K tokens: 8 samples (6.3\%)
+\end{itemize}
+
+This distribution ensures quantization algorithms observe representative activation patterns across the full spectrum of RAG workloads, from simple single-document retrieval to complex multi-hop reasoning over extensive contexts.
+
+\subsubsection{Calibration Protocol}
+
+For GPTQ quantization, we apply the following protocol:
+\begin{itemize}
+    \item \textbf{Samples:} All 128 calibration samples
+    \item \textbf{Sequence length:} Maximum 2048 tokens (truncated if necessary)
+    \item \textbf{Batch size:} 1 (due to variable lengths)
+    \item \textbf{Processing:} Sequential, no example caching on GPU
+    \item \textbf{Hessian computation:} Accumulated across all calibration forward passes
+\end{itemize}
+
+For AWQ quantization, we use the same 128 samples with:
+\begin{itemize}
+    \item \textbf{Sequence length:} Maximum 2048 tokens
+    \item \textbf{Activation collection:} Per-channel statistics aggregated across all samples
+    \item \textbf{Salient weight identification:} Top 1\% channels protected based on activation magnitudes
+\end{itemize}
+
+By tailoring the calibration dataset to RAG-specific patterns, we ensure quantization algorithms preserve the activation distributions and weight sensitivities most critical for retrieval-augmented generation performance.
+
+\subsection{RAG Pipeline Configuration}
+
+\subsubsection{Pipeline Architecture}
+Our RAG (Retrieval-Augmented Generation) pipeline implements a modular architecture consisting of five core components that work in sequence to enable context-aware question answering:
+
+\begin{enumerate}
+    \item \textbf{Document Processing:} Extract and clean text from source documents (PDF, TXT, Markdown)
+    \item \textbf{Text Chunking:} Split documents into semantically coherent segments
+    \item \textbf{Embedding:} Convert text chunks into dense vector representations
+    \item \textbf{Vector Indexing:} Store and index embeddings for efficient similarity search
+    \item \textbf{Retrieval \& Generation:} Query the index and generate contextualized answers
+\end{enumerate}
+
+The pipeline is implemented as a reusable framework that can be applied to any of our compressed models, enabling direct comparison of RAG performance across quantization methods.
+
+\subsubsection{Document Processing}
+
+\textbf{Text Extraction:}
+\begin{itemize}
+    \item \textbf{PDF Processing:} PyPDF2-based extraction with page-level granularity
+    \item \textbf{Text Normalization:} Whitespace normalization, OCR error correction, quote standardization
+    \item \textbf{Cleaning Operations:}
+    \begin{itemize}
+        \item Remove page numbers and headers
+        \item Strip citation references ([1], (Author, 2020))
+        \item Remove URLs and excessive whitespace
+        \item Fix common ligature errors (fi, fl)
+    \end{itemize}
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Document processing parameters}
+\label{tab:doc_processing_params}
+\small
+\begin{tabular}{lll}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+remove\_headers & true & Strip page headers and numbers \\
+remove\_citations & true & Remove citation markers \\
+extract\_sections & false & Parse document sections \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Text Chunking Strategy}
+
+We employ a \textbf{semantic chunking} strategy that respects natural document boundaries while maintaining optimal chunk sizes for embedding and retrieval. This approach outperforms fixed-size chunking by preserving contextual coherence.
+
+\textbf{Chunking Algorithm:}
+\begin{itemize}
+    \item \textbf{Strategy:} Semantic (paragraph-aware)
+    \item \textbf{Primary Delimiter:} Double newlines (paragraph boundaries)
+    \item \textbf{Fallback:} Sentence-level tokenization using NLTK punkt tokenizer
+    \item \textbf{Overlap Mechanism:} Sliding window with configurable overlap to maintain context continuity across chunk boundaries
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Text chunking parameters}
+\label{tab:chunking_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+strategy & semantic & Chunking strategy (semantic, sentence, fixed) \\
+chunk\_size & 512 & Target chunk size in tokens \\
+chunk\_overlap & 50 & Overlap between consecutive chunks \\
+min\_chunk\_size & 100 & Minimum viable chunk size \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Chunk Metadata:}
+Each chunk includes metadata for traceability and filtering:
+\begin{itemize}
+    \item \textbf{chunk\_id:} Unique identifier (chunk\_0, chunk\_1, ...)
+    \item \textbf{page\_number:} Source page in original document
+    \item \textbf{start\_char / end\_char:} Character offsets in source
+    \item \textbf{tokens:} Word count for the chunk
+    \item \textbf{section:} Optional section header (if extracted)
+\end{itemize}
+
+\subsubsection{Embedding Model}
+
+We use \textbf{sentence-transformers/all-MiniLM-L6-v2} as our embedding model, balancing quality and efficiency for retrieval tasks.
+
+\textbf{Model Characteristics:}
+\begin{itemize}
+    \item \textbf{Architecture:} Distilled from Microsoft MiniLM
+    \item \textbf{Embedding Dimension:} 384
+    \item \textbf{Max Sequence Length:} 256 tokens
+    \item \textbf{Training:} Fine-tuned on 1B+ sentence pairs
+    \item \textbf{Performance:} SBERT benchmark score: 68.06 (semantic similarity)
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Embedding model parameters}
+\label{tab:embedding_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+model\_name & all-MiniLM-L6-v2 & SentenceTransformer model identifier \\
+batch\_size & 32 & Batch size for embedding generation \\
+normalize & true & L2 normalization of embeddings \\
+device & cuda & Compute device (cuda, mps, cpu) \\
+\hline
+\end{tabular}
+\end{table}
 
 \textbf{Implementation:}
-\begin{lstlisting}
-from auto_round import AutoRound
+\begin{lstlisting}[language=Python, caption={Embedding Generation}]
+from sentence_transformers import SentenceTransformer
 
-ar = AutoRound(
-    model=MODEL_PATH,
-    scheme="W4A16",
-    bits=4,
-    group_size=128,
-    nsamples=64,
-    iters=50,
-    lr=5e-3,
-    seqlen=1024,
-    batch_size=4,
-    amp_dtype=torch.float16
+model = SentenceTransformer(
+    'sentence-transformers/all-MiniLM-L6-v2',
+    device='cuda'
 )
 
-ar.quantize_and_save(
-    output_dir=OUTPUT_DIR,
-    format="auto_round"
+embeddings = model.encode(
+    texts,
+    batch_size=32,
+    show_progress_bar=True,
+    normalize_embeddings=True,
+    convert_to_numpy=True
 )
 \end{lstlisting}
 
-\subsection{Evaluation Metrics}
+\subsubsection{Vector Store and Indexing}
 
-We assess compressed models across two primary dimensions: computational efficiency and task performance.
+We use \textbf{ChromaDB} as our vector database, providing efficient similarity search with multiple distance metrics.
 
-\subsubsection{Efficiency Metrics}
-
-\paragraph{Latency Measurements}
+\textbf{Vector Store Configuration:}
 \begin{itemize}
-\item \textbf{Average Latency:} Mean time per generated token (ms)
-\item \textbf{Time-to-First-Token (TTFT):} Initial response latency
-\item \textbf{Prefill vs. Decode:} Separate measurement of prompt processing vs. autoregressive generation
+    \item \textbf{Database:} ChromaDB (persistent or in-memory)
+    \item \textbf{Index Type:} HNSW (Hierarchical Navigable Small World)
+    \item \textbf{Distance Metric:} Cosine similarity (default)
+    \item \textbf{Storage:} Optional persistent storage for index reuse
 \end{itemize}
 
-\paragraph{Throughput and Memory}
+\begin{table}[H]
+\centering
+\caption{Vector store parameters}
+\label{tab:vector_store_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+collection\_name & rag\_documents & Index collection identifier \\
+persist\_directory & null & Directory for persistent storage (null=in-memory) \\
+distance\_metric & cosine & Distance function (cosine, l2, ip) \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Distance-to-Similarity Conversion:}
+ChromaDB returns distances that must be converted to similarity scores [0, 1]:
 \begin{itemize}
-\item \textbf{Throughput:} Tokens per second (tok/s)
-\item \textbf{Peak Memory:} Maximum GPU memory (MB)
-\item \textbf{Model Size:} Disk storage requirements (GB)
+    \item \textbf{Cosine:} $\text{similarity} = 1 - \frac{d^2}{2}$ where $d$ is L2 distance of normalized vectors
+    \item \textbf{L2:} $\text{similarity} = \frac{1}{1 + d}$ (exponential decay)
+    \item \textbf{Inner Product:} $\text{similarity} = \frac{d + 2}{2}$ (normalized to [0, 1])
 \end{itemize}
 
-\paragraph{Computational Efficiency}
-\begin{itemize}
-\item \textbf{Model FLOPs Utilization (MFU):} Percentage of theoretical peak hardware FLOPs achieved:
-\begin{equation}
-\text{MFU} = \frac{\text{Achieved FLOPs/s}}{\text{Peak Hardware FLOPs/s}} \times 100\%
-\end{equation}
+\subsubsection{Retrieval Strategy}
 
-\item \textbf{Energy Consumption:} Estimated energy per token (mJ):
-\begin{equation}
-E = (P_{\text{TDP}} - P_{\text{idle}}) \times t_{\text{inference}}
-\end{equation}
-where $P_{\text{idle}} \approx 0.3 \times P_{\text{TDP}}$
+Our retrieval system implements advanced techniques beyond simple nearest-neighbor search:
+
+\textbf{Base Retrieval:}
+\begin{itemize}
+    \item \textbf{Top-K Selection:} Retrieve top-3 most similar chunks by default
+    \item \textbf{Similarity Threshold:} Configurable minimum similarity score (default: 0.0)
+    \item \textbf{Metadata Filtering:} Optional filtering by page number, section, etc.
 \end{itemize}
 
-\subsubsection{Performance Benchmarks}
+\textbf{Re-ranking (Optional):}
+Hybrid retrieval combining semantic and lexical matching:
+\begin{itemize}
+    \item \textbf{Semantic Score:} Original embedding similarity (70\% weight)
+    \item \textbf{Lexical Score:} Token overlap between query and chunk (30\% weight)
+    \item \textbf{Formula:} $\text{rerank\_score} = 0.7 \times \text{cosine\_sim} + 0.3 \times \text{token\_overlap}$
+\end{itemize}
 
-We evaluate models using established language modeling benchmarks:
+\textbf{Diversity Mechanism (Optional):}
+Maximal Marginal Relevance (MMR) to reduce redundancy:
+\begin{itemize}
+    \item \textbf{Objective:} Balance relevance and diversity in retrieved chunks
+    \item \textbf{Formula:} $\text{MMR} = \lambda \times \text{Sim}(q, c) - (1-\lambda) \times \max[\text{Sim}(c, S)]$
+    \item where $q$ is query, $c$ is candidate chunk, $S$ is selected chunks, $\lambda$ is diversity parameter
+\end{itemize}
 
-\paragraph{Language Modeling}
-\textbf{Perplexity:} Measured on WikiText-2 test set using sliding window evaluation (stride 512):
+\begin{table}[H]
+\centering
+\caption{Retrieval parameters}
+\label{tab:retrieval_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+top\_k & 3 & Number of chunks to retrieve \\
+similarity\_threshold & 0.0 & Minimum similarity score \\
+rerank & false & Enable hybrid re-ranking \\
+diversity\_penalty & 0.0 & MMR diversity parameter [0, 1] \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Answer Generation}
+
+The generation component uses the compressed LLM with retrieved context to produce grounded answers.
+
+\textbf{Prompt Engineering:}
+We design prompts to encourage faithful, concise answers based on retrieved context:
+
+\begin{lstlisting}[language=Python, caption={RAG Generation Prompt Template}]
+prompt = f"""Use the following context to answer the question. 
+Provide a clear, direct answer based on the information given.
+
+Context:
+{retrieved_context}
+
+Question: {user_query}
+
+Answer:"""
+\end{lstlisting}
+
+\textbf{Generation Parameters:}
+Carefully tuned to balance faithfulness and naturalness:
+\begin{itemize}
+    \item \textbf{Max New Tokens:} 128 (concise answers)
+    \item \textbf{Temperature:} 0.3 (low for factual accuracy)
+    \item \textbf{Top-p:} 0.9 (nucleus sampling)
+    \item \textbf{Repetition Penalty:} 1.15 (prevent loops)
+    \item \textbf{Sampling:} Enabled (allows natural phrasing)
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Answer generation parameters}
+\label{tab:generation_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+max\_new\_tokens & 128 & Maximum answer length \\
+temperature & 0.3 & Sampling temperature \\
+top\_p & 0.9 & Nucleus sampling threshold \\
+do\_sample & true & Enable sampling vs greedy \\
+repetition\_penalty & 1.15 & Penalty for repeated tokens \\
+use\_chat\_template & true & Use model's chat template if available \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Answer Validation:}
+Post-processing to ensure quality:
+\begin{itemize}
+    \item \textbf{Truncation:} Limit to 4 sentences maximum
+    \item \textbf{Context Truncation:} Cap context at 2000 characters to prevent overwhelming
+    \item \textbf{Retry Mechanism:} If answer appears problematic (too short, repetitive, verbatim copying), retry with simplified prompt and lower temperature (0.2)
+    \item \textbf{Fallback:} Return "The information is not provided in the given context" for empty/invalid responses
+\end{itemize}
+
+\subsubsection{RAG Evaluation Dataset}
+
+We create a custom technical QA dataset from documentation corpora to evaluate RAG performance:
+
+\textbf{Dataset Characteristics:}
+\begin{itemize}
+    \item \textbf{Domain:} Technical documentation (ML frameworks, APIs)
+    \item \textbf{Size:} 10-50 question-answer pairs per evaluation
+    \item \textbf{Question Types:}
+    \begin{itemize}
+        \item Factual: "What is the default learning rate?"
+        \item Procedural: "How do you initialize a model?"
+        \item Comparative: "What's the difference between X and Y?"
+    \end{itemize}
+    \item \textbf{Answer Format:} Short-form answers (1-3 sentences)
+    \item \textbf{Ground Truth:} Human-verified reference answers
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{RAG evaluation dataset parameters}
+\label{tab:rag_eval_dataset_params}
+\small
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\
+\hline
+num\_questions & 10 & Number of QA pairs to evaluate \\
+dataset\_path & null & Path to custom QA JSON file \\
+compare\_no\_rag & true & Evaluate without retrieval baseline \\
+save\_detailed\_responses & false & Save individual responses to file \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Evaluation Protocol:}
+\begin{enumerate}
+    \item Index source documents using the RAG pipeline
+    \item For each test question:
+    \begin{itemize}
+        \item Retrieve top-K relevant chunks
+        \item Generate answer with context (RAG)
+        \item Generate answer without context (no-RAG baseline)
+    \end{itemize}
+    \item Compute metrics comparing predictions to reference answers
+    \item Aggregate results across all questions
+\end{enumerate}
+
+\subsubsection{Pipeline Integration with Compressed Models}
+
+The RAG pipeline is model-agnostic and interfaces with any compressed model through a unified ModelInterface:
+
+\begin{lstlisting}[language=Python, caption={RAG Pipeline Initialization}]
+from rag import RAGPipeline
+
+# Load compressed model
+model_interface = load_compressed_model("NF4")  
+
+# Initialize RAG pipeline
+rag_config = {
+    "chunking": {"strategy": "semantic", "chunk_size": 512},
+    "embedding": {"model_name": "all-MiniLM-L6-v2"},
+    "retrieval": {"top_k": 3, "rerank": False},
+    "generation": {"temperature": 0.3, "max_new_tokens": 128}
+}
+
+pipeline = RAGPipeline(rag_config)
+pipeline.setup(model_interface)
+
+# Index documents
+pipeline.index_documents("technical_docs.pdf")
+
+# Evaluate
+results = pipeline.evaluate(test_questions, compare_no_rag=True)
+\end{lstlisting}
+
+This design enables fair comparison of RAG performance across all compression methods, as all components except the generation model remain constant.
+
+\subsection{Evaluation Metrics and Benchmarks}
+
+We assess compressed models across three evaluation dimensions: computational efficiency, general task performance, and RAG-specific capabilities. All evaluations are conducted on the same Tesla T4 GPU to ensure fair comparison.
+
+\subsubsection{Computational Efficiency Metrics}
+
+Efficiency metrics quantify the speed, memory, and energy improvements achieved through quantization.
+
+\paragraph{Time Performance Metrics}
+
+\begin{table}[H]
+\centering
+\caption{Time performance metrics}
+\label{tab:time_metrics}
+\small
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Metric} & \textbf{Description} \\
+\midrule
+Latency (ms/token) & End-to-end generation speed measured as mean time per generated token across 10 inference runs with 3 warmup iterations \\
+Time-to-First-Token (TTFT, ms) & Initial response latency measuring time from prompt submission to first token generation \\
+Prefill Latency (ms) & Prompt processing time in parallel \\
+Decode Latency (ms/token) & Autoregressive token generation time \\
+Throughput (tokens/s) & Sustained generation rate: $\text{Throughput} = \frac{\sum_{i=1}^{10} \text{tokens}_i}{\sum_{i=1}^{10} \text{time}_i}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Space Performance Metrics}
+
+\begin{table}[H]
+\centering
+\caption{Space performance metrics}
+\label{tab:space_metrics}
+\small
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Metric} & \textbf{Description} \\
+\midrule
+Model Size (GB) & Disk storage requirements: $\text{Size}_{\text{GB}} = \frac{\sum (\text{element\_size} \times \text{numel})}{1024^3}$ \\
+Peak Memory (MB) & Maximum GPU memory allocated during inference \\
+Bits per Parameter & Average quantization level: $\text{Bits/param} = \frac{\text{Size}_{\text{bytes}} \times 8}{\text{Total parameters}}$ \\
+Compression Ratio & Size reduction relative to FP16: $\text{Compression} = \frac{\text{Size}_{\text{FP16}}}{\text{Size}_{\text{quantized}}}$ \\
+Memory Efficiency & Ratio of model size to peak memory: $\text{Efficiency} = \frac{\text{Model Size (GB)}}{\text{Peak Memory (GB)}}$ \\
+KV Cache Size (MB) & Attention cache memory for sequence length 2048: $\text{KV Size} = 2 \times L \times B \times H \times S \times D \times \text{bytes}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{General Task Performance Benchmarks}
+
+We evaluate compressed models on standard language modeling and reasoning benchmarks to assess general capability preservation.
+
+\paragraph{Language Modeling: Perplexity}
+
+Perplexity (PPL) measures next-token prediction quality on WikiText-2 test set:
 \begin{equation}
-\text{PPL}(W) = \exp\left(-\frac{1}{N}\sum_{i=1}^{N}\ln P(w_i|w_{<i})\right)
+\text{PPL}(W) = \exp\left(-\frac{1}{N}\sum_{i=1}^{N}\log P(w_i|w_{<i})\right)
 \end{equation}
+
+\begin{table}[H]
+\centering
+\caption{Perplexity evaluation parameters}
+\label{tab:perplexity_params}
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Dataset & WikiText-2 test split \\
+Samples & 100 passages \\
+Max length & 512 tokens \\
+Stride & 512 (sliding window) \\
+Min text length & 100 characters \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \paragraph{Core Task Benchmarks}
+
+We evaluate models using the Language Model Evaluation Harness with standardized protocols. Our benchmark selection is organized into four categories:
+
+\textbf{Baseline Reasoning (0-shot):}
+
 \begin{itemize}
-\item \textbf{HellaSwag} (0-shot): Commonsense reasoning via sentence completion
-\item \textbf{ARC-Easy} (0-shot): Grade-school science questions
-\item \textbf{ARC-Challenge} (0-shot): Challenge-level scientific reasoning
-\item \textbf{GSM8K} (8-shot): Grade-school math word problems
-\item \textbf{MMLU} (5-shot): Multi-domain knowledge across 57 subjects
-\item \textbf{HumanEval} (0-shot): Python code generation (pass@1)
+    \item \textbf{HellaSwag}: Sentence completion requiring commonsense reasoning. Tests intuitive understanding preservation. Metric: normalized accuracy.
+    
+    \item \textbf{Winogrande}: Pronoun disambiguation requiring commonsense knowledge. Evaluates semantic understanding. Metric: accuracy.
+    
+    \item \textbf{PIQA}: Physical commonsense reasoning. Tests intuitive physics knowledge. Metric: normalized accuracy.
+    
+    \item \textbf{ARC-Easy}: Grade-school science questions. Assesses factual knowledge retention. Metric: normalized accuracy.
+    
+    \item \textbf{ARC-Challenge}: Challenge-level science questions. Tests complex multi-hop reasoning. Metric: normalized accuracy.
 \end{itemize}
 
-All evaluations use the Language Model Evaluation Harness \cite{eval-harness} with consistent hyperparameters for reproducibility.
+\textbf{Core RAG Tasks (0-shot):}
+
+\begin{itemize}
+    \item \textbf{SQuAD}: Extractive question answering from Wikipedia paragraphs (1-2 paragraphs). Tests accurate answer extraction from short contexts. Metric: F1 score and exact match.
+    
+    \item \textbf{TriviaQA}: Open-domain QA with evidence documents. Tests robustness to longer, noisier contexts. Metric: exact match.
+\end{itemize}
+
+\textbf{RAG with Complex Reasoning (3-shot):}
+
+\begin{itemize}
+    \item \textbf{DROP}: Discrete reasoning over paragraphs requiring arithmetic, counting, sorting. Tests numerical reasoning preservation. Metric: F1 score.
+    
+    \item \textbf{RACE}: Reading comprehension from educational exams requiring inference beyond surface matching. Tests complex comprehension. Metric: accuracy.
+\end{itemize}
+
+\textbf{Fact Verification (0-shot):}
+
+\begin{itemize}
+    \item \textbf{BoolQ}: Yes/no question answering requiring statement verification against passages. Tests binary classification for hallucination detection. Metric: accuracy.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Core task benchmark organization}
+\label{tab:core_tasks_org}
+\small
+\begin{tabular}{lcccp{4.5cm}}
+\toprule
+\textbf{Category} & \textbf{Tasks} & \textbf{Few-shot} & \textbf{Est. Time} & \textbf{RAG Relevance} \\
+ & & & \textbf{(min)} & \\
+\midrule
+Baseline Reasoning & 5 & 0 & 15 & Establishes non-RAG baseline \\
+Core RAG & 2 & 0 & 20 & Direct context QA \\
+RAG + Reasoning & 2 & 3 & 12 & Complex multi-step inference \\
+Verification & 1 & 0 & 5 & Hallucination detection \\
+\midrule
+\textbf{Total} & \textbf{10} & \textbf{—} & \textbf{52} & \textbf{—} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All evaluations use greedy decoding (temperature=0) for reproducibility. Estimated times are per quantization method on Tesla T4 GPU.
+
+\subsubsection{RAG-Specific Performance Metrics}
+
+We develop custom evaluations to assess quantization impact on RAG-critical capabilities: attention preservation, context handling, and retrieval-augmented generation quality.
+
+\paragraph{Attention Preservation}
+
+This metric evaluates whether quantized models maintain proper attention to relevant documents in multi-document contexts.
+
+\begin{table}[H]
+\centering
+\caption{Attention preservation evaluation setup}
+\label{tab:attention_setup}
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Dataset & Natural Questions validation (500 samples) \\
+Documents per query & 5 (1 relevant + 4 distractors) \\
+Document source & Wikipedia passages ($\le 250$ chars) \\
+Max context length & 512 tokens \\
+Generation length & 20 tokens \\
+Target samples & 50 successful evaluations \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Attention Extraction Protocol:}
+
+We extract document-level attention from model outputs during generation by:
+\begin{enumerate}
+    \item Capturing attention weights from last transformer layer
+    \item Averaging across attention heads: $[B, H, S, S] \rightarrow [S, S]$
+    \item Extracting attention from last generated token to input: $[S, S] \rightarrow [S]$
+    \item Aggregating token-level attention to document level by equal division
+    \item Normalizing to probability distribution: $\sum_{i=1}^{5} a_i = 1.0$
+\end{enumerate}
+
+Attention snapshots are captured at three generation stages: start (token 1), middle (token $\lfloor N/2 \rfloor$), and end (token $N$), where $N$ is the number of generated tokens.
+
+\textbf{Metrics:}
+
+\textit{Preservation Metrics:}
+\begin{itemize}
+    \item \textbf{Precision@1:} Fraction of queries where model assigns highest attention to relevant document. Range: [0, 1], higher is better.
+    \item \textbf{Mean/Median Rank:} Average rank of relevant document by attention weight. Range: [1, 5], lower is better (1 = top-ranked).
+    \item \textbf{Mean Attention on Answer:} Average attention weight on relevant document. Range: [0, 1], higher indicates stronger focus.
+    \item \textbf{Attention Concentration (Gini):} Distribution uniformity measured via Gini coefficient. Higher values indicate focused attention on fewer documents.
+\end{itemize}
+
+\textit{Attention Drift Metrics:}
+\begin{itemize}
+    \item \textbf{Mean Total Drift:} Average L1 distance between initial and final attention distributions:
+    \begin{equation}
+    \text{Drift} = \|\mathbf{a}_{\text{final}} - \mathbf{a}_{\text{initial}}\|_1
+    \end{equation}
+    where $\mathbf{a} \in \mathbb{R}^5$ is the document-level attention distribution. Range: [0, 2], lower indicates more stable attention.
+    
+    \item \textbf{Mean Answer Drift:} Attention change on relevant document specifically:
+    \begin{equation}
+    \text{Answer Drift} = |a_{\text{relevant}}^{\text{final}} - a_{\text{relevant}}^{\text{initial}}|
+    \end{equation}
+    Lower values indicate stable focus on relevant information during generation.
+    
+    \item \textbf{Mean Max Drift:} Maximum single-document attention change across all documents, indicating which document experienced largest attention shift.
+    
+    \item \textbf{Answer Drift Direction:} Signed difference indicating whether attention to answer document increased (+) or decreased (-) during generation.
+\end{itemize}
+
+\textit{Quality Correlation:}
+\begin{itemize}
+    \item \textbf{Exact Match:} Fraction of answers containing ground truth string (case-insensitive).
+    \item \textbf{Mean F1:} Token-level F1 score between generated answers and ground truth, measuring whether attention preservation correlates with answer quality.
+\end{itemize}
+
+\paragraph{Context Length Degradation}
+
+This metric evaluates performance degradation as context length increases, simulating long-document RAG scenarios.
+
+\begin{table}[H]
+\centering
+\caption{Context length degradation evaluation setup}
+\label{tab:context_length_setup}
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Dataset & SQuAD v2 validation (300 samples) \\
+Context lengths tested & [512, 1024, 2048, 4096] tokens \\
+Filler passages & WikiText-103 \\
+Samples per length & 25 \\
+Answer position & Middle of context (surrounded by filler) \\
+Generation length & 20 tokens \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Context Assembly Protocol:}
+
+For each evaluation sample:
+\begin{enumerate}
+    \item Start with question + answer-containing context (base passage from SQuAD)
+    \item Calculate token count of base passage
+    \item Add random Wikipedia filler passages until reaching target length
+    \item Shuffle filler to surround answer passage (placing it at target position)
+    \item Truncate to exact target length if exceeded
+    \item Append "Answer:" prompt
+\end{enumerate}
+
+This ensures the answer is embedded in realistic long-context scenarios rather than isolated at the end, testing the model's ability to locate and extract information from extended contexts with distractors.
+
+\textbf{Metrics:}
+
+\textit{Accuracy Metrics:}
+\begin{itemize}
+    \item \textbf{F1 by Length:} Token-level F1 score at each context length, measuring answer quality degradation
+    \item \textbf{Accuracy by Length:} Exact match accuracy at each context length (binary correctness)
+\end{itemize}
+
+\textit{Degradation Analysis:}
+\begin{itemize}
+    \item \textbf{Slope per 1K tokens:} Linear regression slope of F1 vs. context length:
+    \begin{equation}
+    F1 = \beta_0 + \beta_1 \times \text{context\_length} + \epsilon
+    \end{equation}
+    Negative slopes indicate degradation, with steeper slopes showing worse robustness to long contexts. Interpretation:
+    \begin{itemize}
+        \item $|\beta_1| < 0.001$: negligible degradation
+        \item $0.001 \le |\beta_1| < 0.01$: minimal degradation
+        \item $0.01 \le |\beta_1| < 0.05$: moderate degradation
+        \item $|\beta_1| \ge 0.05$: significant degradation
+    \end{itemize}
+    
+    \item \textbf{R-squared:} Regression goodness-of-fit, indicating whether degradation follows linear pattern. Values near 1.0 suggest consistent linear degradation; lower values indicate non-linear or irregular patterns.
+\end{itemize}
+
+\textit{Position Analysis:}
+\begin{itemize}
+    \item \textbf{Mean F1 by Position:} Average performance when answer is at start, middle, or end of context
+    \item \textbf{F1 Standard Deviation:} Variability across different context lengths
+    \item \textbf{Min/Max F1:} Performance range indicating robustness
+\end{itemize}
+
+\paragraph{RAG System Evaluation}
+
+Complete evaluation of retrieval-augmented generation combining retrieval quality, answer generation quality, and system efficiency.
+
+\begin{table}[H]
+\centering
+\caption{RAG system evaluation setup}
+\label{tab:rag_system_setup}
+\small
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Test questions & 10-50 Q\&A pairs \\
+Documents indexed & Technical documentation corpus \\
+Retrieval method & Dense vector search (sentence-transformers) \\
+Top-k chunks & 3 per query \\
+Max generation tokens & 50 \\
+Compare no-RAG baseline & Yes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Metrics:}
+
+\textit{Retrieval Quality:}
+\begin{table}[H]
+\centering
+\caption{Retrieval quality metrics}
+\label{tab:retrieval_quality_metrics}
+\small
+\begin{tabular}{lp{9cm}}
+\toprule
+\textbf{Metric} & \textbf{Description} \\
+\midrule
+Context Sufficiency & Fraction of queries where retrieved contexts contain answer (80\% token overlap threshold) \\
+Context Precision & Query-context relevance via token overlap \\
+Answer Coverage & Fraction of answer tokens present in retrieved contexts \\
+Avg Retrieval Score & Mean similarity score from vector search \\
+Retrieval Consistency & Standard deviation of retrieval scores across queries \\
+Avg Context Length & Mean word count of retrieved context \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textit{Answer Quality:}
+\begin{table}[H]
+\centering
+\caption{Answer generation quality metrics}
+\label{tab:answer_quality_metrics}
+\small
+\begin{tabular}{lp{9cm}}
+\toprule
+\textbf{Metric} & \textbf{Description} \\
+\midrule
+Exact Match (EM) & Binary correctness: perfect normalized string match \\
+F1 Score & Token-level precision-recall harmonic mean \\
+Faithfulness & Fraction of answer tokens present in retrieved context (groundedness) \\
+ROUGE-1/2/L & N-gram overlap (unigram, bigram) and longest common subsequence (optional) \\
+Avg Answer Length & Mean word count of generated answers \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textit{RAG vs. No-RAG Comparison:}
+\begin{itemize}
+    \item \textbf{F1 Gain:} Absolute improvement: $\Delta F1 = F1_{\text{RAG}} - F1_{\text{no-RAG}}$
+    \item \textbf{F1 Gain Percent:} Relative improvement: $\frac{\Delta F1}{F1_{\text{no-RAG}}} \times 100\%$
+    \item \textbf{EM Gain:} Exact match improvement with retrieval augmentation
+\end{itemize}
+
+\textit{Efficiency:}
+\begin{table}[H]
+\centering
+\caption{RAG system efficiency metrics}
+\label{tab:rag_efficiency_metrics}
+\small
+\begin{tabular}{lp{9cm}}
+\toprule
+\textbf{Metric} & \textbf{Description} \\
+\midrule
+Avg Retrieval Time (ms) & Mean time to retrieve and rank top-k chunks \\
+Avg RAG Generation Time (ms) & Mean time to generate answer with context \\
+Avg No-RAG Generation Time (ms) & Baseline generation time without context \\
+RAG Overhead (ms) & Additional latency: $(t_{\text{retrieval}} + t_{\text{RAG-gen}}) - t_{\text{no-RAG-gen}}$ \\
+RAG Overhead Percent & Relative overhead: $\frac{\text{overhead}}{t_{\text{no-RAG-gen}}} \times 100\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All RAG evaluations are conducted on the same Tesla T4 GPU with identical retrieval configurations to ensure fair comparison across quantization methods. Retrieval uses cached embeddings to isolate generation performance from embedding computation overhead.

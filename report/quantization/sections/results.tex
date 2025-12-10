@@ -5,187 +5,82 @@ This section presents empirical results across three evaluation dimensions: comp
 \subsection{Computational Efficiency Analysis}
 \label{sec:efficiency}
 
-\subsubsection{Latency Metrics}
+\subsubsection{Time Performance Metrics}
 
 \begin{table}[H]
 \centering
 \caption{Latency measurements across quantization methods}
 \label{tab:latency_methods}
 \small
-\begin{tabular}{lccccc}
+\begin{tabular}{lcccccc}
 \toprule
-\textbf{Method} & \textbf{Latency} & \textbf{TTFT} & \textbf{Prefill} & \textbf{Decode} & \textbf{Speedup} \\
- & \textbf{(ms/tok)} & \textbf{(ms)} & \textbf{(ms)} & \textbf{(ms/tok)} & \textbf{vs FP16} \\
+\textbf{Method} & \textbf{Latency} & \textbf{Latency} & \textbf{TTFT} & \textbf{TTFT} & \textbf{Prefill} & \textbf{Decode} \\
+ & \textbf{(ms/tok)} & \textbf{Std} & \textbf{(ms)} & \textbf{Std} & \textbf{(ms)} & \textbf{(ms/tok)} \\
 \midrule
-FP16 & & & & & 1.00$\times$ \\
-NF4 & & & & & \\
-GPTQ & & & & & \\
-AWQ & & & & & \\
-HQQ & & & & & \\
+FP16 & 62.72 & 0.19 & 69.47 & 0.23 & 69.47 & 62.72 \\
+NF4 & 81.12 & & 177.16 & & 187.97 & 79.09 \\
+GPTQ & 1136.80 & & 1113.00 & & 1110.89 & 1117.76 \\
+AWQ & 78.68 & & 79.25 & & 92.76 & 77.22 \\
+HQQ & 661.65 & & 664.73 & & 663.17 & 649.84 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{table}[H]
 \centering
-\caption{Latency measurements: GPTQ calibration dataset comparison}
-\label{tab:latency_calibration}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Calibration} & \textbf{Latency} & \textbf{TTFT} & \textbf{Prefill} & \textbf{Decode} & \textbf{Speedup} \\
-\textbf{Dataset} & \textbf{(ms/tok)} & \textbf{(ms)} & \textbf{(ms)} & \textbf{(ms/tok)} & \textbf{vs FP16} \\
-\midrule
-GPTQ-WikiText & & & & & \\
-GPTQ-RAG & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Memory and Compression}
-
-\begin{table}[H]
-\centering
-\caption{Memory utilization and compression metrics}
-\label{tab:memory_methods}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Method} & \textbf{Model Size} & \textbf{Peak Memory} & \textbf{Bits/} & \textbf{Compression} & \textbf{Memory} \\
- & \textbf{(GB)} & \textbf{(MB)} & \textbf{Param} & \textbf{Ratio} & \textbf{Efficiency} \\
-\midrule
-FP16 & 13.49 & & 16.0 & 1.00$\times$ & \\
-NF4 & & & 4.0 & & \\
-GPTQ & & & 4.0 & & \\
-AWQ & & & 4.0 & & \\
-HQQ & & & 4.0 & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Memory utilization: GPTQ calibration dataset comparison}
-\label{tab:memory_calibration}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Calibration} & \textbf{Model Size} & \textbf{Peak Memory} & \textbf{Bits/} & \textbf{Compression} & \textbf{Memory} \\
-\textbf{Dataset} & \textbf{(GB)} & \textbf{(MB)} & \textbf{Param} & \textbf{Ratio} & \textbf{Efficiency} \\
-\midrule
-GPTQ-WikiText & & & 4.0 & & \\
-GPTQ-RAG & & & 4.0 & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Throughput}
-
-\begin{table}[H]
-\centering
-\caption{Generation throughput across quantization methods}
+\caption{Throughput measurements across quantization methods}
 \label{tab:throughput_methods}
 \small
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \toprule
-\textbf{Method} & \textbf{Throughput} & \textbf{Total Tokens} & \textbf{Total Time} & \textbf{Throughput} \\
- & \textbf{(tok/s)} & \textbf{Generated} & \textbf{(s)} & \textbf{vs FP16} \\
+\textbf{Method} & \textbf{Throughput} & \textbf{Throughput} & \textbf{Total} & \textbf{Total} & \textbf{Speedup} \\
+ & \textbf{(tok/s)} & \textbf{Std} & \textbf{Tokens} & \textbf{Time (s)} & \textbf{vs FP16} \\
 \midrule
-FP16 & & & & 1.00$\times$ \\
-NF4 & & & & \\
-GPTQ & & & & \\
-AWQ & & & & \\
-HQQ & & & & \\
+FP16 & 15.90 & 0.03 & 1280 & 80.52 & 1.00$\times$ \\
+NF4 & 12.30 & & & & 0.78$\times$ \\
+GPTQ & 0.88 & & & & 0.06$\times$ \\
+AWQ & 12.79 & & & & 0.81$\times$ \\
+HQQ & 1.51 & & & & 0.10$\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\subsubsection{Space Performance Metrics}
+
 \begin{table}[H]
 \centering
-\caption{Generation throughput: GPTQ calibration dataset comparison}
-\label{tab:throughput_calibration}
+\caption{Model size and compression metrics}
+\label{tab:model_size_methods}
 \small
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Calibration} & \textbf{Throughput} & \textbf{Total Tokens} & \textbf{Total Time} & \textbf{Throughput} \\
-\textbf{Dataset} & \textbf{(tok/s)} & \textbf{Generated} & \textbf{(s)} & \textbf{vs FP16} \\
+\textbf{Method} & \textbf{Model Size} & \textbf{Total} & \textbf{Bits per} & \textbf{Compression} \\
+ & \textbf{(GB)} & \textbf{Parameters} & \textbf{Parameter} & \textbf{Ratio} \\
 \midrule
-GPTQ-WikiText & & & & \\
-GPTQ-RAG & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Batch Inference Scaling}
-
-\begin{table}[H]
-\centering
-\caption{Batch throughput scaling (samples/second)}
-\label{tab:batch_methods}
-\small
-\begin{tabular}{lccccccc}
-\toprule
-\textbf{Method} & \textbf{Batch=1} & \textbf{Batch=2} & \textbf{Batch=4} & \textbf{Batch=8} & \textbf{Optimal} & \textbf{Optimal} & \textbf{Scaling} \\
- & & & & & \textbf{Batch} & \textbf{Throughput} & \textbf{Efficiency} \\
-\midrule
-FP16 & & & & & & & \\
-NF4 & & & & & & & \\
-GPTQ & & & & & & & \\
-AWQ & & & & & & & \\
-HQQ & & & & & & & \\
+FP16 & 13.49 & 7.24B & 16.0 & 1.00$\times$ \\
+NF4 & 3.74 & 7.24B & 4.0 & 3.61$\times$ \\
+GPTQ & 3.87 & 7.24B & 4.0 & 3.48$\times$ \\
+AWQ & 3.87 & 7.24B & 4.0 & 3.49$\times$ \\
+HQQ & 3.74 & 7.24B & 4.0 & 3.61$\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{table}[H]
 \centering
-\caption{Batch throughput scaling: GPTQ calibration dataset comparison}
-\label{tab:batch_calibration}
+\caption{Memory utilization metrics}
+\label{tab:memory_methods}
 \small
-\begin{tabular}{lccccccc}
+\begin{tabular}{lccc}
 \toprule
-\textbf{Calibration} & \textbf{Batch=1} & \textbf{Batch=2} & \textbf{Batch=4} & \textbf{Batch=8} & \textbf{Optimal} & \textbf{Optimal} & \textbf{Scaling} \\
-\textbf{Dataset} & & & & & \textbf{Batch} & \textbf{Throughput} & \textbf{Efficiency} \\
+\textbf{Method} & \textbf{Peak Memory} & \textbf{Memory} & \textbf{Memory} \\
+ & \textbf{(MB)} & \textbf{Efficiency} & \textbf{Reduction vs FP16} \\
 \midrule
-GPTQ-WikiText & & & & & & & \\
-GPTQ-RAG & & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Energy Consumption}
-
-\begin{table}[H]
-\centering
-\caption{Energy consumption estimates}
-\label{tab:energy_methods}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Method} & \textbf{Energy/Token} & \textbf{TDP} & \textbf{Energy} & \textbf{Est. Cost} \\
- & \textbf{(mJ)} & \textbf{(W)} & \textbf{Efficiency vs FP16} & \textbf{(\$/1M tokens)} \\
-\midrule
-FP16 & & 70 & 1.00$\times$ & \\
-NF4 & & 70 & & \\
-GPTQ & & 70 & & \\
-AWQ & & 70 & & \\
-HQQ & & 70 & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Energy consumption: GPTQ calibration dataset comparison}
-\label{tab:energy_calibration}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Calibration} & \textbf{Energy/Token} & \textbf{TDP} & \textbf{Energy} & \textbf{Est. Cost} \\
-\textbf{Dataset} & \textbf{(mJ)} & \textbf{(W)} & \textbf{Efficiency vs FP16} & \textbf{(\$/1M tokens)} \\
-\midrule
-GPTQ-WikiText & & 70 & & \\
-GPTQ-RAG & & 70 & & \\
+FP16 & 6906.26 & 2.00 & 1.00$\times$ \\
+NF4 & 1859.11 & 2.06 & 3.77$\times$ \\
+GPTQ & 4415.90 & 0.90 & 1.59$\times$ \\
+AWQ & 1869.04 & 2.12 & 3.75$\times$ \\
+HQQ & 4721.1 & 0.81 & 1.49$\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -205,140 +100,139 @@ GPTQ-RAG & & 70 & & \\
 \textbf{Method} & \textbf{Perplexity} & \textbf{Loss} & \textbf{Delta PPL} & \textbf{Degradation} \\
  & & & \textbf{vs FP16} & \textbf{(\%)} \\
 \midrule
-FP16 & & & 0.00 & 0.0\% \\
-NF4 & & & & \\
-GPTQ & & & & \\
-AWQ & & & & \\
-HQQ & & & & \\
+FP16 & 8.80 & 2.174 & 0.00 & 0.0\% \\
+NF4 & 13.02 & & +0.23 & +1.8\% \\
+GPTQ & 12.85 & & +0.06 & +0.5\% \\
+AWQ & 13.47 & & +0.68 & +5.3\% \\
+HQQ & 13.5 & & +0.71 & +5.6\% \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{table}[H]
-\centering
-\caption{Perplexity: GPTQ calibration dataset comparison}
-\label{tab:perplexity_calibration}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Calibration} & \textbf{Perplexity} & \textbf{Loss} & \textbf{Delta PPL} & \textbf{Degradation} \\
-\textbf{Dataset} & & & \textbf{vs FP16} & \textbf{(\%)} \\
-\midrule
-GPTQ-WikiText & & & & \\
-GPTQ-RAG & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
+\subsubsection{Core Task Benchmarks}
 
-\subsubsection{Reasoning Tasks}
+\paragraph{Baseline Reasoning (0-shot)}
 
 \begin{table}[H]
 \centering
-\caption{Reasoning benchmark performance (0-shot)}
+\caption{Baseline reasoning tasks}
 \label{tab:reasoning_methods}
 \small
-\begin{tabular}{lccccccc}
-\toprule
-\textbf{Method} & \textbf{Hella-} & \textbf{Wino-} & \textbf{PIQA} & \textbf{ARC-} & \textbf{ARC-} & \textbf{Bool} & \textbf{Avg} \\
- & \textbf{Swag} & \textbf{Grande} & & \textbf{Easy} & \textbf{Chal.} & \textbf{Q} & \\
-\midrule
-FP16 & & & & & & & \\
-NF4 & & & & & & & \\
-GPTQ & & & & & & & \\
-AWQ & & & & & & & \\
-HQQ & & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Reasoning benchmarks: GPTQ calibration dataset comparison}
-\label{tab:reasoning_calibration}
-\small
-\begin{tabular}{lccccccc}
-\toprule
-\textbf{Calibration} & \textbf{Hella-} & \textbf{Wino-} & \textbf{PIQA} & \textbf{ARC-} & \textbf{ARC-} & \textbf{Bool} & \textbf{Avg} \\
-\textbf{Dataset} & \textbf{Swag} & \textbf{Grande} & & \textbf{Easy} & \textbf{Chal.} & \textbf{Q} & \\
-\midrule
-GPTQ-WikiText & & & & & & & \\
-GPTQ-RAG & & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Knowledge and Mathematical Reasoning}
-
-\begin{table}[H]
-\centering
-\caption{Knowledge and mathematical reasoning performance}
-\label{tab:knowledge_math_methods}
-\small
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Method} & \textbf{MMLU} & \textbf{GSM8K} & \textbf{TruthfulQA} & \textbf{Avg} & \textbf{Avg Deg.} \\
- & \textbf{(5-shot)} & \textbf{(5-shot)} & \textbf{(0-shot)} & & \textbf{(\%)} \\
+\textbf{Method} & \textbf{HellaSwag} & \textbf{Winogrande} & \textbf{PIQA} & \textbf{ARC-Easy} & \textbf{ARC-Challenge} \\
 \midrule
-FP16 & & & & & 0.0\% \\
-NF4 & & & & & \\
-GPTQ & & & & & \\
+FP16 & 0.72 & & & 0.76 & 0.58 \\
+NF4 & 0.70 & & & 0.75 & 0.58 \\
+GPTQ & 0.68 & & & 0.75 & 0.60 \\
 AWQ & & & & & \\
-HQQ & & & & & \\
+HQQ & 0.69 & & & 0.72 & 0.5 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph{Core RAG Tasks (0-shot)}
 
 \begin{table}[H]
 \centering
-\caption{Knowledge and math: GPTQ calibration dataset comparison}
-\label{tab:knowledge_math_calibration}
+\caption{Core RAG tasks: reading comprehension}
+\label{tab:core_rag_methods}
 \small
-\begin{tabular}{lccccc}
+\begin{tabular}{lcc}
 \toprule
-\textbf{Calibration} & \textbf{MMLU} & \textbf{GSM8K} & \textbf{TruthfulQA} & \textbf{Avg} & \textbf{Avg Deg.} \\
-\textbf{Dataset} & \textbf{(5-shot)} & \textbf{(5-shot)} & \textbf{(0-shot)} & & \textbf{(\%)} \\
+\textbf{Method} & \textbf{SQuAD} & \textbf{TriviaQA} \\
+ & \textbf{(F1)} & \textbf{(EM)} \\
 \midrule
-GPTQ-WikiText & & & & & \\
-GPTQ-RAG & & & & & \\
+FP16 & & \\
+NF4 & & \\
+GPTQ & & \\
+AWQ & & \\
+HQQ & & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsubsection{RAG-Focused Reading Comprehension}
-
-\begin{table}[H]
-\centering
-\caption{RAG-focused reading comprehension tasks}
-\label{tab:rag_tasks_methods}
-\small
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Method} & \textbf{SQuAD} & \textbf{NQ-Open} & \textbf{TriviaQA} & \textbf{DROP} & \textbf{QuAC} & \textbf{Avg} \\
-\midrule
-FP16 & & & & & & \\
-NF4 & & & & & & \\
-GPTQ & & & & & & \\
-AWQ & & & & & & \\
-HQQ & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
+\paragraph{RAG with Complex Reasoning (3-shot)}
 
 \begin{table}[H]
 \centering
-\caption{RAG-focused tasks: GPTQ calibration dataset comparison}
-\label{tab:rag_tasks_calibration}
+\caption{Complex reasoning over context}
+\label{tab:complex_reasoning_methods}
 \small
-\begin{tabular}{lcccccc}
+\begin{tabular}{lcc}
 \toprule
-\textbf{Calibration} & \textbf{SQuAD} & \textbf{NQ-Open} & \textbf{TriviaQA} & \textbf{DROP} & \textbf{QuAC} & \textbf{Avg} \\
-\textbf{Dataset} & & & & & & \\
+\textbf{Method} & \textbf{DROP} & \textbf{RACE} \\
+ & \textbf{(F1)} & \textbf{(Acc)} \\
 \midrule
-GPTQ-WikiText & & & & & & \\
-GPTQ-RAG & & & & & & \\
+FP16 & & \\
+NF4 & & \\
+GPTQ & & \\
+AWQ & & \\
+HQQ & & \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\paragraph{Fact Verification (0-shot)}
+
+\begin{table}[H]
+\centering
+\caption{Binary fact verification}
+\label{tab:verification_methods}
+\small
+\begin{tabular}{lc}
+\toprule
+\textbf{Method} & \textbf{BoolQ} \\
+ & \textbf{(Acc)} \\
+\midrule
+FP16 & \\
+NF4 & \\
+GPTQ & \\
+AWQ & \\
+HQQ & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% \paragraph{Additional Benchmarks}
+
+% \begin{table}[H]
+% \centering
+% \caption{Knowledge and mathematical reasoning}
+% \label{tab:knowledge_math_methods}
+% \small
+% \begin{tabular}{lcc}
+% \toprule
+% \textbf{Method} & \textbf{GSM8K} & \textbf{MMLU} \\
+%  & \textbf{(8-shot, EM)} & \textbf{(5-shot, Acc)} \\
+% \midrule
+% FP16 & 0.36 & 1.00 \\
+% NF4 & 0.27 & 0.55 \\
+% GPTQ & & \\
+% AWQ & & \\
+% HQQ & & \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+% \begin{table}[H]
+% \centering
+% \caption{Code generation}
+% \label{tab:code_methods}
+% \small
+% \begin{tabular}{lc}
+% \toprule
+% \textbf{Method} & \textbf{HumanEval} \\
+%  & \textbf{(0-shot, pass@1)} \\
+% \midrule
+% FP16 & 0.05 \\
+% NF4 & 0.05 \\
+% GPTQ & 0.05 \\
+% AWQ & \\
+% HQQ & \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
 
 \subsection{RAG-Specific Performance Analysis}
 \label{sec:rag}
@@ -347,15 +241,15 @@ GPTQ-RAG & & & & & & \\
 
 \begin{table}[H]
 \centering
-\caption{Attention preservation to relevant documents}
+\caption{Attention preservation metrics}
 \label{tab:attention_preservation_methods}
 \small
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Method} & \textbf{Precision} & \textbf{Mean} & \textbf{Median} & \textbf{Gini} & \textbf{EM} & \textbf{F1} \\
- & \textbf{@1} & \textbf{Rank} & \textbf{Rank} & \textbf{Coeff} & \textbf{Acc} & \textbf{Score} \\
+\textbf{Method} & \textbf{Precision} & \textbf{Mean} & \textbf{Median} & \textbf{Mean Attn} & \textbf{Gini} & \textbf{Samples} \\
+ & \textbf{@1} & \textbf{Rank} & \textbf{Rank} & \textbf{on Answer} & \textbf{Coeff} & \\
 \midrule
-FP16 & & & & & & \\
+FP16 & 0.273 & 3.18 & 4.0 & 0.230 & 0.499 & 11 \\
 NF4 & & & & & & \\
 GPTQ & & & & & & \\
 AWQ & & & & & & \\
@@ -366,144 +260,15 @@ HQQ & & & & & & \\
 
 \begin{table}[H]
 \centering
-\caption{Attention preservation: GPTQ calibration dataset comparison}
-\label{tab:attention_preservation_calibration}
-\small
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Calibration} & \textbf{Precision} & \textbf{Mean} & \textbf{Median} & \textbf{Gini} & \textbf{EM} & \textbf{F1} \\
-\textbf{Dataset} & \textbf{@1} & \textbf{Rank} & \textbf{Rank} & \textbf{Coeff} & \textbf{Acc} & \textbf{Score} \\
-\midrule
-GPTQ-WikiText & & & & & & \\
-GPTQ-RAG & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Context Degradation Analysis}
-
-\begin{table}[H]
-\centering
-\caption{Accuracy degradation with increasing context length}
-\label{tab:context_degradation_methods}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Method} & \textbf{Slope per} & \textbf{R-squared} & \textbf{Cliff Point} & \textbf{Signif.} & \textbf{Position} \\
- & \textbf{1K tokens} & & \textbf{(tokens)} & \textbf{Deg.?} & \textbf{Effect?} \\
-\midrule
-FP16 & & & & & \\
-NF4 & & & & & \\
-GPTQ & & & & & \\
-AWQ & & & & & \\
-HQQ & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Context degradation: GPTQ calibration dataset comparison}
-\label{tab:context_degradation_calibration}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Calibration} & \textbf{Slope per} & \textbf{R-squared} & \textbf{Cliff Point} & \textbf{Signif.} & \textbf{Position} \\
-\textbf{Dataset} & \textbf{1K tokens} & & \textbf{(tokens)} & \textbf{Deg.?} & \textbf{Effect?} \\
-\midrule
-GPTQ-WikiText & & & & & \\
-GPTQ-RAG & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Context Length Breakdown}
-
-\begin{table}[H]
-\centering
-\caption{Accuracy by context length (F1 score)}
-\label{tab:context_length_methods}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Method} & \textbf{512 tok} & \textbf{1024 tok} & \textbf{2048 tok} & \textbf{4096 tok} & \textbf{Degradation} \\
- & & & & & \textbf{512 to 4096} \\
-\midrule
-FP16 & & & & & \\
-NF4 & & & & & \\
-GPTQ & & & & & \\
-AWQ & & & & & \\
-HQQ & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Context length breakdown: GPTQ calibration comparison}
-\label{tab:context_length_calibration}
-\small
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Calibration} & \textbf{512 tok} & \textbf{1024 tok} & \textbf{2048 tok} & \textbf{4096 tok} & \textbf{Degradation} \\
-\textbf{Dataset} & & & & & \textbf{512 to 4096} \\
-\midrule
-GPTQ-WikiText & & & & & \\
-GPTQ-RAG & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Attention Drift During Generation}
-
-\begin{table}[H]
-\centering
-\caption{Attention stability during generation}
+\caption{Attention drift metrics}
 \label{tab:attention_drift_methods}
-\small
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Method} & \textbf{Mean} & \textbf{Max} & \textbf{Drift from} & \textbf{Drift-F1} & \textbf{Drift@} & \textbf{Drift@} \\
- & \textbf{Drift} & \textbf{Drift} & \textbf{Relevant} & \textbf{Corr (r)} & \textbf{Correct} & \textbf{Wrong} \\
-\midrule
-FP16 & & & & & & \\
-NF4 & & & & & & \\
-GPTQ & & & & & & \\
-AWQ & & & & & & \\
-HQQ & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Attention drift: GPTQ calibration dataset comparison}
-\label{tab:attention_drift_calibration}
-\small
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Calibration} & \textbf{Mean} & \textbf{Max} & \textbf{Drift from} & \textbf{Drift-F1} & \textbf{Drift@} & \textbf{Drift@} \\
-\textbf{Dataset} & \textbf{Drift} & \textbf{Drift} & \textbf{Relevant} & \textbf{Corr (r)} & \textbf{Correct} & \textbf{Wrong} \\
-\midrule
-GPTQ-WikiText & & & & & & \\
-GPTQ-RAG & & & & & & \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Attention-Quality Correlation Analysis}
-
-\begin{table}[H]
-\centering
-\caption{Correlation between attention metrics and answer quality}
-\label{tab:attention_quality_methods}
 \small
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Method} & \textbf{Prec@1 vs F1} & \textbf{Rank vs F1} & \textbf{High Attn} & \textbf{Low Attn} \\
- & \textbf{(Pearson r)} & \textbf{(Spearman rho)} & \textbf{Correct (\%)} & \textbf{Correct (\%)} \\
+\textbf{Method} & \textbf{Mean Total} & \textbf{Mean Answer} & \textbf{Mean Max} & \textbf{Answer Drift} \\
+ & \textbf{Drift} & \textbf{Drift} & \textbf{Drift} & \textbf{Direction} \\
 \midrule
-FP16 & & & & \\
+FP16 & 0.402 & 0.093 & 0.192 & 0.005 \\
 NF4 & & & & \\
 GPTQ & & & & \\
 AWQ & & & & \\
@@ -514,16 +279,174 @@ HQQ & & & & \\
 
 \begin{table}[H]
 \centering
-\caption{Attention-quality correlation: GPTQ calibration comparison}
-\label{tab:attention_quality_calibration}
+\caption{Attention preservation quality correlation}
+\label{tab:attention_quality_methods}
+\small
+\begin{tabular}{lcc}
+\toprule
+\textbf{Method} & \textbf{Exact Match} & \textbf{Mean F1} \\
+\midrule
+FP16 & 0.364 & 0.039 \\
+NF4 & & \\
+GPTQ & & \\
+AWQ & & \\
+HQQ & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Context Length Degradation}
+
+\begin{table}[H]
+\centering
+\caption{Context length degradation analysis}
+\label{tab:context_degradation_methods}
 \small
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Calibration} & \textbf{Prec@1 vs F1} & \textbf{Rank vs F1} & \textbf{High Attn} & \textbf{Low Attn} \\
-\textbf{Dataset} & \textbf{(Pearson r)} & \textbf{(Spearman rho)} & \textbf{Correct (\%)} & \textbf{Correct (\%)} \\
+\textbf{Method} & \textbf{Slope per} & \textbf{R-squared} & \textbf{Degradation} & \textbf{Samples per} \\
+ & \textbf{1K tokens} & & \textbf{Interpretation} & \textbf{Length} \\
 \midrule
-GPTQ-WikiText & & & & \\
-GPTQ-RAG & & & & \\
+FP16 & -0.018 & 0.87 & Mild linear drop & 11 \\
+NF4 & & & & \\
+GPTQ & & & & \\
+AWQ & & & & \\
+HQQ & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Performance by context length}
+\label{tab:context_length_methods}
+\small
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Method} & \textbf{F1 @ 512} & \textbf{F1 @ 1024} & \textbf{F1 @ 2048} & \textbf{F1 @ 4096} & \textbf{Acc @ 512} \\
+ & \textbf{tokens} & \textbf{tokens} & \textbf{tokens} & \textbf{tokens} & \textbf{tokens} \\
+\midrule
+FP16 & 0.039 & — & — & — & 0.364 \\
+NF4 & & & & & \\
+GPTQ & & & & & \\
+AWQ & & & & & \\
+HQQ & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Position analysis summary}
+\label{tab:position_analysis_methods}
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Method} & \textbf{Mean F1} & \textbf{Std F1} & \textbf{Min F1} & \textbf{Max F1} \\
+ & \textbf{(middle pos)} & & & \\
+\midrule
+FP16 & 0.0393 & 0.112 & 0.0 & 0.38 \\
+NF4 & & & & \\
+GPTQ & & & & \\
+AWQ & & & & \\
+HQQ & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{RAG System Evaluation}
+
+\begin{table}[H]
+\centering
+\caption{Retrieval quality metrics}
+\label{tab:retrieval_quality_methods}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Method} & \textbf{Context} & \textbf{Context} & \textbf{Answer} & \textbf{Avg} & \textbf{Retrieval} & \textbf{Avg Context} \\
+ & \textbf{Sufficiency} & \textbf{Precision} & \textbf{Coverage} & \textbf{Score} & \textbf{Consistency} & \textbf{Length (words)} \\
+\midrule
+FP16 & 0.796 & 0.564 & 0.756 & 0.800 & 0.090 & 1308.5 \\
+NF4 & 0.796 & 0.564 & 0.756 & 0.800 & 0.090 & 1308.5 \\
+AWQ & 0.796 & 0.564 & 0.756 & 0.800 & 0.090 & 1308.5 \\
+GPTQ & & & & & & \\
+HQQ & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Answer generation quality}
+\label{tab:answer_quality_methods}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Method} & \textbf{Exact} & \textbf{F1} & \textbf{F1} & \textbf{Faithful-} & \textbf{Avg Answer} \\
+ & \textbf{Match} & \textbf{Score} & \textbf{Std} & \textbf{ness} & \textbf{Length (words)} \\
+\midrule
+FP16 & 0.0 & 0.217 & & 0.559 & 33.75 \\
+NF4 & 0.0 & 0.205 & & 0.539 & 31.95 \\
+AWQ & 0.0 & 0.191 & & 0.476 & 30.5 \\
+GPTQ & & & & & \\
+HQQ & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{ROUGE scores (optional metrics)}
+\label{tab:rouge_methods}
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Method} & \textbf{ROUGE-1} & \textbf{ROUGE-2} & \textbf{ROUGE-L} \\
+\midrule
+FP16 & 0.279 & 0.092 & 0.197 \\
+NF4 & 0.244 & 0.086 & 0.177 \\
+AWQ & 0.243 & 0.088 & 0.181 \\
+GPTQ & & & \\
+HQQ & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{RAG vs No-RAG comparison}
+\label{tab:rag_comparison_methods}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Method} & \textbf{RAG} & \textbf{No-RAG} & \textbf{F1 Gain} & \textbf{F1 Gain} & \textbf{RAG} & \textbf{No-RAG} \\
+ & \textbf{F1} & \textbf{F1} & \textbf{(abs)} & \textbf{(\%)} & \textbf{EM} & \textbf{EM} \\
+\midrule
+FP16 & 0.217 & 0.190 & +0.027 & +14.2\% & 0.0 & 0.0 \\
+NF4 & 0.205 & 0.181 & +0.024 & +13.3\% & 0.0 & 0.0 \\
+AWQ & 0.191 & 0.165 & +0.025 & +15.2\% & 0.0 & 0.0 \\
+GPTQ & & & & & & \\
+HQQ & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{RAG system efficiency}
+\label{tab:rag_efficiency_methods}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Method} & \textbf{Avg} & \textbf{Retrieval} & \textbf{Avg RAG} & \textbf{Avg No-RAG} & \textbf{RAG} & \textbf{RAG} \\
+ & \textbf{Retrieval} & \textbf{Std} & \textbf{Gen Time} & \textbf{Gen Time} & \textbf{Overhead} & \textbf{Overhead} \\
+ & \textbf{Time (ms)} & \textbf{(ms)} & \textbf{(ms)} & \textbf{(ms)} & \textbf{(ms)} & \textbf{(\%)} \\
+\midrule
+FP16 & 24.7 & & 8435.5 & 7855.2 & +605.0 & +7.7\% \\
+NF4 & 28.0 & & 10443.9 & 9965.0 & +506.9 & +5.1\% \\
+AWQ & 26.1 & & 9993.9 & 7744.2 & +2275.8 & +29.4\% \\
+GPTQ & & & & & & \\
+HQQ & & & & & & \\
 \bottomrule
 \end{tabular}
 \end{table}
