@@ -42,34 +42,25 @@
     }
   },
   "custom_rag_benchmarks": {
-    "attention_preservation": {
-      "description": "Measures if attention to relevant documents is preserved in multi-document retrieval",
+    "attention": {
+      "description": "Unified attention evaluation: preservation and drift",
       "speed": "fast",
       "parameters": {
-        "num_samples": 50,
-        "num_documents": 5
-      },
-      "estimated_time_min": 15
-    },
-    "context_degradation": {
-      "description": "Measures accuracy degradation as context length increases",
-      "speed": "fast",
-      "parameters": {
-        "samples_per_length": 30,
-        "context_lengths": [512, 2048, 4096],
-        "answer_positions": ["middle"]
-      },
-      "estimated_time_min": 20
-    },
-    "attention_drift": {
-      "description": "Measures attention stability during generation",
-      "speed": "fast",
-      "parameters": {
-        "num_samples": 50,
+        "num_samples": 40,
         "generation_positions": [1, 5, 20],
         "num_documents": 5
       },
       "estimated_time_min": 20
+    },
+    "context": {
+      "description": "Unified context evaluation: degradation and position effects",
+      "speed": "fast",
+      "parameters": {
+        "samples_per_length": 25,
+        "context_lengths": [512, 2048, 4096],
+        "answer_positions": ["middle"]
+      },
+      "estimated_time_min": 15
     }
   },
   "lm_eval_tasks": {
@@ -103,11 +94,10 @@
       "time_performance",
       "space_performance",
       "perplexity",
-      "attention_preservation",
+      "attention",
       "context_degradation",
-      "attention_drift",
       "lm_eval_tasks"
     ],
-    "estimated_total_time_min": 70
+    "estimated_total_time_min": 60
   }
 }

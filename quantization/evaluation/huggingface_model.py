@@ -110,13 +110,12 @@ class HuggingFaceModel(ModelInterface):
         """Get model configuration info"""
         config = self._model.config
         
+        # Get dtype from parameters, not model object
         try:
-            dtype = str(self._model.dtype)
-        except AttributeError:
-            try:
-                dtype = str(next(self._model.parameters()).dtype)
-            except (StopIteration, AttributeError):
-                dtype = "unknown"
+            first_param = next(self._model.parameters())
+            dtype = str(first_param.dtype)
+        except (StopIteration, AttributeError):
+            dtype = "unknown"
         
         return {
             "model_path": self.model_path,
