@@ -23,7 +23,7 @@ from datasets import load_dataset
 from scipy import stats
 import re
 
-from model_interface import ModelInterface, GenerationConfig
+from models.model_interface import ModelInterface, GenerationConfig
 
 
 def compute_f1(prediction: str, ground_truth: str) -> float:

@@ -10,7 +10,7 @@ from typing import Dict, Any
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from model_interface import ModelInterface, GenerationConfig, ModelOutput
+from models.model_interface import ModelInterface, GenerationConfig, ModelOutput
 
 
 class HuggingFaceModel(ModelInterface):

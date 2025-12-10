@@ -13,7 +13,7 @@ import json
 
 import torch
 
-from model_interface import ModelInterface
+from models.model_interface import ModelInterface
 
 logger = logging.getLogger(__name__)
 

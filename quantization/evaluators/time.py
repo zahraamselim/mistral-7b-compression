@@ -15,7 +15,7 @@ import json
 import torch
 import numpy as np
 
-from model_interface import ModelInterface, GenerationConfig
+from models.model_interface import ModelInterface, GenerationConfig
 
 logger = logging.getLogger(__name__)
 
