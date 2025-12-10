@@ -2,11 +2,12 @@
 HuggingFace Model Implementation
 
 Implements the ModelInterface for HuggingFace transformer models.
+Focus: Research-grade attention extraction for RAG evaluation.
 """
 
 import gc
 import time
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -14,7 +15,7 @@ from models.model_interface import ModelInterface, GenerationConfig, ModelOutput
 
 
 class HuggingFaceModel(ModelInterface):
-    """HuggingFace transformer model implementation"""
+    """HuggingFace transformer model implementation with attention extraction"""
     
     def __init__(self, model_path: str, device: str = "auto"):
         super().__init__(model_path, device)
@@ -36,39 +37,95 @@ class HuggingFaceModel(ModelInterface):
         print(f"Model loaded on: {self._model.device}")
     
     def generate(self, prompt: str, config: GenerationConfig, return_attentions: bool = False) -> ModelOutput:
-        """Generate text from prompt"""
+        """
+        Generate text from prompt.
+        
+        When return_attentions=True, uses custom generation loop to capture
+        attention weights at each decoding step. This is necessary because
+        HuggingFace's generate() method doesn't reliably return attentions.
+        
+        Research note: Attention extraction adds ~2-3x overhead vs standard generation.
+        For large-scale experiments, consider caching or using smaller sample sizes.
+        """
         inputs = self._tokenizer(prompt, return_tensors="pt").to(self._model.device)
+        input_length = inputs.input_ids.shape[1]
         
         start_time = time.perf_counter()
         
         with torch.no_grad():
-            outputs = self._model.generate(
-                inputs.input_ids,
-                max_new_tokens=config.max_new_tokens,
-                do_sample=config.do_sample,
-                temperature=config.temperature if config.do_sample else 1.0,
-                top_p=config.top_p if config.do_sample else 1.0,
-                top_k=config.top_k if config.do_sample else 50,
-                pad_token_id=self._tokenizer.eos_token_id,
-                output_attentions=return_attentions,
-                return_dict_in_generate=return_attentions
-            )
+            if return_attentions:
+                # Custom generation loop for attention extraction
+                # Note: This is slower but necessary for research-grade attention analysis
+                generated_ids = inputs.input_ids.clone()
+                all_attentions = []
+                
+                for step in range(config.max_new_tokens):
+                    outputs = self._model(
+                        input_ids=generated_ids,
+                        attention_mask=torch.ones_like(generated_ids),
+                        output_attentions=True
+                    )
+                    
+                    # Capture attention weights from all layers
+                    # Format: tuple of (batch, heads, seq_len, seq_len) per layer
+                    all_attentions.append(outputs.attentions)
+                    
+                    # Generate next token
+                    next_token_logits = outputs.logits[:, -1, :]
+                    
+                    if config.do_sample:
+                        # Sampling with temperature/top-k/top-p
+                        next_token_logits = next_token_logits / config.temperature
+                        
+                        if config.top_k > 0:
+                            indices_to_remove = next_token_logits < torch.topk(next_token_logits, config.top_k)[0][..., -1, None]
+                            next_token_logits[indices_to_remove] = float('-inf')
+                        
+                        if config.top_p < 1.0:
+                            sorted_logits, sorted_indices = torch.sort(next_token_logits, descending=True)
+                            cumulative_probs = torch.cumsum(torch.softmax(sorted_logits, dim=-1), dim=-1)
+                            sorted_indices_to_remove = cumulative_probs > config.top_p
+                            sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
+                            sorted_indices_to_remove[..., 0] = 0
+                            indices_to_remove = sorted_indices_to_remove.scatter(1, sorted_indices, sorted_indices_to_remove)
+                            next_token_logits[indices_to_remove] = float('-inf')
+                        
+                        probs = torch.softmax(next_token_logits, dim=-1)
+                        next_token = torch.multinomial(probs, num_samples=1)
+                    else:
+                        # Greedy decoding
+                        next_token = torch.argmax(next_token_logits, dim=-1, keepdim=True)
+                    
+                    generated_ids = torch.cat([generated_ids, next_token], dim=-1)
+                    
+                    # Early stopping on EOS
+                    if next_token.item() == self._tokenizer.eos_token_id:
+                        break
+                
+                attentions = all_attentions
+                
+            else:
+                # Fast generation without attention extraction
+                outputs = self._model.generate(
+                    inputs.input_ids,
+                    max_new_tokens=config.max_new_tokens,
+                    do_sample=config.do_sample,
+                    temperature=config.temperature if config.do_sample else 1.0,
+                    top_p=config.top_p if config.do_sample else 1.0,
+                    top_k=config.top_k if config.do_sample else 50,
+                    pad_token_id=self._tokenizer.eos_token_id
+                )
+                generated_ids = outputs
+                attentions = None
         
         latency_ms = (time.perf_counter() - start_time) * 1000
         
-        if return_attentions:
-            generated_ids = outputs.sequences
-            attentions = outputs.attentions if hasattr(outputs, 'attentions') else None
-        else:
-            generated_ids = outputs
-            attentions = None
-        
         generated_text = self._tokenizer.decode(
-            generated_ids[0][inputs.input_ids.shape[1]:],
+            generated_ids[0][input_length:],
             skip_special_tokens=True
         )
         
-        num_tokens = generated_ids.shape[1] - inputs.input_ids.shape[1]
+        num_tokens = generated_ids.shape[1] - input_length
         
         return ModelOutput(
             generated_ids=generated_ids,
@@ -110,7 +167,6 @@ class HuggingFaceModel(ModelInterface):
         """Get model configuration info"""
         config = self._model.config
         
-        # Get dtype from parameters, not model object
         try:
             first_param = next(self._model.parameters())
             dtype = str(first_param.dtype)
