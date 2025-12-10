@@ -1,15 +1,17 @@
 """
-Attention Preservation Benchmark - OPTIMIZED
+Attention Preservation Benchmark - HIGHLY OPTIMIZED
 
 Measures whether quantized models preserve attention to relevant documents in 
 multi-document retrieval scenarios.
 
 Optimizations:
-- Pre-load and cache datasets
+- Pre-load and cache datasets with indexing
 - Batch tokenization
 - Pre-compute BM25 index
 - Faster passage matching with indexing
 - Reduced dataset loading overhead
+- Progress logged at every iteration
+- Aggressive memory management
 """
 
 import random
@@ -68,16 +70,14 @@ class DatasetCache:
         self.bm25_index = None
         self.bm25_passages = None
         
-    def load(self, max_wiki_docs: int = 1000):
+    def load(self, max_wiki_docs: int = 500):
         """Load and index all datasets once."""
-        print("Loading and indexing datasets (one-time setup)...")
+        print("Loading and indexing datasets...")
         
-        # Load Natural Questions
         print("  Loading Natural Questions...")
         self.nq_dataset = load_dataset("nq_open", split="validation")
         print(f"    Loaded {len(self.nq_dataset)} questions")
         
-        # Load Wikipedia
         print("  Loading Wikipedia corpus...")
         try:
             wiki_dataset = load_dataset(
@@ -101,7 +101,7 @@ class DatasetCache:
                         'text_lower': text.lower()
                     })
                 
-                if i % 200 == 0 and i > 0:
+                if i % 100 == 0 and i > 0:
                     print(f"    Loaded {i} documents...")
             
         except Exception as e:
@@ -122,12 +122,10 @@ class DatasetCache:
         
         print(f"    Loaded {len(self.wiki_passages)} passages")
         
-        # Build answer index
         print("  Building answer index...")
         self.answer_to_passages = defaultdict(list)
         
         for idx, passage in enumerate(self.wiki_passages):
-            # Extract key phrases (simple approach: first 100 words)
             words = passage['text_lower'].split()[:100]
             for i in range(len(words) - 2):
                 phrase = ' '.join(words[i:i+3])
@@ -135,7 +133,6 @@ class DatasetCache:
         
         print(f"    Indexed {len(self.answer_to_passages)} phrases")
         
-        # Build BM25 index
         print("  Building BM25 index...")
         self.bm25_passages = [p['text'][:800] for p in self.wiki_passages]
         tokenized_corpus = [doc.lower().split()[:100] for doc in self.bm25_passages]
@@ -159,7 +156,7 @@ class AttentionPreservationBenchmark:
     
     @staticmethod
     def create_fast(model: ModelInterface):
-        """Create FAST benchmark: 50 samples, 5 docs (~10-15 min)"""
+        """Create FAST benchmark: 50 samples, 5 docs"""
         return AttentionPreservationBenchmark(
             model=model,
             num_samples=50,
@@ -170,7 +167,7 @@ class AttentionPreservationBenchmark:
     
     @staticmethod
     def create_standard(model: ModelInterface):
-        """Create STANDARD benchmark: 100 samples, 5 docs (~20-30 min)"""
+        """Create STANDARD benchmark: 100 samples, 5 docs"""
         return AttentionPreservationBenchmark(
             model=model,
             num_samples=100,
@@ -181,7 +178,7 @@ class AttentionPreservationBenchmark:
     
     @staticmethod
     def create_full(model: ModelInterface):
-        """Create FULL benchmark: 300 samples, 10 docs (~60-90 min)"""
+        """Create FULL benchmark: 300 samples, 10 docs"""
         return AttentionPreservationBenchmark(
             model=model,
             num_samples=300,
@@ -212,26 +209,6 @@ class AttentionPreservationBenchmark:
         torch.manual_seed(random_seed)
         
         self.dataset_cache = DatasetCache()
-        self.power_analysis = self._calculate_statistical_power()
-    
-    def _calculate_statistical_power(self) -> Dict[str, float]:
-        """Calculate statistical power for the given sample size."""
-        effect_size = 0.3
-        alpha = 0.05
-        n = self.num_samples
-        
-        from scipy.stats import norm
-        z_alpha = norm.ppf(1 - alpha / 2)
-        z_beta = (effect_size * np.sqrt(n)) - z_alpha
-        power = norm.cdf(z_beta)
-        
-        return {
-            "effect_size": effect_size,
-            "alpha": alpha,
-            "n_samples": n,
-            "actual_power": float(power),
-            "adequate": power >= 0.80
-        }
     
     def _extract_answer_context_fast(
         self, 
@@ -240,7 +217,6 @@ class AttentionPreservationBenchmark:
         """Fast passage lookup using pre-built index."""
         answer_lower = answer.lower()
         
-        # Try exact phrase matches first
         words = answer_lower.split()
         if len(words) >= 3:
             phrase = ' '.join(words[:3])
@@ -251,8 +227,7 @@ class AttentionPreservationBenchmark:
                     passage = self.dataset_cache.wiki_passages[idx]
                     return self._extract_context_from_passage(passage['text'], answer_lower)
         
-        # Fallback to linear search on subset
-        sample_size = min(200, len(self.dataset_cache.wiki_passages))
+        sample_size = min(100, len(self.dataset_cache.wiki_passages))
         for passage in random.sample(self.dataset_cache.wiki_passages, sample_size):
             if answer_lower in passage['text_lower']:
                 return self._extract_context_from_passage(passage['text'], answer_lower)
@@ -261,13 +236,13 @@ class AttentionPreservationBenchmark:
     
     def _extract_context_from_passage(self, text: str, answer_lower: str) -> Optional[str]:
         """Extract context around answer."""
-        sentences = re.split(r'[.!?]+', text)
+        sentences = re.split(r'[.!?]+\s+', text)
         
         for i, sent in enumerate(sentences):
             if answer_lower in sent.lower():
-                start_idx = max(0, i - 1)
-                end_idx = min(len(sentences), i + 2)
-                context = '. '.join(sentences[start_idx:end_idx])
+                start = max(0, i - 1)
+                end = min(len(sentences), i + 2)
+                context = '. '.join(sentences[start:end])
                 
                 if len(context) > 50:
                     return context
@@ -284,11 +259,9 @@ class AttentionPreservationBenchmark:
         """Fast BM25 distractor selection using pre-built index."""
         answer_lower = answer.lower()
         
-        # Get BM25 scores
         query_tokens = query.lower().split()[:20]
         scores = self.dataset_cache.bm25_index.get_scores(query_tokens)
         
-        # Get top candidates excluding answer-containing docs
         top_indices = np.argsort(scores)[::-1]
         
         selected = []
@@ -298,17 +271,14 @@ class AttentionPreservationBenchmark:
             
             doc_text = self.dataset_cache.bm25_passages[idx]
             
-            # Skip if contains answer or is the relevant doc
             if answer_lower in doc_text.lower() or doc_text == relevant_doc:
                 continue
             
-            # Extract context
             sentences = re.split(r'[.!?]+', doc_text)
             if len(sentences) > 2:
                 context = '. '.join(sentences[:3])
                 selected.append(context)
         
-        # Fill remaining with random
         while len(selected) < num_distractors:
             idx = random.randint(0, len(self.dataset_cache.wiki_passages) - 1)
             text = self.dataset_cache.wiki_passages[idx]['text'][:400]
@@ -363,8 +333,7 @@ class AttentionPreservationBenchmark:
         attentions: Tuple[torch.Tensor],
         input_ids: torch.Tensor,
         doc_marker_ids: List[int],
-        num_generated: int,
-        aggregation_strategy: str = "middle_50"
+        num_generated: int
     ) -> np.ndarray:
         """Aggregate attention weights to document level."""
         doc_spans = self._get_document_token_spans(input_ids, doc_marker_ids)
@@ -372,16 +341,9 @@ class AttentionPreservationBenchmark:
         model_info = self.model.get_model_info()
         num_layers = model_info.get('num_layers', 32)
         
-        if aggregation_strategy == "middle_50":
-            start_layer = num_layers // 4
-            end_layer = 3 * num_layers // 4
-            layers_to_use = list(range(start_layer, end_layer))
-        elif aggregation_strategy == "all_layers":
-            layers_to_use = list(range(num_layers))
-        elif aggregation_strategy == "last_layer":
-            layers_to_use = [num_layers - 1]
-        else:
-            layers_to_use = self.layers_to_analyze or list(range(num_layers // 4, 3 * num_layers // 4))
+        start_layer = num_layers // 4
+        end_layer = 3 * num_layers // 4
+        layers_to_use = list(range(start_layer, end_layer))
         
         doc_attention = np.zeros(self.num_documents)
         total_attention = 0.0
@@ -459,10 +421,9 @@ class AttentionPreservationBenchmark:
     
     def run(self) -> Dict[str, any]:
         """Run attention preservation benchmark."""
-        print(f"Samples: {self.num_samples}, Documents: {self.num_documents}, Power: {self.power_analysis['actual_power']:.3f}")
+        print(f"Samples: {self.num_samples}, Documents: {self.num_documents}")
         
-        # Load and index datasets once
-        self.dataset_cache.load(max_wiki_docs=1000)
+        self.dataset_cache.load(max_wiki_docs=500)
         
         precision_at_1 = []
         attention_ranks = []
@@ -476,12 +437,6 @@ class AttentionPreservationBenchmark:
         attention_scores_when_correct = []
         attention_scores_when_wrong = []
         
-        aggregation_results = {
-            "middle_50": {"precision": [], "rank": []},
-            "all_layers": {"precision": [], "rank": []},
-            "last_layer": {"precision": [], "rank": []}
-        } if self.test_aggregation_strategies else None
-        
         config = GenerationConfig(
             max_new_tokens=30,
             do_sample=False,
@@ -492,14 +447,14 @@ class AttentionPreservationBenchmark:
         
         successful = 0
         attempted = 0
-        skipped_no_context = 0
-        skipped_no_distractors = 0
+        skipped = 0
         start_time = time.time()
         
-        print(f"\nStarting evaluation loop (target: {self.num_samples} samples)...")
-        print("Progress: [successful/target] (attempted) - metrics")
+        print(f"\nStarting evaluation (target: {self.num_samples} samples)")
+        print("Progress logged at every iteration\n")
         
         while successful < self.num_samples and attempted < len(self.dataset_cache.nq_dataset):
+            iter_start = time.time()
             sample = self.dataset_cache.nq_dataset[attempted]
             attempted += 1
             
@@ -507,17 +462,18 @@ class AttentionPreservationBenchmark:
             answers = sample.get('answer', [])
             
             if not answers or not question:
+                skipped += 1
+                print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Skipped (no Q/A) - Total skipped: {skipped}")
                 continue
             
             answer = answers[0]
             
-            # Fast context extraction
             relevant_doc = self._extract_answer_context_fast(answer)
             if not relevant_doc:
-                skipped_no_context += 1
+                skipped += 1
+                print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Skipped (no context) - Total skipped: {skipped}")
                 continue
             
-            # Fast distractor selection
             distractor_docs = self._select_distractors_bm25_fast(
                 question,
                 answer,
@@ -526,7 +482,8 @@ class AttentionPreservationBenchmark:
             )
             
             if len(distractor_docs) < self.num_documents - 1:
-                skipped_no_distractors += 1
+                skipped += 1
+                print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Skipped (no distractors) - Total skipped: {skipped}")
                 continue
             
             all_docs = [relevant_doc[:600]] + [d[:600] for d in distractor_docs]
@@ -544,12 +501,8 @@ class AttentionPreservationBenchmark:
             )
             
             try:
-                sample_start = time.time()
-                
                 inputs = self.model.encode(prompt, max_length=2048)
                 output = self.model.generate(prompt, config, return_attentions=True)
-                
-                sample_time = time.time() - sample_start
                 
                 generated_text = output.generated_text
                 
@@ -566,8 +519,7 @@ class AttentionPreservationBenchmark:
                         final_step_attentions,
                         inputs['input_ids'],
                         doc_marker_ids,
-                        output.num_generated_tokens,
-                        aggregation_strategy="middle_50"
+                        output.num_generated_tokens
                     )
                     
                     if doc_attention.sum() > 0:
@@ -594,57 +546,40 @@ class AttentionPreservationBenchmark:
                         else:
                             attention_scores_when_wrong.append(relevant_doc_attention)
                         
-                        if self.test_aggregation_strategies:
-                            for strategy in ["all_layers", "last_layer"]:
-                                doc_attn_alt = self._aggregate_attention_to_documents(
-                                    final_step_attentions,
-                                    inputs['input_ids'],
-                                    doc_marker_ids,
-                                    output.num_generated_tokens,
-                                    aggregation_strategy=strategy
-                                )
-                                
-                                if doc_attn_alt.sum() > 0:
-                                    top_doc_alt = np.argmax(doc_attn_alt)
-                                    aggregation_results[strategy]["precision"].append(
-                                        1.0 if top_doc_alt == answer_idx else 0.0
-                                    )
-                                    
-                                    sorted_indices_alt = np.argsort(doc_attn_alt)[::-1]
-                                    rank_alt = int(np.where(sorted_indices_alt == answer_idx)[0][0] + 1)
-                                    aggregation_results[strategy]["rank"].append(rank_alt)
-                        
                         successful += 1
                         
-                        if successful % 5 == 0:
-                            elapsed = time.time() - start_time
-                            avg_time = elapsed / successful
-                            remaining = (self.num_samples - successful) * avg_time
-                            current_precision = np.mean(precision_at_1)
-                            current_f1 = np.mean(f1_scores)
-                            
-                            print(f"[{successful}/{self.num_samples}] ({attempted}) - "
-                                  f"Prec@1={current_precision:.3f} F1={current_f1:.3f} "
-                                  f"AvgTime={sample_time:.1f}s ETA={remaining/60:.1f}min "
-                                  f"Skip:ctx={skipped_no_context},dist={skipped_no_distractors}")
+                        iter_time = time.time() - iter_start
+                        elapsed = time.time() - start_time
+                        avg_time = elapsed / successful
+                        remaining = (self.num_samples - successful) * avg_time
+                        current_precision = np.mean(precision_at_1)
+                        current_f1 = np.mean(f1_scores)
+                        
+                        print(f"[{successful}/{self.num_samples}] Attempt {attempted}: SUCCESS "
+                              f"Prec@1={current_precision:.3f} F1={current_f1:.3f} Rank={rank} "
+                              f"Time={iter_time:.1f}s Avg={avg_time:.1f}s ETA={remaining/60:.1f}min")
+                    else:
+                        print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Failed (no attention)")
+                else:
+                    print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Failed (no attentions)")
                 
-                del inputs, output
+                del inputs, output, final_step_attentions, doc_attention
                 gc.collect()
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
                 
             except RuntimeError as e:
                 if "out of memory" in str(e):
-                    print(f"[{successful}/{self.num_samples}] OOM, clearing memory...")
+                    print(f"[{successful}/{self.num_samples}] Attempt {attempted}: OOM - clearing memory")
                     gc.collect()
                     if torch.cuda.is_available():
                         torch.cuda.empty_cache()
                     continue
                 else:
+                    print(f"[{successful}/{self.num_samples}] Attempt {attempted}: RuntimeError - {str(e)[:50]}")
                     continue
             except Exception as e:
-                if successful % 10 == 0:
-                    print(f"[{successful}/{self.num_samples}] Error: {type(e).__name__}")
+                print(f"[{successful}/{self.num_samples}] Attempt {attempted}: Error - {type(e).__name__}")
                 continue
         
         if len(precision_at_1) == 0:
@@ -709,11 +644,9 @@ class AttentionPreservationBenchmark:
             "attention_by_correctness": attention_by_correctness,
             "num_samples": len(precision_at_1),
             "samples_attempted": attempted,
-            "skipped_no_context": skipped_no_context,
-            "skipped_no_distractors": skipped_no_distractors,
-            "power_analysis": self.power_analysis,
+            "samples_skipped": skipped,
             "methodology": {
-                "layers_analyzed": "middle_50_percent" if self.layers_to_analyze is None else self.layers_to_analyze,
+                "layers_analyzed": "middle_50_percent",
                 "attention_aggregation": "final_step_only_no_double_counting",
                 "distractor_selection": "bm25_semantic",
                 "answer_quality_measured": True,
@@ -721,21 +654,11 @@ class AttentionPreservationBenchmark:
             }
         }
         
-        if self.test_aggregation_strategies and aggregation_results:
-            results["aggregation_comparison"] = {
-                strategy: {
-                    "precision_at_1": float(np.mean(data["precision"])) if data["precision"] else 0.0,
-                    "rank_mean": float(np.mean(data["rank"])) if data["rank"] else 0.0
-                }
-                for strategy, data in aggregation_results.items()
-            }
-        
         total_time = time.time() - start_time
         print(f"\nCompleted in {total_time/60:.1f} minutes")
         print(f"Precision@1: {precision_mean:.3f} [{precision_ci[0]:.3f}, {precision_ci[1]:.3f}]")
         print(f"Mean rank: {rank_mean:.2f}, Gini: {gini_mean:.3f}")
         print(f"Answer quality: EM={em_mean:.3f}, F1={f1_mean:.3f}")
-        print(f"Attention-quality correlation: r={attention_quality_correlation.get('precision_vs_f1_pearson_r', 0):.3f}")
         print(f"Success rate: {successful}/{attempted} ({100*successful/max(attempted, 1):.1f}%)")
         
         return results
