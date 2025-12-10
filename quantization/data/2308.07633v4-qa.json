@@ -1,0 +1,248 @@
+[
+  {
+    "question": "What is the main focus of this survey paper?",
+    "answer": "This paper presents a comprehensive survey of model compression techniques for Large Language Models (LLMs), covering methods like quantization, pruning, knowledge distillation, and low-rank factorization.",
+    "section": "abstract",
+    "difficulty": "easy"
+  },
+  {
+    "question": "What challenges do Large Language Models face?",
+    "answer": "LLMs face challenges stemming from their extensive size and computational requirements. For instance, GPT-175B with 175 billion parameters demands a minimum of 350GB of memory in half-precision (FP16) format and requires at least five A100 GPUs with 80GB of memory each for efficient inference.",
+    "section": "introduction",
+    "difficulty": "easy"
+  },
+  {
+    "question": "What is model compression and why is it important?",
+    "answer": "Model compression involves transforming a large, resource-intensive model into a compact version suitable for deployment on resource-constrained devices. It is important because it can enhance LLM inference speed, optimize resource efficiency, and make LLMs more accessible for practical deployment.",
+    "section": "introduction",
+    "difficulty": "easy"
+  },
+  {
+    "question": "What are the main categories of model compression techniques covered in this survey?",
+    "answer": "The survey covers four main categories: (1) Quantization, (2) Pruning, (3) Knowledge Distillation, and (4) Low-Rank Factorization.",
+    "section": "introduction",
+    "difficulty": "easy"
+  },
+  {
+    "question": "What metrics are used to evaluate compressed LLMs?",
+    "answer": "Key metrics include: Model Size (number of parameters), FLOPs (floating-point operations), MFU (Mean FLOPS Utilization), Inference Time/Latency, Speedup Ratio, and Compression Ratio.",
+    "section": "metrics",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is the difference between FLOPs and MFU?",
+    "answer": "FLOPs measures the theoretical computational efficiency (number of floating-point operations required), while MFU (Mean FLOPS Utilization) measures the practical efficiency by calculating the ratio of actual FLOPS utilized to the maximum theoretical FLOPS of a device. FLOPs shows theoretical compute needs, while MFU shows actual effectiveness of resource use.",
+    "section": "metrics",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is quantization in the context of LLMs?",
+    "answer": "Quantization refers to the process of reducing the number of bits (i.e., precision) in the parameters of the model with minimal loss in inference performance.",
+    "section": "quantization",
+    "difficulty": "easy"
+  },
+  {
+    "question": "What is the difference between QAT and PTQ?",
+    "answer": "The primary distinction lies in whether retraining is needed during quantization. Post-Training Quantization (PTQ) enables direct use of quantized models in inference without retraining, while Quantization-Aware Training (QAT) requires retraining to rectify errors introduced by quantization.",
+    "section": "quantization",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What are the three categories of Post-Training Quantization?",
+    "answer": "PTQ for LLMs is categorized into three groups: (1) Weight-Only Quantization - focuses solely on quantizing weights, (2) Weight-Activation Quantization - extends to both weights and activations, and (3) KV Cache Quantization - targets the key-value cache in attention layers.",
+    "section": "quantization",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is GPTQ and how does it work?",
+    "answer": "GPTQ is a layer-wise quantization method based on Optimal Brain Quantization (OBQ) that updates weights with inverse Hessian information and quantizes LLMs into 3/4-bit precision.",
+    "section": "quantization",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What is AWQ's approach to weight quantization?",
+    "answer": "AWQ (Activation-aware Weight Quantization) stores the top 1% of weights that have the most significant impact on LLM performance in high-precision and integrates a per-channel scaling method to identify optimal scaling factors.",
+    "section": "quantization",
+    "difficulty": "hard"
+  },
+  {
+    "question": "Why do LLMs have issues with activation quantization?",
+    "answer": "LLMs have outliers in activations, and the performance declines significantly if these activations with outliers are directly quantized. Recent works treat these outliers specially to reduce quantization errors.",
+    "section": "quantization",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is SmoothQuant's approach?",
+    "answer": "SmoothQuant designs a per-channel scaling transformation to smooth the activation outliers based on the discovery that different tokens have similar variations across channels of activations.",
+    "section": "quantization",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What is KV cache quantization and why is it important?",
+    "answer": "KV cache quantization targets the KV cache, which stores keys and values of attention layers. It's important because the KV cache often consumes lots of memory and acts as a bottleneck for input streams containing lengthy tokens. By implementing KV cache quantization, it's possible to increase throughput and accommodate inputs with longer tokens more efficiently.",
+    "section": "quantization",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is pruning in neural networks?",
+    "answer": "Pruning is a powerful technique to reduce the size or complexity of a model by removing redundant components such as individual parameters, neurons, attention heads, or entire layers.",
+    "section": "pruning",
+    "difficulty": "easy"
+  },
+  {
+    "question": "What are the three types of pruning methods?",
+    "answer": "The three types are: (1) Unstructured Pruning - prunes individual parameters resulting in irregular sparse structure, (2) Structured Pruning - removes entire components like neurons or layers while preserving network structure, and (3) Semi-Structured Pruning - lies between the two, achieving fine-grained pruning with structural regularization.",
+    "section": "pruning",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is SparseGPT?",
+    "answer": "SparseGPT is a one-shot pruning strategy without retraining that frames pruning as an extensive sparse regression problem and solves it using an approximate sparse regression solver. It achieves significant unstructured sparsity, even up to over 50% on models like OPT-175B and BLOOM-176B, with minimal increase in perplexity.",
+    "section": "pruning",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What is Wanda's pruning approach?",
+    "answer": "Wanda achieves model sparsity by pruning weights with the smallest magnitudes multiplied by the norm of the corresponding input activations, without the need for retraining or weight updates.",
+    "section": "pruning",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What are the three categories of structured pruning metrics?",
+    "answer": "Structured pruning works are divided into: (1) Loss-based Pruning - assesses significance by measuring impact on loss or gradient information, (2) Magnitude-based Pruning - uses heuristic metrics based on magnitudes of pruning units, and (3) Regularization-based Pruning - adds regularization terms to the loss function to induce sparsity.",
+    "section": "pruning",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is N:M sparsity?",
+    "answer": "N:M sparsity is a semi-structured pruning pattern where every M contiguous elements leave N non-zero elements. For example, 2:4 sparsity means that in every 4 consecutive elements, 2 are kept non-zero.",
+    "section": "pruning",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is knowledge distillation?",
+    "answer": "Knowledge Distillation (KD) is a technique aimed at transferring knowledge from a large and complex model (teacher model) to a smaller and simpler model (student model).",
+    "section": "knowledge_distillation",
+    "difficulty": "easy"
+  },
+  {
+    "question": "What is the difference between black-box and white-box knowledge distillation?",
+    "answer": "Black-box KD only accesses the teacher's outputs (typically from closed-source LLMs like GPT-4), while white-box KD has access to the teacher's parameters or output distribution (usually from open-source LLMs), enabling deeper understanding of internal structure and knowledge representations.",
+    "section": "knowledge_distillation",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What are the three types of emergent ability distillation in black-box KD?",
+    "answer": "The three types are: (1) Chain-of-Thought (CoT) Distillation - transfers reasoning capabilities through intermediate reasoning steps, (2) In-Context Learning (ICL) Distillation - transfers the ability to learn from examples in context, and (3) Instruction Following (IF) Distillation - transfers zero-shot instruction-following abilities.",
+    "section": "knowledge_distillation",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is Chain-of-Thought distillation?",
+    "answer": "Chain-of-Thought (CoT) distillation prompts LLMs to generate intermediate reasoning steps and uses these to train student models, enabling them to tackle complex reasoning tasks step by step. It transfers the reasoning capability from large teacher models to smaller student models.",
+    "section": "knowledge_distillation",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is MINILLM?",
+    "answer": "MINILLM is the first work to study distillation from open-source generative LLMs. It uses a reverse Kullback-Leibler divergence objective, which is more suitable for KD on generative language models, to prevent the student model from overestimating the low-probability regions of the teacher distribution.",
+    "section": "knowledge_distillation",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What is Low-Rank Factorization?",
+    "answer": "Low-Rank Factorization reduces a large matrix into smaller ones to save space and computational effort. For example, it decomposes a large matrix W into two small matrices U and V (W ≈ UV), where U is m × k and V is k × n, with k much smaller than m and n.",
+    "section": "low_rank_factorization",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is ASVD?",
+    "answer": "ASVD (Activation-aware Singular Value Decomposition) finds that activation distribution affects compression performance. It scales the weight matrix with a diagonal matrix containing scaling factors corresponding to the activation distribution of input feature channels, and assigns suitable compression ratios to different layers by analyzing singular value distributions.",
+    "section": "low_rank_factorization",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What benchmarks are commonly used to evaluate compressed LLMs?",
+    "answer": "Common benchmarks include: WikiText-2, C4, and PTB for perplexity; LAMBADA, PIQA, and OpenBookQA for zero-shot ability; GSM8K, CommonsenseQA, and StrategyQA for reasoning ability; and BIG-Bench (BBH) covering over 200 NLP tasks.",
+    "section": "benchmarks",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is the EleutherAI LM Harness?",
+    "answer": "The EleutherAI LM Harness is an advanced framework for evaluating LLMs, providing a unified testing platform that supports over 60 standard academic benchmarks along with hundreds of subtasks and variants. It ensures reproducibility and comparability of evaluations for compressed LLMs.",
+    "section": "benchmarks",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What are the main challenges in LLM compression research?",
+    "answer": "Main challenges include: (1) compressed LLMs still have significant performance gaps compared to uncompressed ones, (2) need for more advanced methods, (3) extending classic compression methods from small models to LLMs, (4) efficient deployment and inference optimization, (5) understanding the scaling law trade-offs, (6) reducing manual design through AutoML, and (7) improving explainability of compression techniques.",
+    "section": "challenges",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What role can AutoML play in LLM compression?",
+    "answer": "AutoML techniques such as Meta-Learning and Neural Architecture Search (NAS) can automatically select appropriate hyperparameters and tailor architectures and scales of compressed models, minimizing human involvement and lowering costs. AutoML can also identify optimal model compression strategies tailored to specific task requirements.",
+    "section": "challenges",
+    "difficulty": "hard"
+  },
+  {
+    "question": "Why is explainability important for LLM compression?",
+    "answer": "Explainability clarifies the changes and trade-offs in the compression process, enhances efficiency and accuracy, and aids in evaluating the compressed model's performance to ensure it aligns with practical requirements. For example, while CoT-distillation enhances reasoning performance, the mechanism through which it imparts CoT ability remains unclear.",
+    "section": "challenges",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is the trade-off presented by the scaling law for LLM compression?",
+    "answer": "The scaling law shows that model size, dataset size, and compute resources significantly impact LLM performance. This presents a fundamental challenge for compression: there is a trade-off between model size and performance. Understanding the mechanisms underpinning the scaling law is crucial for potentially overcoming this limitation.",
+    "section": "challenges",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What advantage does structured pruning have over unstructured pruning?",
+    "answer": "Structured pruning offers the advantage of being hardware-agnostic, allowing for accelerated inference on traditional hardware post-pruning. However, it may result in performance degradation as it removes larger and potentially more critical components.",
+    "section": "pruning",
+    "difficulty": "medium"
+  },
+  {
+    "question": "Why might weight-only quantization introduce computational overhead?",
+    "answer": "Since quantized weights necessitate dequantization before multiplication with activations, weight-only quantization inevitably introduces additional computational overhead during inference and cannot enjoy the accelerated low-bit operation supported by specific hardware.",
+    "section": "quantization",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What is the main advantage of QAT over PTQ?",
+    "answer": "QAT can better mitigate quantization's accuracy degradation by retraining the model to counteract performance loss. However, it requires significant effort due to the tens or hundreds of billions of parameters in LLMs.",
+    "section": "quantization",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What practical solution is suggested for improving QAT efficiency?",
+    "answer": "Incorporating Parameter-Efficient Fine-Tuning (PEFT) into the retraining process of QAT. Methods like QLORA, PEQA, and LoftQ combine quantization with PEFT for model fine-tuning efficiency, though these are typically task-dependent.",
+    "section": "quantization",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What is the importance of calibration data for PTQ and pruning?",
+    "answer": "Preparing a high-quality calibration dataset is crucial for improving the performance of compressed LLMs. Empirical studies show that the performance of downstream tasks can vary significantly depending on the calibration data selected. High-quality calibration data improves the performance and accuracy of the compressed model.",
+    "section": "remarks",
+    "difficulty": "medium"
+  },
+  {
+    "question": "What is LLM.int8() and what makes it special?",
+    "answer": "LLM.int8() is a weight-activation quantization method that stores outlier feature dimensions in high-precision and uses vector-wise quantization (assigning separate normalization constants to each inner product within matrix multiplication) to quantize other features. It quantizes weights and activations of LLMs into 8-bit without any performance degradation.",
+    "section": "quantization",
+    "difficulty": "hard"
+  },
+  {
+    "question": "What is the 2:4 sparsity pattern and its hardware support?",
+    "answer": "2:4 sparsity is a semi-structured pruning pattern where in every 4 consecutive elements, 2 are kept non-zero. The Ampere Tensor Core GPU architecture (e.g., A100 GPUs) supports 2:4 fine-grained semi-structured sparsity to accelerate Sparse Neural Networks, though only this specific ratio is currently supported.",
+    "section": "pruning",
+    "difficulty": "hard"
+  },
+  {
+    "question": "How does SliceGPT approach pruning?",
+    "answer": "SliceGPT leverages the computational invariance of transformer networks and optimizes pruning through Principal Component Analysis (PCA). It applies PCA as the pruning metric at each layer to project the signal matrix onto its principal components and eliminate insignificant columns or rows from the transformed weight matrices.",
+    "section": "pruning",
+    "difficulty": "hard"
+  }
+]
