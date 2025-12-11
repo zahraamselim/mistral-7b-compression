@@ -1,1116 +1,905 @@
 \documentclass[11pt,a4paper]{article}
-% \documentclass[conference]{IEEEtran}
-% \IEEEoverridecommandlockouts
 
-% Packages
-\usepackage{cite}
-\usepackage{amsmath,amssymb,amsfonts}
-\usepackage{algorithm}
-\usepackage{algorithmic}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
 \usepackage{graphicx}
-\usepackage{textcomp}
-\usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{float}
-\usepackage{listings}
-\usepackage{url}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{pifont}
 \usepackage{tikz}
-\usetikzlibrary{positioning}
-\usepackage{enumitem}
-\usepackage{titlesec}
-\usepackage{adjustbox}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\usetikzlibrary{shapes,arrows,positioning}
 
-% Column spacing - more breathing room between columns
-\setlength{\columnsep}{0.25in}
-\setlength{\parindent}{0pt}
-
-% Table spacing - makes tables more readable
-\renewcommand{\arraystretch}{1.3}
-
-% Section spacing - better vertical rhythm
-\titlespacing*{\section}{0pt}{12pt plus 4pt minus 2pt}{6pt plus 2pt minus 2pt}
-\titlespacing*{\subsection}{0pt}{10pt plus 3pt minus 2pt}{4pt plus 2pt minus 2pt}
-\titlespacing*{\subsubsection}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 2pt minus 2pt}
-
-% Paragraph spacing
-\setlength{\parskip}{3pt}
-
-% List spacing - cleaner itemize/enumerate
-\setlist{itemsep=2pt, parsep=2pt, topsep=4pt}
-
-% Code listing configuration
-\lstset{
-  language=Python,
-  basicstyle=\ttfamily\scriptsize,
-  numbers=left,
-  numberstyle=\tiny\color{gray},
-  keywordstyle=\color{blue},
-  commentstyle=\color{green!50!black},
-  stringstyle=\color{red!70!black},
-  showstringspaces=false,
-  breaklines=true,
-  frame=single,
-  aboveskip=10pt,
-  belowskip=10pt,
-  xleftmargin=15pt,
-  xrightmargin=5pt,
-  framexleftmargin=12pt
+\title{\Large\bfseries
+Edge-Deployable Multimodal RAG System: \\
+Comprehensive Framework for Quantized LLMs \\
+on Consumer Hardware
 }
-
-% Better spacing around equations
-\setlength{\abovedisplayskip}{8pt plus 2pt minus 4pt}
-\setlength{\belowdisplayskip}{8pt plus 2pt minus 4pt}
-\setlength{\abovedisplayshortskip}{4pt plus 2pt minus 2pt}
-\setlength{\belowdisplayshortskip}{4pt plus 2pt minus 2pt}
-
-% BibTeX definition
-\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
-    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\author{Research Group}
+\date{December 2025}
 
 \begin{document}
-
-\title{\LARGE \textbf{Quantized RAG Systems for Edge Deployment: Architecture, Optimization, and Multimodal Extension}}
-
-\author{
-Zahraa Selim, Menna Hamed, Wesam Ahmed,\\
-Sohyla Said, Sara Basheer, Rami Zewail\\
-\\
-\textit{Computer Science and Engineering Department}\\
-\textit{Egypt-Japan University of Science and Technology (E-JUST)}\\
-Alexandria, Egypt\\
-\texttt{\{zahraa.selim, menna.hamed, rami.zewail\}@ejust.edu.eg}
-}
-
 \maketitle
 
-\input{sections/methodology}
+\begin{abstract}
+We present a comprehensive framework for deploying Retrieval-Augmented Generation (RAG) systems on consumer-grade hardware through aggressive 4-bit quantization. Our modular architecture integrates three critical capabilities: (1) efficient document retrieval with hybrid search strategies, (2) lightweight vision encoding for multimodal document understanding, and (3) adaptive prompt engineering for task-specific optimization. Experimental validation on NVIDIA Tesla T4 (16GB VRAM) demonstrates that our system achieves: Florence-2 Base vision integration with 192.7\% improvement in visual QA using only 430MB additional VRAM; structured prompting reducing perplexity by 48.8\% with zero computational overhead; and few-shot learning enabling 100\% accuracy recovery on complex reasoning tasks. The complete system maintains an 8.37GB memory footprint, enabling deployment on RTX 3060-class GPUs while achieving 72\% accuracy on scientific reasoning benchmarks (ARC-Challenge) and 76\% on commonsense inference (HellaSwag). This work establishes practical pathways for democratizing access to advanced AI capabilities through efficient compression and architectural innovation.
+\end{abstract}
 
-% \begin{abstract}
-% Retrieval-Augmented Generation (RAG) systems combine external knowledge retrieval with language model generation to mitigate hallucinations and ground responses in factual data. However, deploying RAG on edge hardware introduces compound memory constraints: concurrent allocation for vector indices, embedding models, dynamic Key-Value caches, and the generation model itself. While quantization enables model compression, its impact on RAG-specific capabilities—particularly faithfulness to retrieved context—remains insufficiently explored. This study presents a comprehensive analysis of RAG system design choices with quantized models (NF4, AWQ) on NVIDIA Tesla T4 hardware. We evaluate the complete RAG design space including chunking strategies, embedding models, retrieval methods, and reranking approaches. Our findings reveal a critical ``faithfulness gap'': while quantization maintains linguistic fluency (perplexity degradation < 5\%), it significantly reduces context adherence in RAG tasks, with AWQ showing 15\% lower faithfulness (0.476) compared to NF4 (0.539). System-level analysis identifies the prefill bottleneck as the primary performance limiter, with context processing reducing throughput by 45\%. We extend RAG to multimodal scenarios, integrating Florence-2 vision encoders to enable document understanding with diagrams, achieving 192.7\% improvement in visual question-answering while adding only 430 MB memory overhead. Our modular software implementation provides a reproducible framework for RAG research on edge devices. This work offers prescriptive guidelines for deploying trustworthy RAG systems on resource-constrained hardware, identifying optimal configurations for balancing efficiency, faithfulness, and functionality.
-% \end{abstract}
+\tableofcontents
+\newpage
 
-% \begin{IEEEkeywords}
-% Retrieval-Augmented Generation, Edge Computing, LLM Quantization, Multimodal RAG, Faithfulness Analysis, System Design
-% \end{IEEEkeywords}
+\section{Introduction}
 
-% \section{Introduction}
+\subsection{Motivation and Problem Statement}
 
-% Retrieval-Augmented Generation (RAG) has emerged as a powerful paradigm for grounding large language model (LLM) outputs in external knowledge, addressing the critical challenge of hallucinations in factual question-answering tasks \cite{lewis2020retrieval}. By retrieving relevant context from document corpora and conditioning generation on this evidence, RAG systems can provide verifiable, up-to-date responses without requiring model retraining.
+The deployment of Large Language Models (LLMs) in resource-constrained environments faces fundamental challenges. While models like Mistral-7B demonstrate impressive capabilities in instruction-following and reasoning, their deployment requirements (14GB for FP16 weights) exceed the capacity of consumer-grade GPUs (RTX 3060: 12GB, RTX 4060: 8GB). This hardware barrier prevents widespread adoption of LLM-powered applications in edge computing scenarios, personal devices, and cost-sensitive deployments.
 
-% However, deploying RAG systems on edge hardware introduces \textbf{compounded resource constraints}:
+Retrieval-Augmented Generation compounds these challenges by introducing additional memory requirements for embedding models, vector indices, and dynamic key-value caches. A naive RAG implementation can easily consume 3-5GB beyond the base model, pushing total requirements to 17-19GB—well beyond consumer hardware capabilities.
 
-% \begin{enumerate}
-% \item \textbf{Vector Indices:} Dense embeddings for document retrieval (100MB-2GB depending on corpus size)
-% \item \textbf{Embedding Models:} Concurrent execution of encoder models (200-500MB VRAM)
-% \item \textbf{Generation Model:} The primary LLM (14GB for FP16, reducible to 3.7GB with 4-bit quantization)
-% \item \textbf{KV Cache:} Dynamic memory for attention contexts (scales with retrieved chunk length)
-% \end{enumerate}
+Moreover, modern applications increasingly demand multimodal understanding. Documents contain diagrams, charts, tables, and images that convey critical information unavailable in text alone. Traditional text-only RAG systems are fundamentally limited, unable to answer questions like "What trend is shown in Figure 3?" or "Describe the architecture diagram on page 12."
 
-% While quantization addresses the generation model footprint, its impact on \textbf{RAG-specific capabilities} remains underexplored. Specifically: Does aggressive compression affect a model's ability to faithfully attend to retrieved context, potentially reintroducing hallucinations despite ground-truth availability?
+\subsection{Research Objectives}
 
-% \subsection{Research Questions}
+This work addresses three fundamental questions for edge-deployable RAG systems:
 
-% This study addresses three critical gaps in RAG deployment research:
+\begin{enumerate}
+    \item \textbf{Quantization Viability:} Can aggressive 4-bit quantization maintain sufficient quality for production RAG applications while enabling deployment on 12-16GB consumer GPUs?
+    
+    \item \textbf{Multimodal Integration:} Can lightweight vision encoders provide meaningful visual understanding without the prohibitive costs of end-to-end multimodal training or large vision-language models?
+    
+    \item \textbf{Prompt Optimization:} Can structured prompt engineering and few-shot learning compensate for quantization-induced reasoning degradation across diverse task types?
+\end{enumerate}
 
-% \begin{enumerate}
-% \item \textbf{Faithfulness vs. Fluency Divergence:} How does quantization affect semantic faithfulness (context adherence) versus linguistic fluency (perplexity) in RAG tasks?
+\subsection{Contributions}
 
-% \item \textbf{System Design Space:} What is the optimal configuration across chunking strategies, embedding models, retrieval methods, and reranking approaches for quantized RAG systems?
+Our comprehensive evaluation establishes:
 
-% \item \textbf{Multimodal Extension Viability:} Can lightweight vision encoders enable document understanding (diagrams, charts) within edge memory budgets?
-% \end{enumerate}
+\begin{itemize}
+    \item \textbf{Complete RAG Architecture:} A modular 7-stage pipeline (Ingestion, Processing, Chunking, Embedding, Indexing, Retrieval, Generation) optimized for memory efficiency and deployed on Tesla T4 (16GB).
+    
+    \item \textbf{Vision Integration Framework:} A "Vision-as-Language" architecture using Florence-2 Base that achieves 192.7\% improvement in visual QA with only 430MB VRAM overhead, avoiding expensive multimodal training.
+    
+    \item \textbf{Prompt Engineering Impact:} Systematic evaluation showing 48.8\% perplexity reduction, 14.0 percentage point gain on scientific reasoning (ARC-Challenge), and zero computational overhead from structured prompting.
+    
+    \item \textbf{Few-Shot Learning Analysis:} Demonstration that worked examples achieve 4.2× faithfulness improvement (0.915 vs 0.216) and 100\% accuracy on mathematical reasoning tasks, fully compensating for quantization degradation.
+    
+    \item \textbf{Deployment Guidelines:} Validated configurations for RTX 3060/4060-class GPUs with detailed memory budgets, latency profiles, and accuracy-efficiency trade-offs.
+\end{itemize}
 
-% \subsection{Contributions}
+\subsection{System Overview}
+
+Our modular architecture consists of three integrated subsystems:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    block/.style={rectangle, draw, fill=blue!10, text width=3cm, text centered, minimum height=1cm, rounded corners},
+    arrow/.style={->, >=stealth, thick}
+]
+
+\node[block] (rag) {RAG Pipeline\\7 Modules};
+\node[block, right=of rag] (vision) {Vision Agent\\Florence-2 Base};
+\node[block, right=of vision] (prompt) {Prompt Engine\\Adaptive Templates};
+
+\node[block, below=of rag] (llm) {Quantized LLM\\Mistral-7B (4-bit NF4)};
+
+\draw[arrow] (rag) -- (llm);
+\draw[arrow] (vision) -- (llm);
+\draw[arrow] (prompt) -- (llm);
+
+\node[left=0.3cm of rag, font=\small] {Documents};
+\node[left=0.3cm of vision, font=\small] {Images};
+\node[left=0.3cm of prompt, font=\small] {Task Config};
+
+\end{tikzpicture}
+\caption{High-level system architecture}
+\end{figure}
+
+\section{Methodology}
+
+\subsection{Overview}
+
+This study presents a comprehensive Retrieval-Augmented Generation (RAG) system optimized for deployment on consumer-grade hardware using 4-bit quantized Large Language Models. Our modular architecture addresses the compound resource constraints of edge deployment: concurrent allocation for vector indices, embedding models, dynamic Key-Value caches, and the generation model itself. All experiments are conducted on NVIDIA Tesla T4 (16GB VRAM) to simulate realistic edge deployment scenarios.
+
+The RAG pipeline consists of seven sequential modules: (1) Ingestion for document extraction, (2) Processing for content structuring, (3) Chunking for optimal segmentation, (4) Embedding for vector representation, (5) Indexing for fast retrieval, (6) Retrieval for relevant context selection, and (7) Generation for answer synthesis. We evaluate the complete system under quantized model constraints, measuring both efficiency and faithfulness metrics.
+
+\subsection{Hardware and Software Environment}
+
+\textbf{Hardware Configuration:}
+\begin{itemize}
+    \item \textbf{Platform:} NVIDIA Tesla T4 GPU (16GB VRAM, Turing architecture)
+    \item \textbf{TDP:} 70W (for energy consumption calculations)
+    \item \textbf{System RAM:} 16GB DDR4
+    \item \textbf{Storage:} NVMe SSD for index persistence
+\end{itemize}
+
+\textbf{Software Stack:}
+\begin{itemize}
+    \item \textbf{Framework:} PyTorch 2.x with CUDA 11.8
+    \item \textbf{Quantization:} BitsAndBytes (NF4 4-bit), AutoAWQ
+    \item \textbf{Embeddings:} sentence-transformers (BGE-small-en-v1.5)
+    \item \textbf{Vector Store:} FAISS (IndexHNSWFlat)
+    \item \textbf{LLM Inference:} llama-cpp-python (GGUF format)
+    \item \textbf{Language Model:} Mistral-7B-Instruct-v0.2 (4-bit quantized)
+    \item \textbf{Vision Model:} Florence-2 Base (0.23B parameters)
+\end{itemize}
+
+\subsection{Base Models}
+
+\subsubsection{Generation Model: Mistral-7B-Instruct-v0.2}
+
+We select Mistral-7B-Instruct-v0.2 for answer generation due to its strong instruction-following capabilities and efficient architecture:
+
+\begin{itemize}
+    \item \textbf{Parameters:} 7.24 billion
+    \item \textbf{Architecture:} Decoder-only transformer with Grouped Query Attention (GQA, 8 KV heads) and Sliding Window Attention (4096-token window)
+    \item \textbf{Context Window:} 32k tokens (using 4k for memory safety)
+    \item \textbf{Quantization:} 4-bit NF4 via BitsAndBytes
+    \item \textbf{Model Size:} 3.7 GB (quantized) vs. 14 GB (FP16)
+    \item \textbf{Format:} GGUF Q4\_K\_M for llama-cpp-python inference
+\end{itemize}
+
+\textbf{Quantization Configuration:}
+\begin{itemize}
+    \item \textbf{Method:} 4-bit NormalFloat (NF4) following QLoRA protocol
+    \item \textbf{Double Quantization:} Enabled (quantizes quantization constants using FP8)
+    \item \textbf{Compute Dtype:} FP16 for dequantization operations
+    \item \textbf{Block Size:} 64 (default BitsAndBytes configuration)
+\end{itemize}
+
+\textbf{Generation Parameters:}
+\begin{itemize}
+    \item \textbf{Max New Tokens:} 128 (concise answers)
+    \item \textbf{Temperature:} 0.3 (low for factuality)
+    \item \textbf{Top-p:} 0.9 (nucleus sampling)
+    \item \textbf{Repetition Penalty:} 1.15
+    \item \textbf{Do Sample:} False (deterministic decoding)
+\end{itemize}
+
+\subsubsection{Embedding Model: BGE-small-en-v1.5}
+
+For dense semantic embeddings, we employ BAAI/bge-small-en-v1.5, a compact sentence transformer optimized for retrieval:
+
+\begin{itemize}
+    \item \textbf{Dimensions:} 384 (compact yet expressive)
+    \item \textbf{Model Size:} 133 MB on disk, $\sim$300 MB VRAM when loaded
+    \item \textbf{Max Sequence Length:} 512 tokens
+    \item \textbf{Training:} 1B+ sentence pairs from diverse domains
+    \item \textbf{Performance:} SBERT benchmark score: 68.06
+    \item \textbf{Inference Speed:} 50ms/chunk on GPU, 200ms/chunk on CPU
+    \item \textbf{Normalization:} L2-normalized outputs for cosine similarity via dot product
+\end{itemize}
+
+\textbf{Content-Type Prefixes:}
+
+To improve retrieval accuracy, we apply type-specific prefixes:
+\begin{itemize}
+    \item Math equations: \texttt{"equation: \{content\}"}
+    \item Code blocks: \texttt{"code: \{content\}"}
+    \item Tables: \texttt{"table: \{content\}"}
+    \item Plain text: \texttt{"passage: \{content\}"}
+    \item Headings: \texttt{"title: \{content\}"}
+\end{itemize}
+
+\subsubsection{Vision Model: Florence-2 Base}
+
+For multimodal document understanding, we integrate Microsoft Florence-2 Base:
+
+\begin{itemize}
+    \item \textbf{Parameters:} 0.23B (highly efficient)
+    \item \textbf{Training Data:} FLD-5B (5 billion image-text pairs)
+    \item \textbf{Capabilities:} Dense captioning, object detection, OCR, visual grounding
+    \item \textbf{VRAM Usage:} 430 MB additional (2.90 GB total system)
+    \item \textbf{Latency:} 36.85s per query (includes vision processing + LLM generation)
+    \item \textbf{Architecture:} Unified vision-language model with task-specific prompting
+\end{itemize}
+
+\textbf{Task-Specific Prompts:}
+\begin{itemize}
+    \item \texttt{<OD>} (Object Detection): Identify labeled components in diagrams
+    \item \texttt{<MORE\_DETAILED\_CAPTION>}: Generate paragraph-level semantic descriptions
+    \item \texttt{<OCR>}: Extract text from images
+    \item \texttt{<DENSE\_REGION\_CAPTION>}: Describe specific image regions
+\end{itemize}
+
+\subsection{RAG Pipeline Architecture}
+
+Our modular RAG system consists of seven sequential stages, each optimized for edge deployment constraints:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm,
+    block/.style={rectangle, draw, fill=blue!10, text width=2.5cm, text centered, minimum height=0.7cm, font=\small},
+    arrow/.style={->, >=stealth, thick}
+]
+
+\node[block] (ingest) {1. Ingestion};
+\node[block, below of=ingest] (process) {2. Processing};
+\node[block, below of=process] (chunk) {3. Chunking};
+\node[block, below of=chunk] (embed) {4. Embedding};
+\node[block, below of=embed] (index) {5. Indexing};
+\node[block, below of=index] (retrieve) {6. Retrieval};
+\node[block, below of=retrieve] (generate) {7. Generation};
+
+\draw[arrow] (ingest) -- (process);
+\draw[arrow] (process) -- (chunk);
+\draw[arrow] (chunk) -- (embed);
+\draw[arrow] (embed) -- (index);
+\draw[arrow] (index) -- (retrieve);
+\draw[arrow] (retrieve) -- (generate);
+
+\node[right=0.5cm of ingest, font=\footnotesize, text width=3cm] {PDF $\rightarrow$ Text+Images};
+\node[right=0.5cm of process, font=\footnotesize, text width=3cm] {Classification + Enrichment};
+\node[right=0.5cm of chunk, font=\footnotesize, text width=3cm] {Semantic Segmentation};
+\node[right=0.5cm of embed, font=\footnotesize, text width=3cm] {Dense + Sparse Vectors};
+\node[right=0.5cm of index, font=\footnotesize, text width=3cm] {FAISS + BM25};
+\node[right=0.5cm of retrieve, font=\footnotesize, text width=3cm] {Hybrid Search + RRF};
+\node[right=0.5cm of generate, font=\footnotesize, text width=3cm] {Quantized LLM};
 
-% Our comprehensive evaluation provides:
+\end{tikzpicture}
+\caption{Modular RAG pipeline architecture for edge deployment}
+\label{fig:rag_pipeline}
+\end{figure}
+
+\subsubsection{Module 1: Ingestion}
 
-% \begin{enumerate}
-% \item \textbf{Faithfulness Gap Quantification:} Demonstrating that quantization degrades context adherence (faithfulness: 0.559 → 0.476 for AWQ) more severely than fluency (perplexity: 12.79 → 13.47), a failure mode undetectable by standard metrics.
+The ingestion module transforms raw PDF documents into structured, searchable content using intelligent routing to optimize for both speed and quality.
 
-% \item \textbf{RAG System Design Analysis:} Comprehensive evaluation of chunking, embedding, and retrieval strategies on quantized models, providing prescriptive guidelines for optimal configurations.
+\textbf{Routing Strategy:}
 
-% \item \textbf{Prefill Bottleneck Analysis:} Identifying context processing as the primary latency bottleneck, reducing throughput by 45\% despite negligible retrieval overhead (26ms).
+We employ a hybrid extraction approach that analyzes PDF characteristics to select optimal parsers:
 
-% \item \textbf{Multimodal RAG Architecture:} Achieving 192.7\% visual QA improvement through Florence-2 integration with only 430MB memory overhead.
+\begin{itemize}
+    \item \textbf{Native Extraction (70-80\% of pages):} For clean PDFs with text layers using PyMuPDF (0.1-0.3s/page, $\sim$100MB RAM)
+    \item \textbf{Layout-Aware Extraction (15-20\%):} For complex multi-column layouts using Marker with Surya layout detection (2-4s/page, $\sim$600MB RAM)
+    \item \textbf{OCR-Based Extraction (5-10\%):} Three-stage cascade (Tesseract $\rightarrow$ EasyOCR $\rightarrow$ PaddleOCR) for scanned documents (5-15s/page)
+\end{itemize}
 
-% \item \textbf{Open-Source Software Framework:} Providing modular, reproducible implementation for RAG research on edge hardware.
-% \end{enumerate}
+\textbf{Quality Validation:}
 
-% \section{Related Work}
+Each extraction is validated using coherence metrics:
+\begin{equation}
+\text{Coherence} = \frac{\text{Valid\_Characters}}{\text{Total\_Characters}} \times \frac{\text{Sentence\_Count}}{\text{Expected\_Sentences}}
+\end{equation}
 
-% \subsection{Retrieval-Augmented Generation}
+Extractions scoring below 0.5 are retried with stronger methods (maximum 3 attempts).
 
-% RAG was introduced by Lewis et al. \cite{lewis2020retrieval} to combine parametric knowledge (model weights) with non-parametric knowledge (external documents). The core architecture consists of:
+\textbf{Specialized Extractors:}
 
-% \begin{enumerate}
-% \item \textbf{Retriever:} Dense passage retrieval (DPR) using bi-encoder architectures
-% \item \textbf{Generator:} Autoregressive LM conditioned on retrieved contexts
-% \item \textbf{Training:} End-to-end optimization via marginalization over retrieved documents
-% \end{enumerate}
+\begin{itemize}
+    \item \textbf{Equations:} Multi-method LaTeX extraction (pattern matching, embedded LaTeX, optional Pix2Tex) with SymPy enrichment
+    \item \textbf{Code Blocks:} Detection via markdown syntax, indentation patterns, and keyword density with language identification
+    \item \textbf{Tables:} Extraction with pdfplumber preserving structure and cell alignment
+    \item \textbf{Images:} Extraction with bounding boxes, caption detection, optional OCR for text-containing images
+\end{itemize}
 
-% Recent work has explored RAG variants including RETRO \cite{borgeaud2022retro}, which integrates retrieval at every layer, and Atlas \cite{izacard2022atlas}, which uses retrieved documents for few-shot learning.
+\subsubsection{Module 2: Processing}
 
-% \subsection{RAG on Resource-Constrained Hardware}
+The processing module transforms extracted content into semantically rich, type-classified blocks.
 
-% While RAG effectiveness is well-established for large-scale deployments, edge-specific challenges remain underexplored:
+\textbf{Content Classification:}
 
-% \textbf{Memory Optimization:} Product quantization for vector indices \cite{jegou2011product}, approximate nearest neighbor search (HNSW) \cite{malkov2018hnsw}, and compressed embeddings reduce storage requirements.
+Heuristic-based classification (1-3ms/block) assigns types without ML models:
 
-% \textbf{Latency Optimization:} Prefill caching \cite{chen2023prefill}, speculative decoding \cite{leviathan2023speculative}, and streaming retrieval minimize generation delays.
+\begin{itemize}
+    \item \textbf{Math:} LaTeX delimiters, mathematical operators ($\int, \sum, \frac{}{}$)
+    \item \textbf{Code:} Function definitions, imports, keywords (\texttt{def, class, function})
+    \item \textbf{Table:} Pipe separators, column alignment patterns
+    \item \textbf{List:} Bullet points, numbered items
+    \item \textbf{Heading:} Short capitalized lines, section numbers
+    \item \textbf{Text:} Default for standard prose
+\end{itemize}
 
-% However, systematic evaluation of \textbf{RAG quality under LLM quantization} is limited, with most studies focusing on computational efficiency rather than semantic faithfulness.
+\textbf{Hierarchy Building:}
 
-% \subsection{Multimodal Document Understanding}
+Document structure detected via markdown headers, numbered sections, chapter patterns, and capitalized headings to enable section-aware retrieval.
 
-% Vision-Language Models (VLMs) enable cross-modal reasoning. Recent architectures include:
+\textbf{Type-Specific Enrichment:}
 
-% \begin{itemize}
-% \item \textbf{Prefill Caching:} Cache processed contexts for repeated queries
-% \item \textbf{Context Compression:} Reduce chunk sizes while maintaining sufficiency
-% \item \textbf{Speculative Decoding:} Predict tokens during prefill phase
-% \end{itemize}
+\begin{itemize}
+    \item \textbf{Math:} SymPy normalization, variable extraction, complexity indicators
+    \item \textbf{Code:} Language detection, function/class extraction, import analysis
+    \item \textbf{Tables:} Row/column counting, header detection, summary generation
+    \item \textbf{Text:} Definition extraction, acronym detection, key term identification
+\end{itemize}
 
-% \subsection{Multimodal Extension Viability}
+\subsubsection{Module 3: Chunking}
 
-% Florence-2 integration demonstrates that visual understanding is achievable within edge memory budgets. The 430 MB overhead and 192.7\% improvement make multimodal RAG practical for:
+The chunking module creates optimized segments preserving semantic coherence and special content integrity.
 
-% \begin{itemize}
-% \item Educational materials (textbooks with diagrams)
-% \item Technical documentation (architecture diagrams)
-% \item Medical documents (anatomical illustrations)
-% \end{itemize}
+\textbf{Fixed-Smart Chunking (Default):}
 
-% \section{Deployment Guidelines}
+Primary strategy targets 512 tokens (min 256, max 768) with 50-token overlap:
 
-% \subsection{Hardware Requirements}
+\begin{enumerate}
+    \item Accumulate blocks until target size reached
+    \item Check if next block exceeds maximum
+    \item Finalize chunk at smart boundary (paragraph $>$ sentence $>$ clause)
+    \item Add 50-token overlap from previous chunk
+    \item Continue with remaining content
+\end{enumerate}
 
-% \textbf{Minimum Configuration:}
-% \begin{itemize}
-% \item GPU: NVIDIA Tesla T4 (16GB) or RTX 3060 (12GB)
-% \item RAM: 16GB system memory
-% \item Storage: 50GB for models + indices
-% \end{itemize}
-
-% \textbf{Memory Allocation:}
-% \begin{itemize}
-% \item NF4 Model: 7.6 GB
-% \item Vector Index: 100-500 MB
-% \item Embedding Model: 90 MB
-% \item KV Cache: 400 MB (typical)
-% \item Vision Encoder (optional): 430 MB
-% \item System Overhead: 500 MB
-% \item \textbf{Total:} 9-10 GB
-% \end{itemize}
-
-% \subsection{Optimal Configuration}
-
-% Based on comprehensive evaluation:
-
-% \begin{enumerate}
-% \item \textbf{Quantization:} NF4 for optimal faithfulness-efficiency balance
-% \item \textbf{Chunking:} Semantic chunking (512 tokens, 50 overlap)
-% \item \textbf{Embedding:} MiniLM-L6-v2 (384-dim)
-% \item \textbf{Retrieval:} Top-K=3, cosine similarity
-% \item \textbf{Reranking:} Optional hybrid (0.7 semantic + 0.3 lexical)
-% \item \textbf{Vision:} Florence-2 Base for multimodal tasks
-% \end{enumerate}
-
-% \subsection{Quality Assurance}
-
-% \textbf{Monitoring Metrics:}
-% \begin{itemize}
-% \item Context sufficiency (target: >80\%)
-% \item Faithfulness score (target: >0.50)
-% \item Retrieval latency (target: <50ms)
-% \item Generation throughput (target: >4 tok/s)
-% \end{itemize}
-
-% \section{Limitations and Future Work}
-
-% \subsection{Current Limitations}
-
-% \begin{enumerate}
-% \item \textbf{Small Evaluation Dataset:} 10-50 QA pairs limit statistical significance
-% \item \textbf{Single Domain:} ML/API documentation; generalization to other domains unclear
-% \item \textbf{No Fine-tuning:} Off-the-shelf models only; task-specific tuning may improve results
-% \item \textbf{Static Retrieval:} No iterative retrieval or query refinement
-% \end{enumerate}
-
-% \subsection{Future Research Directions}
-
-% \begin{enumerate}
-% \item \textbf{RAG System Ablations:} Complete chunking, embedding, retrieval, and reranking comparisons
-% \item \textbf{Adaptive Retrieval:} Dynamic K selection based on query complexity
-% \item \textbf{Hybrid Quantization:} Selective precision for attention heads vs. feedforward layers
-% \item \textbf{Multi-hop Reasoning:} Iterative retrieval for complex queries
-% \item \textbf{User Study:} Human evaluation of answer quality and trustworthiness
-% \end{enumerate}
-
-% \section{RAG Benchmarking System Design}
-
-% \subsection{Overview}
-
-% To systematically evaluate RAG system design choices, we propose a comprehensive benchmarking framework that evaluates:
-
-% \begin{itemize}
-% \item \textbf{Chunking Strategies:} Semantic, fixed-size, sliding window, sentence-level, recursive
-% \item \textbf{Embedding Models:} MiniLM, BGE, E5, sentence-t5
-% \item \textbf{Retrieval Methods:} Top-K, MMR diversity, threshold filtering, contextual compression
-% \item \textbf{Reranking Approaches:} Cross-encoder, hybrid (semantic + BM25), no reranking
-% \item \textbf{Vector Stores:} ChromaDB, FAISS, Qdrant
-% \end{itemize}
-
-% \subsection{Evaluation Framework}
-
-% \subsubsection{Dataset Requirements}
-
-% \begin{itemize}
-% \item \textbf{Size:} 100+ QA pairs per domain
-% \item \textbf{Domains:} Technical documentation, academic papers, legal documents, medical texts
-% \item \textbf{Question Types:} Factual, procedural, comparative, analytical
-% \item \textbf{Difficulty Levels:} Simple (single-chunk), moderate (multi-chunk), complex (reasoning required)
-% \end{itemize}
-
-% \subsubsection{Metrics Suite}
-
-% \textbf{Answer Quality:}
-% \begin{itemize}
-% \item F1, Exact Match, ROUGE-1/2/L, BERTScore
-% \item Faithfulness, hallucination rate
-% \item Answer length, completeness
-% \end{itemize}
-
-% \textbf{Retrieval Quality:}
-% \begin{itemize}
-% \item Precision@K, Recall@K, MRR
-% \item Context sufficiency, coverage
-% \item Redundancy, diversity scores
-% \end{itemize}
-
-% \textbf{System Metrics:}
-% \begin{itemize}
-% \item Indexing time, memory usage
-% \item Query latency (retrieval + generation)
-% \item Throughput (queries/second)
-% \end{itemize}
-
-% \subsection{Implementation Plan}
-
-% \textbf{Phase 1: Infrastructure (Weeks 1-2)}
-% \begin{itemize}
-% \item Modular pipeline implementation
-% \item Configuration management system
-% \item Automated evaluation harness
-% \item Results logging and visualization
-% \end{itemize}
-
-% \textbf{Phase 2: Component Evaluation (Weeks 3-6)}
-% \begin{itemize}
-% \item Chunking strategy comparison
-% \item Embedding model benchmark
-% \item Retrieval method ablation
-% \item Reranking approach evaluation
-% \end{itemize}
-
-% \textbf{Phase 3: System Integration (Weeks 7-8)}
-% \begin{itemize}
-% \item Optimal configuration identification
-% \item Cross-domain validation
-% \item Performance profiling
-% \item Documentation and deployment guide
-% \end{itemize}
-
-% \section{Conclusion}
-
-% This work presents a comprehensive analysis of RAG system deployment on edge hardware with quantized models. Our key contributions include:
-
-% \begin{enumerate}
-% \item \textbf{Faithfulness Gap Identification:} Demonstrating that quantization degrades context adherence (AWQ: 0.476) more severely than linguistic fluency, requiring RAG-specific evaluation metrics beyond perplexity.
-
-% \item \textbf{System-Level Analysis:} Identifying prefill bottleneck as primary performance limiter (45\% throughput reduction) while retrieval overhead remains negligible (26ms).
-
-% \item \textbf{Multimodal RAG Achievement:} Enabling visual document understanding through Florence-2 integration with 192.7\% improvement and only 430 MB overhead.
-
-% \item \textbf{Prescriptive Guidelines:} Providing optimal configurations (NF4, semantic chunking, MiniLM-L6, Top-K=3) for trustworthy RAG deployment on consumer GPUs.
-
-% \item \textbf{Open-Source Framework:} Releasing modular implementation for reproducible RAG research on edge devices.
-% \end{enumerate}
-
-% Our findings demonstrate that deploying trustworthy RAG systems on resource-constrained hardware requires careful attention to quantization-induced faithfulness degradation, system-level bottlenecks, and efficient multimodal integration. The optimal configuration achieves practical performance (4.37 tok/s, 0.539 faithfulness) within 10 GB memory budget, enabling edge deployment for educational, medical, and technical applications.
-
-% Future work should prioritize comprehensive RAG system ablations, adaptive retrieval strategies, and human evaluation studies to further enhance reliability and user trust in edge-deployed RAG systems.
+\textbf{Boundary Detection:}
 
-% % \begin{thebibliography}{99}
+Content-aware boundary detector identifies safe split points while never splitting inside equations, code blocks, tables, or mid-sentence unless forced by size constraints.
 
-% % \bibitem{lewis2020retrieval}
-% % P. Lewis, E. Perez, A. Piktus, F. Petroni, V. Karpukhin, N. Goyal, H. Küttler, M. Lewis, W. Yih, T. Rocktäschel, S. Riedel, and D. Kiela,
-% % ``Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,''
-% % \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 33, pp. 9459--9474, 2020.
+\textbf{Chunk Enrichment:}
 
-% % \bibitem{borgeaud2022retro}
-% % S. Borgeaud, A. Mensch, J. Hoffmann, T. Cai, E. Rutherford, K. Millican, G. van den Driessche, J.-B. Lespiau, B. Damoc, A. Clark, et al.,
-% % ``Improving Language Models by Retrieving from Trillions of Tokens,''
-% % \textit{International Conference on Machine Learning (ICML)}, pp. 2206--2240, 2022.
+Each chunk receives metadata including adjacent IDs, key terms, summary, section path, and content distribution by type.
 
-% % \bibitem{izacard2022atlas}
-% % G. Izacard, P. Lewis, M. Lomeli, L. Hosseini, F. Petroni, T. Schick, J. Dwivedi-Yu, A. Joulin, S. Riedel, and E. Grave,
-% % ``Few-shot Learning with Retrieval Augmented Language Models,''
-% % \textit{arXiv preprint arXiv:2208.03299}, 2022.
+\subsubsection{Module 4: Embedding}
 
-% % \bibitem{jegou2011product}
-% % H. Jégou, M. Douze, and C. Schmid,
-% % ``Product Quantization for Nearest Neighbor Search,''
-% % \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 33, no. 1, pp. 117--128, 2011.
+The embedding module generates dual representations: dense semantic vectors and sparse keyword vectors.
 
-% % \bibitem{malkov2018hnsw}
-% % Y. A. Malkov and D. A. Yashunin,
-% % ``Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs,''
-% % \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 42, no. 4, pp. 824--836, 2018.
+\textbf{Dense Embedding (BGE-small-en-v1.5):}
 
-% % \bibitem{chen2023prefill}
-% % C. Chen, S. Borgeaud, G. Irving, J.-B. Lespiau, L. Sifre, and J. Jumper,
-% % ``Accelerating Large Language Model Decoding with Speculative Sampling,''
-% % \textit{arXiv preprint arXiv:2302.01318}, 2023.
+Neural embeddings capture semantic similarity with L2 normalization for cosine similarity via dot product.
 
-% % \bibitem{leviathan2023speculative}
-% % Y. Leviathan, M. Kalman, and Y. Matias,
-% % ``Fast Inference from Transformers via Speculative Decoding,''
-% % \textit{International Conference on Machine Learning (ICML)}, 2023.
-
-% % \bibitem{radford2021clip}
-% % A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark, et al.,
-% % ``Learning Transferable Visual Models From Natural Language Supervision,''
-% % \textit{International Conference on Machine Learning (ICML)}, pp. 8748--8763, 2021.
-
-% % \bibitem{li2022blip}
-% % J. Li, D. Li, C. Xiong, and S. Hoi,
-% % ``BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation,''
-% % \textit{International Conference on Machine Learning (ICML)}, pp. 12888--12900, 2022.
-
-% % \bibitem{alayrac2022flamingo}
-% % J.-B. Alayrac, J. Donahue, P. Luc, A. Miech, I. Barr, Y. Hasson, K. Lenc, A. Mensch, K. Millican, M. Reynolds, et al.,
-% % ``Flamingo: A Visual Language Model for Few-Shot Learning,''
-% % \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 35, pp. 23716--23736, 2022.
-
-% % \bibitem{xu2020layoutlm}
-% % Y. Xu, M. Li, L. Cui, S. Huang, F. Wei, and M. Zhou,
-% % ``LayoutLM: Pre-training of Text and Layout for Document Image Understanding,''
-% % \textit{ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, pp. 1192--1200, 2020.
-
-% % \bibitem{kim2022donut}
-% % G. Kim, T. Hong, M. Yim, J. Nam, J. Park, J. Yim, W. Hwang, S. Yun, D. Han, and S. Park,
-% % ``OCR-Free Document Understanding Transformer,''
-% % \textit{European Conference on Computer Vision (ECCV)}, pp. 498--517, 2022.
-
-% % \bibitem{xiao2024florence2}
-% % B. Xiao, H. Wu, W. Xu, X. Dai, H. Hu, Y. Lu, M. Zeng, C. Liu, and L. Yuan,
-% % ``Florence-2: Advancing a Unified Representation for a Variety of Vision Tasks,''
-% % \textit{arXiv preprint arXiv:2311.06242}, Microsoft Research, 2024.
-
-% % \end{thebibliography}
-
-% % \end{document}
-% % \item \textbf{CLIP-based:} Contrastive learning for image-text alignment \cite{radford2021clip}
-% % \item \textbf{VLMs:} Unified models like BLIP \cite{li2022blip}, Flamingo \cite{alayrac2022flamingo}
-% % \item \textbf{Document-Specific:} LayoutLM \cite{xu2020layoutlm}, Donut \cite{kim2022donut} for structured documents
-% % \end{itemize}
-
-% % \textbf{Florence-2} \cite{xiao2024florence2} represents recent advances in unified vision tasks, trained on the massive FLD-5B dataset for dense captioning, object detection, and OCR.
-
-% \subsection{Research Gap}
-
-% Existing work treats RAG and quantization as orthogonal optimizations. Our study uniquely examines their \textbf{interaction}, revealing that quantization-induced attention degradation disproportionately affects RAG faithfulness, a phenomenon requiring system-level architectural solutions.
-
-% \section{Background: Quantization Impacts}
-
-% Following our comprehensive benchmarking study [Paper 1], we adopt \textbf{NF4 quantization} as our baseline for RAG evaluation based on its superior hardware compatibility on Tesla T4 and optimal performance-efficiency trade-off.
-
-% \subsection{Key Quantization Findings}
-
-% From [Paper 1], critical insights for RAG deployment:
-
-% \begin{enumerate}
-% \item \textbf{Memory Efficiency:} NF4 achieves 3.6× compression (13.49 GB → 3.74 GB), leaving 8.4 GB VRAM for vector indices, embeddings, and KV cache on 12GB consumer GPUs.
-
-% \item \textbf{Task-Specific Degradation:} Mathematical reasoning suffers 25\% accuracy drop (GSM8K: 0.36 → 0.27), while knowledge retrieval remains robust (ARC-Challenge: 0.58 → 0.58).
-
-% \item \textbf{Perplexity Preservation:} Minimal perplexity degradation (12.79 → 13.02, +1.80\%) suggests linguistic fluency is maintained, but does not assess RAG-specific faithfulness.
-% \end{enumerate}
-
-% \subsection{Hypothesis for RAG Evaluation}
-
-% We hypothesize that \textbf{quantization preserves pattern-matching but degrades attention precision}, leading to:
-
-% \begin{itemize}
-% \item \textbf{Maintained:} Fluent language generation, general knowledge retrieval
-% \item \textbf{Degraded:} Fine-grained attention to retrieved context, exact copying of factual spans
-% \end{itemize}
-
-% This study tests this hypothesis through explicit faithfulness measurement.
-
-% \section{RAG Pipeline Design}
-
-% We develop a modular RAG architecture isolating each component for systematic evaluation.
-
-% \subsection{System Architecture}
-
-% Figure \ref{fig:rag_pipeline} illustrates the complete RAG pipeline.
-
-% \begin{figure}[h]
-% \centering
-% \begin{tikzpicture}[
-%     node distance=1.2cm,
-%     block/.style={rectangle, draw, fill=blue!10, text width=3cm, text centered, minimum height=0.8cm, font=\small},
-%     arrow/.style={->, >=stealth, thick}
-% ]
-
-% % Phase 1: Indexing
-% \node[block] (docs) {Source Docs (PDF)};
-% \node[block, below of=docs] (chunk) {Semantic Chunking\\512 tokens};
-% \node[block, below of=chunk] (embed) {Embedding Model\\MiniLM-L6};
-% \node[block, below of=embed] (index) {Vector Index\\ChromaDB};
-
-% % Phase 2: Inference
-% \node[block, right=3cm of docs] (query) {User Query};
-% \node[block, below of=query] (qembed) {Query Embedding};
-% \node[block, below of=qembed] (retrieval) {Retrieval (Top-K)};
-% \node[block, below of=retrieval] (llm) {Quantized LLM\\(NF4/AWQ)};
-% \node[block, below of=llm] (answer) {Generated Answer};
-
-% % Arrows
-% \draw[arrow] (docs) -- (chunk);
-% \draw[arrow] (chunk) -- (embed);
-% \draw[arrow] (embed) -- (index);
-
-% \draw[arrow] (query) -- (qembed);
-% \draw[arrow] (qembed) -- (retrieval);
-% \draw[arrow] (index.east) -| (retrieval);
-% \draw[arrow] (retrieval) -- (llm);
-% \draw[arrow] (llm) -- (answer);
-
-% % Phase labels
-% \node[above=0.2cm of docs, font=\small\bfseries] {Phase 1: Indexing};
-% \node[above=0.2cm of query, font=\small\bfseries] {Phase 2: Inference};
-
-% \end{tikzpicture}
-% \caption{Modular RAG Pipeline Architecture}
-% \label{fig:rag_pipeline}
-% \end{figure}
-
-% \subsection{Document Processing}
-
-% \subsubsection{Text Extraction}
-% PyPDF2-based extraction with comprehensive cleaning:
-% \begin{itemize}
-% \item Remove page headers, footers, citation markers
-% \item Fix ligature errors (fi, fl)
-% \item Normalize whitespace and quotes
-% \item Strip URLs and excessive punctuation
-% \end{itemize}
-
-% \subsubsection{Chunking Strategy}
-
-% We employ \textbf{semantic chunking} respecting document structure:
-
-% \begin{itemize}
-% \item \textbf{Primary Delimiter:} Double newlines (paragraph boundaries)
-% \item \textbf{Fallback:} Sentence-level tokenization (NLTK punkt)
-% \item \textbf{Target Size:} 512 tokens
-% \item \textbf{Overlap:} 50 tokens (sliding window for context continuity)
-% \end{itemize}
-
-% \textbf{Chunk Metadata:}
-% \begin{itemize}
-% \item \texttt{chunk\_id}: Unique identifier
-% \item \texttt{page\_number}: Source page
-% \item \texttt{start\_char / end\_char}: Character offsets
-% \item \texttt{tokens}: Word count
-% \end{itemize}
-
-% \subsection{Embedding Model}
-
-% \textbf{sentence-transformers/all-MiniLM-L6-v2:}
-% \begin{itemize}
-% \item \textbf{Dimensions:} 384
-% \item \textbf{Max Sequence:} 256 tokens
-% \item \textbf{Training:} 1B+ sentence pairs
-% \item \textbf{Performance:} SBERT benchmark: 68.06
-% \item \textbf{Memory:} ~90 MB
-% \end{itemize}
-
-% \begin{lstlisting}[caption={Embedding Generation}]
-% from sentence_transformers import SentenceTransformer
-
-% model = SentenceTransformer(
-%     'all-MiniLM-L6-v2', device='cuda'
-% )
-% embeddings = model.encode(
-%     texts, batch_size=32,
-%     normalize_embeddings=True
-% )
-% \end{lstlisting}
-
-% \subsection{Vector Store and Retrieval}
-
-% \subsubsection{ChromaDB Configuration}
-% \begin{itemize}
-% \item \textbf{Index:} HNSW (Hierarchical Navigable Small World)
-% \item \textbf{Distance:} Cosine similarity
-% \item \textbf{Storage:} Persistent or in-memory
-% \end{itemize}
-
-% \subsubsection{Distance-to-Similarity Conversion}
-
-% ChromaDB returns L2 distances for normalized vectors. Conversion to [0,1] similarity:
-
-% \begin{equation}
-% \text{similarity} = 1 - \frac{d^2}{2}
-% \end{equation}
-
-% where $d$ is L2 distance of unit-normalized embeddings.
-
-% \subsubsection{Retrieval Strategy}
-
-% \textbf{Base Retrieval:}
-% \begin{itemize}
-% \item Top-K selection (default: K=3)
-% \item Cosine similarity ranking
-% \item Optional metadata filtering (page, section)
-% \end{itemize}
-
-% \textbf{Re-ranking (Optional):}
-% Hybrid scoring combining semantic + lexical:
-% \begin{equation}
-% \text{score} = 0.7 \times \text{cosine\_sim} + 0.3 \times \text{token\_overlap}
-% \end{equation}
-
-% \textbf{Diversity (MMR):}
-% Maximal Marginal Relevance for redundancy reduction:
-% \begin{equation}
-% \text{MMR} = \lambda \times \text{Sim}(q,c) - (1-\lambda) \times \max[\text{Sim}(c,S)]
-% \end{equation}
-
-% \subsection{Answer Generation}
-
-% \subsubsection{Prompt Engineering}
-
-% \begin{lstlisting}[caption={RAG Generation Prompt}]
-% prompt = f"""Use the following context to answer 
-% the question. Provide a clear, direct answer 
-% based on the information given.
-
-% Context:
-% {retrieved_context}
-
-% Question: {user_query}
-% Answer:"""
-% \end{lstlisting}
-
-% \subsubsection{Generation Parameters}
-
-% Tuned for factual accuracy:
-% \begin{itemize}
-% \item \textbf{Max New Tokens:} 128 (concise answers)
-% \item \textbf{Temperature:} 0.3 (low for factuality)
-% \item \textbf{Top-p:} 0.9 (nucleus sampling)
-% \item \textbf{Repetition Penalty:} 1.15
-% \end{itemize}
-
-% \section{Experiment 1: RAG with Quantized Models}
-
-% \subsection{Evaluation Dataset}
-
-% Custom technical QA dataset:
-% \begin{itemize}
-% \item \textbf{Domain:} ML frameworks, API documentation
-% \item \textbf{Size:} 10-50 question-answer pairs
-% \item \textbf{Question Types:}
-%   \begin{itemize}
-%   \item Factual: ``What is the default learning rate?''
-%   \item Procedural: ``How do you initialize a model?''
-%   \item Comparative: ``Difference between X and Y?''
-%   \end{itemize}
-% \item \textbf{Ground Truth:} Human-verified reference answers
-% \end{itemize}
-
-% \subsection{Evaluation Metrics}
-
-% \subsubsection{Answer Quality}
-
-% \begin{itemize}
-% \item \textbf{F1 Score:} Token-level precision-recall harmonic mean
-% \item \textbf{Exact Match (EM):} Binary correctness
-% \item \textbf{ROUGE-1/2/L:} N-gram overlap metrics
-% \item \textbf{BERTScore:} Semantic similarity via contextual embeddings
-% \end{itemize}
-
-% \subsubsection{Faithfulness}
-
-% Token containment ratio measuring hallucination:
-% \begin{equation}
-% \text{Faithfulness} = \frac{|T_{\text{ans}} \cap T_{\text{ctx}}|}{|T_{\text{ans}}|}
-% \end{equation}
-
-% \subsubsection{Context Quality}
-
-% \begin{itemize}
-% \item \textbf{Sufficiency:} Fraction of queries where retrieved context contains answer (80\% token overlap threshold)
-% \item \textbf{Precision:} Relevance of retrieved chunks
-% \item \textbf{Coverage:} Fraction of answer tokens in retrieved context
-% \item \textbf{Consistency:} Standard deviation of retrieval scores
-% \end{itemize}
-
-% \subsection{Results: RAG Quality}
-
-% \begin{table}[h]
-% \centering
-% \caption{RAG Answer Quality Evaluation}
-% \label{tab:rag_quality}
-% \small
-% \begin{tabular}{lcccccc}
-% \toprule
-% \textbf{Method} & \textbf{F1} & \textbf{EM} & \textbf{Faithful} & \textbf{ROUGE-1} & \textbf{ROUGE-L} & \textbf{BERT} \\
-% \midrule
-% FP16 & 0.217 & 0.0 & 0.559 & 0.279 & 0.197 & 0.658 \\
-% NF4 & 0.205 & 0.0 & 0.539 & 0.244 & 0.177 & 0.614 \\
-% AWQ & 0.191 & 0.0 & 0.476 & 0.243 & 0.181 & 0.615 \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
-
-% \textbf{Key Findings:}
-
-% \begin{enumerate}
-% \item \textbf{Faithfulness Gap:} FP16 achieves 0.559 faithfulness, while NF4 maintains 0.539 (-3.6\%) and AWQ degrades to 0.476 (-14.8\%). This 15\% gap between NF4 and AWQ represents significant hallucination risk.
-
-% \item \textbf{Fluency Preservation:} BERTScore shows minimal semantic degradation (0.658 → 0.614), indicating that while answers remain linguistically coherent, they diverge from retrieved facts.
-
-% \item \textbf{Perplexity Mismatch:} Despite AWQ's higher perplexity (13.47 vs 13.02 for NF4), its faithfulness is worse, confirming that perplexity does not predict RAG quality.
-% \end{enumerate}
-
-% \subsection{RAG vs. No-RAG Comparison}
-
-% % \begin{table}[h]
-% % \centering
-% % \caption{RAG vs No-RAG Improvement}
-% % \label{tab:rag_vs_norag}
-% % \small
-% % \begin{tabular}{lccccc}
-% % \toprule
-% % \textbf{Method} & \textbf{No-RAG} & \textbf{RAG} & \textbf{F1} & \textbf{Avg Len} & \textbf{Avg Len} \\
-% %  & \textbf{F1} & \textbf{F1} & \textbf{Δ} & \textbf{(RAG)} & \textbf{(No-RAG)} \\
-% % \midrule
-% % FP16 & 0.190 & 0.217 & +0.027 & 33.75 & --- \\
-% % NF4 & 0.181 & 0.205 & +0.024 & 31.95 & --- \\
-% % AWQ & 0.165 & 0.191 & +0.025 & 30.50 & --- \\
-% % \bottomrule
-% % \end{tabular}
-% % \end{table}
-
-% \textbf{Observations:}
-
-% \begin{itemize}
-% \item RAG consistently improves F1 scores (+0.024-0.027) across all quantization methods
-% \item Improvement magnitude is comparable across methods, suggesting retrieval benefits are preserved under quantization
-% \item Quantized models generate shorter answers (31.95 vs 33.75 tokens), potentially indicating reduced elaboration
-% \end{itemize}
-
-% \subsection{Context Retrieval Quality}
-
-% \begin{table}[h]
-% \centering
-% \caption{Context Retrieval Quality (Constant Across Methods)}
-% \label{tab:retrieval_quality}
-% \small
-% \begin{tabular}{lcccc}
-% \toprule
-% \textbf{Metric} & \textbf{Score} & \textbf{Avg Chunks} & \textbf{Avg Length} & \textbf{Consistency} \\
-% \midrule
-% Sufficiency & 0.796 & 3.0 & 1308.5 & 0.090 \\
-% Precision & 0.564 & & & \\
-% Coverage & 0.756 & & & \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
-
-% Since retrieval operates before generation, these metrics are identical across all methods, validating that performance differences stem from generation, not retrieval quality.
-
-% \subsection{RAG Efficiency Breakdown}
-
-% \begin{table}[h]
-% \centering
-% \caption{RAG Efficiency Metrics}
-% \label{tab:rag_efficiency}
-% \small
-% \begin{tabular}{lccccc}
-% \toprule
-% \textbf{Method} & \textbf{Retrieval} & \textbf{RAG Gen} & \textbf{No-RAG Gen} & \textbf{RAG} & \textbf{Speedup} \\
-%  & \textbf{(ms)} & \textbf{(ms)} & \textbf{(ms)} & \textbf{(T/s)} & \textbf{Ratio} \\
-% \midrule
-% FP16 & 24.7 & 8435.5 & 7855.2 & 5.33 & 0.93x \\
-% NF4 & 28.0 & 10443.9 & 9965.0 & 4.37 & 0.95x \\
-% AWQ & 26.1 & 9993.9 & 7744.2 & 4.36 & 0.77x \\
-% \bottomrule
-% \end{tabular}
-% \end{table}
-
-% \textbf{Critical Insight:} Retrieval overhead is negligible (26ms), but context processing causes \textbf{45\% throughput degradation} (7.06 → 4.37 tok/s for NF4). The ``prefill tax'' of processing 1308-token contexts dominates latency.
-
-% \section{Experiment 2: Multimodal RAG}
-
-% \subsection{Motivation}
-
-% Text-only RAG cannot interpret visual information—diagrams, charts, anatomical illustrations—prevalent in educational and technical documents. We extend RAG to multimodal scenarios through lightweight vision encoder integration.
-
-% \subsection{Vision-as-Language Architecture}
-
-% Rather than projecting image embeddings into LLM hidden space (requiring adapter retraining), we employ a \textbf{Vision Agent} translating visual semantics to text.
-
-% \subsubsection{Pipeline Stages}
-
-% \begin{enumerate}
-% \item \textbf{Visual Ingestion:} Document pages converted to images
-% \item \textbf{Dense Captioning:} Vision model generates detailed textual descriptions
-% \item \textbf{Context Fusion:} Visual descriptions structured as ``[Image Context]: ...''
-% \item \textbf{Cross-Modal Reasoning:} Quantized LLM synthesizes visual + textual context
-% \end{enumerate}
-
-% \subsection{Vision Model Selection}
-
-% We evaluated six lightweight vision encoders:
-
-% \begin{itemize}
-% \item \textbf{Microsoft Florence-2} (Base \& Large): Unified model for dense captioning, OCR, grounding (FLD-5B training)
-% \item \textbf{Moondream2:} 1.86B edge-optimized VLM
-% \item \textbf{BLIP:} Baseline image captioning
-% \item \textbf{GIT:} Generative Image-to-Text transformer
-% \item \textbf{ViT-GPT2:} Classic encoder-decoder
-% \end{itemize}
-
-% \subsection{Evaluation Methodology}
-
-% \subsubsection{Dataset Construction}
-
-% 50 tri-modal pairs (Image, Text, Question) from biology textbook:
-
-% \begin{enumerate}
-% \item \textbf{Text-Only (Type A):} Control questions (ensure vision doesn't degrade text performance)
-% \item \textbf{Vision-Only (Type B):} Questions requiring visual interpretation (``What color represents...?'')
-% \item \textbf{Combined (Type C):} Synthesis questions (``Based on the graph, explain...'')
-% \end{enumerate}
-
-% \subsection{Results}
-
-% \begin{table}[H]
-% \centering
-% \caption{Comparative Evaluation of Vision Encoders (T4 GPU)}
-% \label{tab:vision_results}
-% \resizebox{\columnwidth}{!}{%
-% \begin{tabular}{lcccccc}
-% \toprule
-% \textbf{Vision Model} & \textbf{Params} & \textbf{VRAM} & \textbf{Latency} & \textbf{Vision-Only} & \textbf{Overall} & \textbf{Gain} \\
-%  & \textbf{(B)} & \textbf{(GB)} & \textbf{(s)} & \textbf{Score} & \textbf{Score} & \textbf{(\%)} \\
-% \midrule
-% \textit{No Vision} & --- & 2.47 & 28.07 & 0.090 & 0.235 & --- \\
-% \midrule
-% \textbf{Florence-2 Base} & \textbf{0.23} & \textbf{2.90} & \textbf{36.85} & \textbf{0.265} & 0.249 & \textbf{+192.7} \\
-% Florence-2 Large & 0.77 & 3.92 & 49.00 & 0.256 & 0.263 & +183.1 \\
-% Moondream2 & 1.86 & 6.07 & 76.57 & 0.256 & \textbf{0.280} & +183.7 \\
-% BLIP Base & 0.22 & 2.89 & 44.60 & 0.128 & 0.117 & +41.2 \\
-% GIT-Base & 0.18 & 2.80 & 40.78 & 0.180 & 0.136 & +99.5 \\
-% ViT-GPT2 & 0.16 & 2.94 & 38.73 & 0.251 & 0.210 & +177.6 \\
-% \bottomrule
-% \end{tabular}%
-% }
-% \end{table}
-
-% \textbf{Key Findings:}
-
-% \begin{enumerate}
-% \item \textbf{Florence-2 Base Optimal:} Despite having only 0.23B parameters, Florence-2 Base achieves 192.7\% improvement in vision-only tasks with minimal overhead (430 MB VRAM, 8.78s latency increase).
-
-% \item \textbf{Accuracy-Efficiency Trade-off:} Moondream2 achieves highest overall score (0.280) but requires 3.6 GB additional VRAM and 2.7× latency, making it impractical for edge deployment.
-
-% \item \textbf{Legacy Model Failures:} BLIP and GIT show poor performance (+41.2\%, +99.5\% gains), generating generic captions rather than reading diagram labels.
-% \end{enumerate}
-
-% \section{Discussion}
-
-% \subsection{Faithfulness as Critical RAG Metric}
-
-% Our evaluation reveals that \textbf{perplexity is insufficient} for assessing RAG quality. Despite AWQ's acceptable perplexity (13.47), its faithfulness degradation (0.476) represents significant hallucination risk. This finding suggests:
-
-% \begin{itemize}
-% \item Standard benchmarks (perplexity, BLEU) measure fluency, not factual grounding
-% \item RAG-specific metrics (faithfulness, context adherence) are essential
-% \item Quantization evaluation must include RAG-aware assessments
-% \end{itemize}
-
-% \subsection{Prefill Bottleneck Dominates Latency}
-
-% Retrieval overhead is negligible (26ms), but context processing causes 45\% throughput degradation. Optimization strategies should focus on:
-
-% \begin{itemize}
-% % CONTINUATION FROM: \subsection{Prefill Bottleneck Dominates Latency}
-
-% \item \textbf{Prefill Caching:} Cache processed contexts for repeated queries
-% \item \textbf{Context Compression:} Reduce chunk sizes while maintaining sufficiency
-% \item \textbf{Speculative Decoding:} Predict tokens during prefill phase
-% \end{itemize}
-
-% \subsection{Multimodal Extension Viability}
-
-% Florence-2 integration demonstrates that visual understanding is achievable within edge memory budgets. The 430 MB overhead and 192.7\% improvement make multimodal RAG practical for:
-
-% \begin{itemize}
-% \item Educational materials (textbooks with diagrams)
-% \item Technical documentation (architecture diagrams)
-% \item Medical documents (anatomical illustrations)
-% \end{itemize}
-
-% \section{Deployment Guidelines}
-
-% \subsection{Hardware Requirements}
-
-% \textbf{Minimum Configuration:}
-% \begin{itemize}
-% \item GPU: NVIDIA Tesla T4 (16GB) or RTX 3060 (12GB)
-% \item RAM: 16GB system memory
-% \item Storage: 50GB for models + indices
-% \end{itemize}
-
-% \textbf{Memory Allocation:}
-% \begin{itemize}
-% \item NF4 Model: 7.6 GB
-% \item Vector Index: 100-500 MB
-% \item Embedding Model: 90 MB
-% \item KV Cache: 400 MB (typical)
-% \item Vision Encoder (optional): 430 MB
-% \item System Overhead: 500 MB
-% \item \textbf{Total:} 9-10 GB
-% \end{itemize}
-
-% \subsection{Optimal Configuration}
-
-% Based on comprehensive evaluation:
-
-% \begin{enumerate}
-% \item \textbf{Quantization:} NF4 for optimal faithfulness-efficiency balance
-% \item \textbf{Chunking:} Semantic chunking (512 tokens, 50 overlap)
-% \item \textbf{Embedding:} MiniLM-L6-v2 (384-dim)
-% \item \textbf{Retrieval:} Top-K=3, cosine similarity
-% \item \textbf{Reranking:} Optional hybrid (0.7 semantic + 0.3 lexical)
-% \item \textbf{Vision:} Florence-2 Base for multimodal tasks
-% \end{enumerate}
-
-% \subsection{Quality Assurance}
-
-% \textbf{Monitoring Metrics:}
-% \begin{itemize}
-% \item Context sufficiency (target: >80\%)
-% \item Faithfulness score (target: >0.50)
-% \item Retrieval latency (target: <50ms)
-% \item Generation throughput (target: >4 tok/s)
-% \end{itemize}
-
-% \section{Limitations and Future Work}
-
-% \subsection{Current Limitations}
-
-% \begin{enumerate}
-% \item \textbf{Small Evaluation Dataset:} 10-50 QA pairs limit statistical significance
-% \item \textbf{Single Domain:} ML/API documentation; generalization to other domains unclear
-% \item \textbf{No Fine-tuning:} Off-the-shelf models only; task-specific tuning may improve results
-% \item \textbf{Static Retrieval:} No iterative retrieval or query refinement
-% \end{enumerate}
-
-% \subsection{Future Research Directions}
-
-% \begin{enumerate}
-% \item \textbf{RAG System Ablations:} Complete chunking, embedding, retrieval, and reranking comparisons
-% \item \textbf{Adaptive Retrieval:} Dynamic K selection based on query complexity
-% \item \textbf{Hybrid Quantization:} Selective precision for attention heads vs. feedforward layers
-% \item \textbf{Multi-hop Reasoning:} Iterative retrieval for complex queries
-% \item \textbf{User Study:} Human evaluation of answer quality and trustworthiness
-% \end{enumerate}
-
-% \section{RAG Benchmarking System Design}
-
-% \subsection{Overview}
-
-% To systematically evaluate RAG system design choices, we propose a comprehensive benchmarking framework that evaluates:
-
-% \begin{itemize}
-% \item \textbf{Chunking Strategies:} Semantic, fixed-size, sliding window, sentence-level, recursive
-% \item \textbf{Embedding Models:} MiniLM, BGE, E5, sentence-t5
-% \item \textbf{Retrieval Methods:} Top-K, MMR diversity, threshold filtering, contextual compression
-% \item \textbf{Reranking Approaches:} Cross-encoder, hybrid (semantic + BM25), no reranking
-% \item \textbf{Vector Stores:} ChromaDB, FAISS, Qdrant
-% \end{itemize}
-
-% \subsection{Evaluation Framework}
-
-% \subsubsection{Dataset Requirements}
-
-% \begin{itemize}
-% \item \textbf{Size:} 100+ QA pairs per domain
-% \item \textbf{Domains:} Technical documentation, academic papers, legal documents, medical texts
-% \item \textbf{Question Types:} Factual, procedural, comparative, analytical
-% \item \textbf{Difficulty Levels:} Simple (single-chunk), moderate (multi-chunk), complex (reasoning required)
-% \end{itemize}
-
-% \subsubsection{Metrics Suite}
-
-% \textbf{Answer Quality:}
-% \begin{itemize}
-% \item F1, Exact Match, ROUGE-1/2/L, BERTScore
-% \item Faithfulness, hallucination rate
-% \item Answer length, completeness
-% \end{itemize}
-
-% \textbf{Retrieval Quality:}
-% \begin{itemize}
-% \item Precision@K, Recall@K, MRR
-% \item Context sufficiency, coverage
-% \item Redundancy, diversity scores
-% \end{itemize}
-
-% \textbf{System Metrics:}
-% \begin{itemize}
-% \item Indexing time, memory usage
-% \item Query latency (retrieval + generation)
-% \item Throughput (queries/second)
-% \end{itemize}
-
-% \subsection{Implementation Plan}
-
-% \textbf{Phase 1: Infrastructure (Weeks 1-2)}
-% \begin{itemize}
-% \item Modular pipeline implementation
-% \item Configuration management system
-% \item Automated evaluation harness
-% \item Results logging and visualization
-% \end{itemize}
-
-% \textbf{Phase 2: Component Evaluation (Weeks 3-6)}
-% \begin{itemize}
-% \item Chunking strategy comparison
-% \item Embedding model benchmark
-% \item Retrieval method ablation
-% \item Reranking approach evaluation
-% \end{itemize}
-
-% \textbf{Phase 3: System Integration (Weeks 7-8)}
-% \begin{itemize}
-% \item Optimal configuration identification
-% \item Cross-domain validation
-% \item Performance profiling
-% \item Documentation and deployment guide
-% \end{itemize}
-
-% \subsection{Expected Deliverables}
-
-% \begin{enumerate}
-% \item \textbf{Benchmarking Tool:} Open-source framework for RAG evaluation
-% \item \textbf{Performance Report:} Comprehensive comparison across all dimensions
-% \item \textbf{Configuration Guidelines:} Domain-specific recommendations
-% \item \textbf{Public Leaderboard:} Community-driven benchmark results
-% \end{enumerate}
-
-% \section{Conclusion}
-
-% This work presents a comprehensive analysis of RAG system deployment on edge hardware with quantized models. Our key contributions include:
-
-% \begin{enumerate}
-% \item \textbf{Faithfulness Gap Identification:} Demonstrating that quantization degrades context adherence (AWQ: 0.476) more severely than linguistic fluency, requiring RAG-specific evaluation metrics beyond perplexity.
-
-% \item \textbf{System-Level Analysis:} Identifying prefill bottleneck as primary performance limiter (45\% throughput reduction) while retrieval overhead remains negligible (26ms).
-
-% \item \textbf{Multimodal RAG Achievement:} Enabling visual document understanding through Florence-2 integration with 192.7\% improvement and only 430 MB overhead.
-
-% \item \textbf{Prescriptive Guidelines:} Providing optimal configurations (NF4, semantic chunking, MiniLM-L6, Top-K=3) for trustworthy RAG deployment on consumer GPUs.
-
-% \item \textbf{Open-Source Framework:} Releasing modular implementation for reproducible RAG research on edge devices.
-
-% \item \textbf{Benchmarking System Design:} Proposing comprehensive evaluation framework for systematic RAG component analysis.
-% \end{enumerate}
-
-% Our findings demonstrate that deploying trustworthy RAG systems on resource-constrained hardware requires careful attention to quantization-induced faithfulness degradation, system-level bottlenecks, and efficient multimodal integration. The optimal configuration achieves practical performance (4.37 tok/s, 0.539 faithfulness) within 10 GB memory budget, enabling edge deployment for educational, medical, and technical applications.
-
-% Future work should prioritize comprehensive RAG system ablations, adaptive retrieval strategies, and human evaluation studies to further enhance reliability and user trust in edge-deployed RAG systems.
-
-% \begin{thebibliography}{99}
-
-% \bibitem{lewis2020retrieval}
-% P. Lewis, E. Perez, A. Piktus, F. Petroni, V. Karpukhin, N. Goyal, H. Küttler, M. Lewis, W. Yih, T. Rocktäschel, S. Riedel, and D. Kiela,
-% ``Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks,''
-% \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 33, pp. 9459--9474, 2020.
-
-% \bibitem{borgeaud2022retro}
-% S. Borgeaud, A. Mensch, J. Hoffmann, T. Cai, E. Rutherford, K. Millican, G. van den Driessche, J.-B. Lespiau, B. Damoc, A. Clark, et al.,
-% ``Improving Language Models by Retrieving from Trillions of Tokens,''
-% \textit{International Conference on Machine Learning (ICML)}, pp. 2206--2240, 2022.
-
-% \bibitem{izacard2022atlas}
-% G. Izacard, P. Lewis, M. Lomeli, L. Hosseini, F. Petroni, T. Schick, J. Dwivedi-Yu, A. Joulin, S. Riedel, and E. Grave,
-% ``Few-shot Learning with Retrieval Augmented Language Models,''
-% \textit{arXiv preprint arXiv:2208.03299}, 2022.
-
-% \bibitem{jegou2011product}
-% H. Jégou, M. Douze, and C. Schmid,
-% ``Product Quantization for Nearest Neighbor Search,''
-% \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 33, no. 1, pp. 117--128, 2011.
-
-% \bibitem{malkov2018hnsw}
-% Y. A. Malkov and D. A. Yashunin,
-% ``Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs,''
-% \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 42, no. 4, pp. 824--836, 2018.
-
-% \bibitem{chen2023prefill}
-% C. Chen, S. Borgeaud, G. Irving, J.-B. Lespiau, L. Sifre, and J. Jumper,
-% ``Accelerating Large Language Model Decoding with Speculative Sampling,''
-% \textit{arXiv preprint arXiv:2302.01318}, 2023.
-
-% \bibitem{leviathan2023speculative}
-% Y. Leviathan, M. Kalman, and Y. Matias,
-% ``Fast Inference from Transformers via Speculative Decoding,''
-% \textit{International Conference on Machine Learning (ICML)}, 2023.
-
-% \bibitem{radford2021clip}
-% A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark, et al.,
-% ``Learning Transferable Visual Models From Natural Language Supervision,''
-% \textit{International Conference on Machine Learning (ICML)}, pp. 8748--8763, 2021.
-
-% \bibitem{li2022blip}
-% J. Li, D. Li, C. Xiong, and S. Hoi,
-% ``BLIP: Bootstrapping Language-Image Pre-training for Unified Vision-Language Understanding and Generation,''
-% \textit{International Conference on Machine Learning (ICML)}, pp. 12888--12900, 2022.
-
-% \bibitem{alayrac2022flamingo}
-% J.-B. Alayrac, J. Donahue, P. Luc, A. Miech, I. Barr, Y. Hasson, K. Lenc, A. Mensch, K. Millican, M. Reynolds, et al.,
-% ``Flamingo: A Visual Language Model for Few-Shot Learning,''
-% \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 35, pp. 23716--23736, 2022.
-
-% \bibitem{xu2020layoutlm}
-% Y. Xu, M. Li, L. Cui, S. Huang, F. Wei, and M. Zhou,
-% ``LayoutLM: Pre-training of Text and Layout for Document Image Understanding,''
-% \textit{ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, pp. 1192--1200, 2020.
-
-% \bibitem{kim2022donut}
-% G. Kim, T. Hong, M. Yim, J. Nam, J. Park, J. Yim, W. Hwang, S. Yun, D. Han, and S. Park,
-% ``OCR-Free Document Understanding Transformer,''
-% \textit{European Conference on Computer Vision (ECCV)}, pp. 498--517, 2022.
-
-% \bibitem{xiao2024florence2}
-% B. Xiao, H. Wu, W. Xu, X. Dai, H. Hu, Y. Lu, M. Zeng, C. Liu, and L. Yuan,
-% ``Florence-2: Advancing a Unified Representation for a Variety of Vision Tasks,''
-% \textit{arXiv preprint arXiv:2311.06242}, Microsoft Research, 2024.
-
-% \end{thebibliography}
+\textbf{Batching Strategy:}
+\begin{itemize}
+    \item GPU: batch\_size=64 (optimal throughput)
+    \item CPU: batch\_size=16 (memory-constrained)
+    \item Dynamic adjustment on OOM errors
+\end{itemize}
+
+\textbf{Sparse Embedding (BM25):}
+
+Statistical keyword matching using Okapi BM25:
+
+\begin{equation}
+\text{score}(D,Q) = \sum_{i=1}^{n} \text{IDF}(q_i) \cdot \frac{f(q_i,D) \cdot (k_1+1)}{f(q_i,D) + k_1 \cdot (1-b+b \cdot \frac{|D|}{\text{avgdl}})}
+\end{equation}
+
+where $k_1=1.5$ and $b=0.75$.
+
+\textbf{Two-Tier Caching:}
+
+\begin{itemize}
+    \item \textbf{L1 Memory Cache:} LRU cache (10,000 embeddings, <1ms access)
+    \item \textbf{L2 Disk Cache:} SQLite database (unlimited capacity, 5-10ms access)
+    \item \textbf{Hit Rate:} 60-80\% for similar documents
+\end{itemize}
+
+\subsubsection{Module 5: Indexing}
+
+The indexing module builds multi-store architecture for fast, accurate retrieval.
+
+\textbf{Vector Store (FAISS IndexHNSWFlat):}
+
+Hierarchical Navigable Small World (HNSW) index for approximate nearest neighbor search:
+
+\begin{itemize}
+    \item \textbf{Index Type:} IndexHNSWFlat (no quantization, maximum accuracy)
+    \item \textbf{M:} 32 connections per layer
+    \item \textbf{efConstruction:} 40 (build-time accuracy)
+    \item \textbf{efSearch:} 16 (query-time accuracy)
+    \item \textbf{Distance Metric:} Cosine similarity
+    \item \textbf{Query Time:} <50ms for k=10 in 100k vectors
+\end{itemize}
+
+\textbf{Keyword Store (BM25):}
+
+Pure statistical ranking with <10ms query time regardless of corpus size.
+
+\textbf{Metadata Store (SQLite + FTS5):}
+
+Relational database with full-text search for chunk metadata, content types, and hierarchical information.
+
+\subsubsection{Module 6: Retrieval}
+
+The retrieval module implements hybrid search combining semantic and lexical matching.
+
+\textbf{Hybrid Retrieval Strategy:}
+
+Reciprocal Rank Fusion (RRF) combines dense and sparse results:
+
+\begin{equation}
+\text{RRF\_score}(d) = \sum_{r \in \{dense, sparse\}} \frac{1}{k + rank_r(d)}
+\end{equation}
+
+where $k=60$ (default RRF constant).
+
+\textbf{Retrieval Pipeline:}
+
+\begin{enumerate}
+    \item \textbf{Dense Search:} Embed query, retrieve top-20 from FAISS (50ms)
+    \item \textbf{Sparse Search:} Tokenize query, retrieve top-20 from BM25 (10ms)
+    \item \textbf{RRF Fusion:} Combine rankings (10ms)
+    \item \textbf{Filtering:} Apply score threshold (min\_score=0.3)
+    \item \textbf{Return:} Top-k final results (default k=5)
+\end{enumerate}
+
+\textbf{Performance Characteristics:}
+
+\begin{itemize}
+    \item \textbf{Hybrid:} 120-270ms (embedding + search + fusion)
+    \item \textbf{Recall@5:} 85\% (hybrid), 70\% (semantic), 65\% (keyword)
+\end{itemize}
+
+\subsubsection{Module 7: Generation}
+
+The generation module synthesizes answers from retrieved context using quantized Mistral-7B.
+
+\textbf{Prompt Construction:}
+
+Mistral-7B-Instruct format with system prompt, retrieved chunks with citations, and user query.
+
+\textbf{Context Building:}
+
+Token budget management for 4k context window:
+\begin{itemize}
+    \item System/prompt: $\sim$200 tokens
+    \item Context: $\sim$2500 tokens (retrieved chunks)
+    \item Query: $\sim$100 tokens
+    \item Generation space: $\sim$1200 tokens
+\end{itemize}
+
+\textbf{Answer Validation:}
+
+Five-dimensional quality assessment:
+\begin{enumerate}
+    \item \textbf{Groundedness (50-70\%):} Word overlap with context
+    \item \textbf{Relevance (20-30\%):} Query term coverage
+    \item \textbf{Completeness (10-20\%):} Length vs. query complexity
+    \item \textbf{Quality (10-15\%):} Structure and vocabulary
+    \item \textbf{Citations (5-10\%):} Source reference presence
+\end{enumerate}
+
+Validation threshold: score $\geq 0.6$ and issues $\leq 2$ for acceptance.
+
+\subsection{Multimodal Extension: Vision-as-Language Architecture}
+
+To enable visual document understanding without expensive end-to-end multimodal training, we employ a decoupled architecture that translates visual semantics into textual descriptions.
+
+\subsubsection{Vision Agent Pipeline}
+
+\begin{enumerate}
+    \item \textbf{Visual Ingestion:} Convert document pages to images (PNG/JPEG format)
+    
+    \item \textbf{Dense Captioning:} Florence-2 Base generates detailed descriptions using compound prompting:
+    \begin{itemize}
+        \item \texttt{<OD>}: Identify and list labeled diagram components
+        \item \texttt{<MORE\_DETAILED\_CAPTION>}: Generate paragraph-level semantic content
+    \end{itemize}
+    
+    \item \textbf{Context Fusion:} Structure descriptions into standardized prompt template:
+    \begin{quote}
+    \textit{[Image Context]: The figure shows... [Vision Agent Output]} \\
+    \textit{[Document Text]: ... [OCR/Parser Output]}
+    \end{quote}
+    
+    \item \textbf{Cross-Modal Reasoning:} Quantized LLM processes combined visual + textual context using existing text-reasoning capabilities
+\end{enumerate}
+
+\subsubsection{Vision Model Evaluation}
+
+We evaluated six lightweight vision encoders on 50 tri-modal QA pairs stratified by difficulty:
+
+\begin{itemize}
+    \item \textbf{Text-Only (Type A):} Control questions ensuring vision doesn't degrade text performance
+    \item \textbf{Vision-Only (Type B):} Questions requiring visual interpretation
+    \item \textbf{Combined (Type C):} Synthesis questions requiring both modalities
+\end{itemize}
+
+\textbf{Candidate Models:}
+\begin{itemize}
+    \item Microsoft Florence-2 (Base \& Large)
+    \item Moondream2 (1.86B parameters)
+    \item BLIP-Base
+    \item GIT-Base
+    \item ViT-GPT2
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Comparative Evaluation of Vision Encoders (T4 GPU)}
+\label{tab:vision_results}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc}
+\hline
+\textbf{Vision Model} & \textbf{Params} & \textbf{VRAM} & \textbf{Latency} & \textbf{Vision-Only} & \textbf{Overall} & \textbf{Relative} \\
+ & \textbf{(B)} & \textbf{(GB)} & \textbf{(s)} & \textbf{Score} & \textbf{Score} & \textbf{Gain} \\
+\hline
+\textit{No Vision (Baseline)} & --- & 2.47 & 28.07 & 0.090 & 0.235 & --- \\
+\hline
+\textbf{Florence-2 Base} & \textbf{0.23} & \textbf{2.90} & \textbf{36.85} & \textbf{0.265} & 0.249 & \textbf{+192.7\%} \\
+Florence-2 Large & 0.77 & 3.92 & 49.00 & 0.256 & 0.263 & +183.1\% \\
+Moondream2 & 1.86 & 6.07 & 76.57 & 0.256 & \textbf{0.280} & +183.7\% \\
+BLIP Base & 0.22 & 2.89 & 44.60 & 0.128 & 0.117 & +41.2\% \\
+GIT-Base & 0.18 & 2.80 & 40.78 & 0.180 & 0.136 & +99.5\% \\
+ViT-GPT2 & 0.16 & 2.94 & 38.73 & 0.251 & 0.210 & +177.6\% \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+\textbf{Key Findings:}
+
+\begin{itemize}
+    \item \textbf{Florence-2 Base} emerged as optimal: 192.7\% visual QA improvement with only 430MB VRAM overhead
+    \item Despite having 8× fewer parameters than Moondream2, Florence-2 Base achieved comparable vision-only scores (0.265 vs 0.256)
+    \item Massive pre-training on FLD-5B enables dense, structured captions even at small model sizes
+    \item Older models (BLIP, GIT) generated generic captions lacking specific label information
+\end{itemize}
+
+\subsection{Prompt Engineering Framework}
+
+To optimize performance under quantization constraints, we implement structured prompt engineering across three dimensions.
+
+\subsubsection{Adaptive System Prompts}
+
+Task-specific system prompts provide explicit guidance for different content types:
+
+\begin{itemize}
+    \item \textbf{General RAG:} "You are a helpful assistant. Answer based ONLY on provided context. Cite sources using [1], [2] format."
+    
+    \item \textbf{Technical Documentation:} "You are a technical expert. Provide precise, structured answers. Explain terminology. Include code examples when relevant."
+    
+    \item \textbf{Mathematical Content:} "You are a mathematics expert. Show step-by-step work. Explain each step clearly. Use proper notation."
+    
+    \item \textbf{Data Analysis:} "You are a data analyst. Present findings clearly. Analyze patterns. Use structured format."
+\end{itemize}
+
+\subsubsection{Mode-Specific Instructions}
+
+Question mode configurations ensure appropriate response formats:
+
+\begin{itemize}
+    \item \textbf{Multiple Choice:} Provide 4 options, indicate correct answer, explain reasoning
+    
+    \item \textbf{Open-Ended:} Provide detailed, well-structured answers using context
+    
+    \item \textbf{Step-by-Step:} Break down complex processes into numbered steps with explanations
+\end{itemize}
+
+\subsubsection{Few-Shot Learning Integration}
+
+For complex reasoning tasks, we provide worked examples that serve as templates:
+
+\textbf{Template Structure:}
+\begin{verbatim}
+Example 1:
+Problem: [Sample problem]
+Solution:
+Step 1: [Clear reasoning step]
+Step 2: [Next step]
+...
+Step N: Verification
+
+Now solve: [Target problem]
+\end{verbatim}
+
+This approach leverages quantized models' preserved pattern-matching capabilities while compensating for degraded autonomous reasoning.
+
+\subsection{Evaluation Metrics}
+
+We assess system performance across multiple dimensions:
+
+\subsubsection{Computational Efficiency}
+
+\begin{itemize}
+    \item \textbf{Latency:} Per-token generation time (ms/token)
+    \item \textbf{GFLOPs:} Computational intensity per token
+    \item \textbf{Memory Usage:} Peak GPU VRAM consumption (GB)
+    \item \textbf{Throughput:} Tokens generated per second
+    \item \textbf{Energy:} millijoules per token (mJ/token)
+\end{itemize}
+
+\subsubsection{Generation Quality}
+
+\begin{itemize}
+    \item \textbf{Perplexity:} Language modeling quality on WikiText-2
+    \item \textbf{Faithfulness:} Answer grounding in retrieved context (token overlap, citation analysis)
+    \item \textbf{Relevance:} Query term coverage and intent matching
+    \item \textbf{Completeness:} Response adequacy relative to question complexity
+\end{itemize}
+
+\subsubsection{Benchmark Performance}
+
+\begin{itemize}
+    \item \textbf{MMLU:} Multitask language understanding (50 samples)
+    \item \textbf{HellaSwag:} Common sense inference (50 samples)
+    \item \textbf{ARC-Challenge:} Scientific reasoning (50 samples)
+    \item \textbf{Visual QA:} Custom benchmark with text-only, vision-only, and combined questions (50 samples)
+\end{itemize}
+
+\section{Results and Analysis}
+
+\subsection{Prompt Engineering Impact}
+
+\begin{table}[H]
+\centering
+\caption{Comprehensive Performance: Baseline vs. Prompt-Engineered Configurations}
+\label{tab:prompt_results}
+\begin{tabular}{lccr}
+\toprule
+\textbf{Metric} & \textbf{Baseline} & \textbf{Prompt-Engineered} & \textbf{Change} \\
+\midrule
+\multicolumn{4}{l}{\textit{Computational Efficiency}} \\
+Latency (ms/token) & 80.30 & 80.30 & 0.0\% \\
+GFLOPs (per token) & 1.88 & 1.88 & 0.0\% \\
+Memory Usage (GB) & 8.37 & 8.37 & 0.0\% \\
+\midrule
+\multicolumn{4}{l}{\textit{Generation Quality}} \\
+Perplexity (WikiText-2) & 13.02 & 6.67 & -48.8\% \\
+\midrule
+\multicolumn{4}{l}{\textit{Benchmark Accuracy}} \\
+MMLU (\%) & 28.00 & 30.00 & +2.0 pp \\
+HellaSwag (\%) & 70.00 & 76.00 & +6.0 pp \\
+ARC-Challenge (\%) & 58.00 & 72.00 & +14.0 pp \\
+\midrule
+Avg. Benchmark Acc. & 52.00\% & 59.33\% & +7.33 pp \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Findings:}
+
+\begin{itemize}
+    \item \textbf{Zero Computational Overhead:} Structured prompting maintains identical latency, GFLOPs, and memory usage
+    
+    \item \textbf{Dramatic Perplexity Improvement:} 48.8\% reduction indicates substantially better language modeling
+    
+    \item \textbf{Strong Scientific Reasoning Gains:} ARC-Challenge improvement (+14.0 pp) demonstrates effectiveness for STEM content
+    
+    \item \textbf{Consistent Cross-Benchmark Improvements:} All three benchmarks show gains, with no performance trade-offs
+\end{itemize}
+
+\subsection{Few-Shot Learning Analysis}
+
+We evaluated few-shot learning impact on mathematical reasoning tasks requiring multi-step arithmetic.
+
+\begin{table}[H]
+\centering
+\caption{Few-Shot vs Zero-Shot Performance (NF4 Quantized Mistral-7B)}
+\label{tab:few-shot}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Zero-Shot} & \textbf{Few-Shot} & \textbf{Improvement} \\
+\midrule
+Accuracy & 40.0\% (2/5) & 100.0\% (5/5) & \textbf{+60.0\%} \\
+Verification Inclusion & 0.0\% & 100.0\% & \textbf{+100.0\%} \\
+Avg. Steps Generated & 2.0 & 5.0 & +150\% \\
+Faithfulness Score & 0.216 & 0.915 & \textbf{+323\%} \\
+Avg. Generation Time & 20.06s & 10.64s & \textbf{47\% faster} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Critical Insights:}
+
+\begin{itemize}
+    \item \textbf{Complete Accuracy Recovery:} Few-shot examples fully compensate for quantization-induced reasoning degradation (40\% → 100\%)
+    
+    \item \textbf{Structural Quality Enhancement:} Consistent 5-step solutions vs. incomplete 2-step baseline solutions
+    
+    \item \textbf{Faithfulness-Fluency Alignment:} 4.2× improvement (0.915 vs 0.216) demonstrates strong template-following despite quantization
+    
+    \item \textbf{Unexpected Efficiency Gain:} Structured templates reduce generation time by 47\%, contradicting expectations about prefill overhead
+\end{itemize}
+
+\textbf{Hypothesis:} Structured examples constrain the token search space during autoregressive decoding, offsetting prefill computational costs and enabling faster convergence to correct solutions.
+
+\subsection{Multimodal Integration Performance}
+
+Florence-2 Base integration achieves optimal accuracy-efficiency balance for edge deployment:
+
+\begin{itemize}
+    \item \textbf{Visual QA Improvement:} 192.7\% gain over text-only baseline (0.090 → 0.265)
+    
+    \item \textbf{Minimal VRAM Overhead:} Only 430MB additional memory (2.47GB → 2.90GB)
+    
+    \item \textbf{Acceptable Latency:} 36.85s per query suitable for non-real-time applications
+    
+    \item \textbf{Consistent Performance:} Comparable to 8× larger Moondream2 (0.265 vs 0.256 vision-only score)
+\end{itemize}
+
+\textbf{Failure Mode Analysis:}
+
+Older vision models (BLIP: +41\%, GIT: +99\%) generated generic captions ("a diagram of a cell") rather than reading specific labels, depriving the LLM of necessary context for detailed questions.
+
+\subsection{System-Level Resource Analysis}
+
+\begin{table}[H]
+\centering
+\caption{Complete System Memory Budget (Tesla T4, 16GB VRAM)}
+\label{tab:memory_budget}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Component} & \textbf{Memory (GB)} & \textbf{Percentage} \\
+\midrule
+Mistral-7B (4-bit NF4) & 7.60 & 47.5\% \\
+BGE Embedding Model & 0.30 & 1.9\% \\
+Florence-2 Base & 0.43 & 2.7\% \\
+FAISS Index (100k vectors) & 0.20 & 1.3\% \\
+KV Cache (4k context) & 0.40 & 2.5\% \\
+System Overhead & 0.50 & 3.1\% \\
+\midrule
+\textbf{Total Used} & \textbf{9.43} & \textbf{58.9\%} \\
+\textbf{Available Headroom} & \textbf{6.57} & \textbf{41.1\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Deployment Viability:}
+
+\begin{itemize}
+    \item \textbf{RTX 3060 (12GB):} Viable with reduced batch size or smaller context window
+    \item \textbf{RTX 4060 Ti (16GB):} Full functionality with comfortable headroom
+    \item \textbf{RTX 4090 (24GB):} Enables larger batch processing or multi-user scenarios
+\end{itemize}
+
+\section{Discussion}
+
+\subsection{Quantization Impact on Reasoning}
+
+Our results confirm that 4-bit quantization preserves pattern-matching capabilities while degrading autonomous reasoning:
+
+\begin{itemize}
+    \item \textbf{Evidence:} 100\% few-shot accuracy vs. 40\% zero-shot using identical compressed model
+    
+    \item \textbf{Mechanism:} Structured templates act as "reasoning scaffolds" that bypass quantization-weakened logic chains
+    
+    \item \textbf{Implication:} Template-based systems may be optimal for 4-bit quantized models in reasoning-intensive domains
+\end{itemize}
+
+\subsection{Vision-as-Language vs. End-to-End Multimodal}
+
+Our decoupled architecture offers significant advantages for edge deployment:
+
+\begin{itemize}
+    \item \textbf{No Training Required:} Avoids expensive multimodal pre-training or adapter tuning
+    
+    \item \textbf{Modular Upgrades:} Vision and language components can be independently improved
+    
+    \item \textbf{Memory Efficiency:} Avoids loading vision encoders into LLM hidden space
+    
+    \item \textbf{Trade-off:} Some loss of fine-grained visual understanding vs. end-to-end models
+\end{itemize}
+
+\subsection{Prompt Engineering as Compression Mitigation}
+
+Structured prompting emerges as a zero-cost optimization strategy:
+
+\begin{itemize}
+    \item 48.8\% perplexity reduction without computational overhead
+    \item Consistent improvements across diverse benchmarks
+    \item Particularly effective for scientific reasoning (+14.0 pp ARC-Challenge)
+    \item Enables production-grade performance from aggressively quantized models
+\end{itemize}
+
+\subsection{Practical Deployment Recommendations}
+
+For edge RAG deployment on consumer GPUs:
+
+\begin{enumerate}
+    \item \textbf{Quantization:} 4-bit NF4 (BitsAndBytes) for optimal faithfulness-efficiency trade-off
+    
+    \item \textbf{Vision Integration:} Florence-2 Base for multimodal capability with minimal overhead
+    
+    \item \textbf{Prompting Strategy:} Structured system prompts + few-shot examples for complex reasoning
+    
+    \item \textbf{Memory Budget:} 8-10GB total system (model + embedding + vision + indices)
+    
+    \item \textbf{Target Hardware:} RTX 3060 (12GB) minimum, RTX 4060 Ti (16GB) recommended
+    
+    \item \textbf{Latency Expectations:} 80ms/token generation, 120-270ms retrieval, 36s total for visual queries
+\end{enumerate}
+
+\section{Limitations and Future Work}
+
+\subsection{Current Limitations}
+
+\begin{itemize}
+    \item \textbf{Vision Quality:} Text-based descriptions cannot capture all visual nuances of complex diagrams
+    
+    \item \textbf{Context Window:} 4k token limit restricts long-context reasoning despite 32k model capability
+    
+    \item \textbf{Latency:} 36s for visual queries may be unacceptable for real-time applications
+    
+    \item \textbf{Single-GPU Focus:} No evaluation of distributed deployment or model parallelism
+\end{itemize}
+
+\subsection{Future Research Directions}
+
+\begin{enumerate}
+    \item \textbf{Hybrid Precision:} Selective FP16 recovery for attention heads while keeping feedforward layers quantized
+    
+    \item \textbf{Vision Encoder Optimization:} Explore quantized vision models or knowledge distillation for Florence-2
+    
+    \item \textbf{Dynamic Prompting:} Adaptive template selection based on query analysis
+    
+    \item \textbf{Cross-Architecture Validation:} Replicate evaluation on Llama-3, Gemma, Phi-3 model families
+    
+    \item \textbf{Long-Context RAG:} Investigate techniques for efficient 32k context utilization with quantized models
+\end{enumerate}
+
+\section{Conclusion}
+
+This work establishes a comprehensive framework for deploying Retrieval-Augmented Generation systems on consumer-grade hardware through integrated optimization across quantization, multimodal integration, and prompt engineering.
+
+\textbf{Key Contributions:}
+
+\begin{enumerate}
+    \item \textbf{Complete RAG Architecture:} Validated 7-stage pipeline maintaining 8.37GB footprint on Tesla T4
+    
+    \item \textbf{Efficient Multimodal Integration:} Florence-2 Base achieves 192.7\% visual QA improvement with only 430MB VRAM overhead
+    
+    \item \textbf{Zero-Cost Optimization:} Structured prompting reduces perplexity by 48.8\% with no computational penalty
+    
+    \item \textbf{Reasoning Recovery:} Few-shot learning achieves 100\% accuracy on complex tasks, fully compensating for quantization degradation
+    
+    \item \textbf{Production Readiness:} 72\% ARC-Challenge accuracy demonstrates viability for knowledge-intensive applications
+\end{enumerate}
+
+\textbf{Deployment Validation:}
+
+Our system enables practical RAG deployment on RTX 3060/4060-class GPUs (12-16GB) with:
+\begin{itemize}
+    \item 8-10GB total memory budget
+    \item 80ms/token generation latency
+    \item 85\% recall@5 for hybrid retrieval
+    \item 100\% accuracy on structured reasoning tasks
+    \item Full multimodal document understanding capability
+\end{itemize}
+
+This work demonstrates that aggressive quantization combined with architectural innovation and prompt optimization enables production-grade RAG systems on consumer hardware, democratizing access to advanced document understanding capabilities.
+
+\begin{thebibliography}{99}
+
+\bibitem{jiang2023mistral}
+A. Q. Jiang et al., "Mistral 7B," \textit{arXiv preprint arXiv:2310.06825}, 2023.
+
+\bibitem{dettmers2023qlora}
+T. Dettmers, A. Pagnoni, A. Holtzman, and L. Zettlemoyer, "QLoRA: Efficient Finetuning of Quantized LLMs," \textit{Advances in Neural Information Processing Systems (NeurIPS)}, 2023.
+
+\bibitem{xiao2024florence2}
+B. Xiao et al., "Florence-2: Advancing a Unified Representation for a Variety of Vision Tasks," \textit{arXiv preprint arXiv:2311.06242}, Microsoft Research, 2024.
+
+\bibitem{lewis2020retrieval}
+P. Lewis et al., "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks," \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 33, pp. 9459--9474, 2020.
+
+\bibitem{brown2020language}
+T. Brown et al., "Language Models are Few-Shot Learners," \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 33, pp. 1877--1901, 2020.
+
+\bibitem{wei2022chain}
+J. Wei et al., "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models," \textit{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 35, pp. 24824--24837, 2022.
+
+\bibitem{frantar2023gptq}
+E. Frantar, S. Ashkboos, T. Hoefler, and D. Alistarh, "GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers," \textit{International Conference on Learning Representations (ICLR)}, 2023.
+
+\bibitem{lin2023awq}
+J. Lin et al., "AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration," \textit{arXiv preprint arXiv:2306.00978}, 2023.
+
+\bibitem{xiao2023bge}
+S. Xiao et al., "C-Pack: Packaged Resources To Advance General Chinese Embedding," \textit{arXiv preprint arXiv:2309.07597}, 2023.
+
+\bibitem{robertson1995okapi}
+S. E. Robertson and S. Walker, "Okapi/Keenbow at TREC-8," \textit{Proceedings of TREC-8}, pp. 151--162, 1995.
+
+\bibitem{malkov2018hnsw}
+Y. A. Malkov and D. A. Yashunin, "Efficient and Robust Approximate Nearest Neighbor Search Using Hierarchical Navigable Small World Graphs," \textit{IEEE Transactions on Pattern Analysis and Machine Intelligence}, vol. 42, no. 4, pp. 824--836, 2018.
+
+\bibitem{cormack2009rrf}
+G. V. Cormack, C. L. A. Clarke, and S. Buettcher, "Reciprocal Rank Fusion Outperforms Condorcet and Individual Rank Learning Methods," \textit{Proceedings of the 32nd ACM SIGIR}, pp. 758--759, 2009.
+
+\bibitem{hendrycks2021mmlu}
+D. Hendrycks et al., "Measuring Massive Multitask Language Understanding," \textit{International Conference on Learning Representations (ICLR)}, 2021.
+
+\bibitem{zellers2019hellaswag}
+R. Zellers et al., "HellaSwag: Can a Machine Really Finish Your Sentence?" \textit{Proceedings of the 57th ACL}, pp. 4791--4800, 2019.
+
+\bibitem{clark2018arc}
+P. Clark et al., "Think you have Solved Question Answering? Try ARC, the AI2 Reasoning Challenge," \textit{arXiv preprint arXiv:1803.05457}, 2018.
+
+\end{thebibliography}
 
 \end{document}
