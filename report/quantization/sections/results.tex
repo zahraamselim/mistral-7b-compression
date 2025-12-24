@@ -14,9 +14,8 @@
 \midrule
 FP16 Baseline & 0.72 & 0.70 & 0.79 & 0.76 & 0.58 \\
 NF4 & 0.70 & 0.68 & 0.78 & 0.75 & 0.58 \\
-GPTQ & 0.68 & --- & --- & 0.75 & 0.60 \\
+GPTQ & 0.714 & 0.752 & 0.840 & 0.776 & 0.510 \\
 AWQ & --- & --- & --- & --- & --- \\
-HQQ & --- & --- & --- & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -35,7 +34,6 @@ FP16 Baseline & 0.56 & 0.71 & 0.61 & 0.75 & 0.66 \\
 NF4 & 0.55 & 0.70 & 0.60 & 0.74 & 0.65 \\
 GPTQ & 0.53 & 0.68 & 0.58 & 0.72 & 0.63 \\
 AWQ & --- & --- & --- & --- & --- \\
-HQQ & --- & --- & --- & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -59,8 +57,24 @@ HQQ & --- & --- & --- \\
 \end{tabular}
 \end{table}
 
-\newpage
-\subsubsection{Verification Tasks}
+\subsubsection{Additional Commonsense Tasks}
+
+\begin{table}[h]
+\centering
+\caption{Commonsense QA}
+\label{tab:commonsense_qa}
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Model} & \textbf{CommonsenseQA Accuracy} \\
+\midrule
+FP16 Baseline & --- \\
+NF4 & --- \\
+GPTQ & 0.552 \\
+AWQ & --- \\
+HQQ & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[h]
 \centering
@@ -93,11 +107,10 @@ HQQ & --- & --- \\
 \textbf{Model} & \textbf{Latency} & \textbf{Throughput} & \textbf{TTFT} \\
  & \textbf{(ms/token)} & \textbf{(tokens/s)} & \textbf{(ms)} \\
 \midrule
-FP16 Baseline & 62.48 $\pm$ 0.13 & 15.97 $\pm$ 0.03 & 68.30 $\pm$ 0.11 \\
+FP16 Baseline & 64.92 $\pm$ 0.21 & 15.40 $\pm$ 0.05 & 71.70 $\pm$ 0.00 \\
 NF4 & 81.12 $\pm$ 0.44 & 12.30 $\pm$ 0.07 & 177.16 $\pm$ 4.02 \\
-GPTQ & 1136.80 $\pm$ 1.12 & 0.88 $\pm$ 0.001 & 1113.00 $\pm$ 1.70 \\
+GPTQ & 21.32 $\pm$ 0.46 & 46.94 $\pm$ 1.03 & 46.68 $\pm$ 0.00 \\
 AWQ & 78.68 $\pm$ 0.88 & 12.79 $\pm$ 0.03 & 79.25 $\pm$ 0.80 \\
-HQQ & --- & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -113,11 +126,10 @@ HQQ & --- & --- & --- \\
 \textbf{Model} & \textbf{Peak Memory} & \textbf{Allocated} & \textbf{Reserved} & \textbf{Model Size} \\
  & \textbf{(MB)} & \textbf{(MB)} & \textbf{(MB)} & \textbf{(GB)} \\
 \midrule
-FP16 Baseline & 7010.65 & --- & --- & 13.49 \\
+FP16 Baseline & 6930.64 & 6914.38 & 6940.00 & 13.49 \\
 NF4 & 1859.11 & --- & --- & 3.74 \\
-GPTQ & 4415.90 & --- & --- & 3.87 \\
+GPTQ & 8098.41 & 8096.26 & 8130.00 & 3.12 \\
 AWQ & 1869.04 & --- & --- & 3.87 \\
-HQQ & --- & --- & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -141,7 +153,6 @@ FP16 Baseline & 12.788 & 2.549 & & 13.2 & 2.58 \\
 NF4 & 13.016 & 2.567 & & 13.4 & 2.60 \\
 GPTQ & 12.854 & 2.554 & & 13.1 & 2.57 \\
 AWQ & 13.474 & 2.601 & & 13.8 & 2.62 \\
-HQQ & --- & --- & & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -175,10 +186,10 @@ UltraChat & 50 & 20,000--25,000 \\
 \midrule
 \multicolumn{5}{c}{\textit{FP16 Baseline}} \\
 \midrule
-512 tokens & 0.80 & 0.76 & 0.78 & 0.78 \\
-1024 tokens & 0.77 & 0.72 & 0.75 & 0.75 \\
-2048 tokens & 0.73 & 0.68 & 0.71 & 0.71 \\
-4096 tokens & 0.69 & 0.64 & 0.67 & 0.67 \\
+512 tokens & 0.17 & 0.04 & 0.06 & 0.09 \\
+1024 tokens & 0.17 & 0.00 & 0.00 & 0.06 \\
+2048 tokens & --- & --- & --- & --- \\
+4096 tokens & --- & --- & --- & --- \\
 \midrule
 \multicolumn{5}{c}{\textit{NF4}} \\
 \midrule
@@ -189,19 +200,12 @@ UltraChat & 50 & 20,000--25,000 \\
 \midrule
 \multicolumn{5}{c}{\textit{GPTQ}} \\
 \midrule
-512 tokens & 0.77 & 0.73 & 0.75 & 0.75 \\
-1024 tokens & 0.73 & 0.68 & 0.71 & 0.71 \\
-2048 tokens & 0.68 & 0.63 & 0.66 & 0.66 \\
-4096 tokens & 0.64 & 0.59 & 0.62 & 0.62 \\
-\midrule
-\multicolumn{5}{c}{\textit{AWQ}} \\
-\midrule
-512 tokens & --- & --- & --- & --- \\
-1024 tokens & --- & --- & --- & --- \\
+512 tokens & 0.12 & 0.04 & 0.07 & 0.08 \\
+1024 tokens & 0.17 & 0.00 & 0.00 & 0.06 \\
 2048 tokens & --- & --- & --- & --- \\
 4096 tokens & --- & --- & --- & --- \\
 \midrule
-\multicolumn{5}{c}{\textit{HQQ}} \\
+\multicolumn{5}{c}{\textit{AWQ}} \\
 \midrule
 512 tokens & --- & --- & --- & --- \\
 1024 tokens & --- & --- & --- & --- \\
@@ -224,8 +228,8 @@ UltraChat & 50 & 20,000--25,000 \\
 \midrule
 \multicolumn{3}{c}{\textit{FP16 Baseline}} \\
 \midrule
-Slope per 1K tokens & $-0.035$ & Moderate degradation \\
-R-squared & 0.96 & Strong linear fit \\
+Slope per 1K tokens & $-0.065$ & Significant degradation \\
+R-squared & 0.054 & Weak linear fit \\
 \midrule
 \multicolumn{3}{c}{\textit{NF4}} \\
 \midrule
@@ -234,15 +238,10 @@ R-squared & 0.94 & Strong linear fit \\
 \midrule
 \multicolumn{3}{c}{\textit{GPTQ}} \\
 \midrule
-Slope per 1K tokens & $-0.042$ & Moderate degradation \\
-R-squared & 0.95 & Strong linear fit \\
+Slope per 1K tokens & $-0.039$ & Moderate degradation \\
+R-squared & 0.027 & Weak linear fit \\
 \midrule
 \multicolumn{3}{c}{\textit{AWQ}} \\
-\midrule
-Slope per 1K tokens & --- & --- \\
-R-squared & --- & --- \\
-\midrule
-\multicolumn{3}{c}{\textit{HQQ}} \\
 \midrule
 Slope per 1K tokens & --- & --- \\
 R-squared & --- & --- \\
@@ -263,9 +262,9 @@ R-squared & --- & --- \\
 \midrule
 \multicolumn{5}{c}{\textit{FP16 Baseline}} \\
 \midrule
-Start & 0.75 & 0.10 & 0.62 & 0.88 \\
-Middle & 0.70 & 0.12 & 0.55 & 0.84 \\
-End & 0.73 & 0.11 & 0.58 & 0.86 \\
+Start & 0.17 & 0.001 & 0.17 & 0.17 \\
+Middle & 0.02 & 0.02 & 0.00 & 0.04 \\
+End & 0.03 & 0.03 & 0.00 & 0.06 \\
 \midrule
 \multicolumn{5}{c}{\textit{NF4}} \\
 \midrule
@@ -275,17 +274,11 @@ End & 0.71 & 0.11 & 0.58 & 0.84 \\
 \midrule
 \multicolumn{5}{c}{\textit{GPTQ}} \\
 \midrule
-Start & 0.71 & 0.11 & 0.58 & 0.84 \\
-Middle & 0.66 & 0.13 & 0.51 & 0.79 \\
-End & 0.69 & 0.12 & 0.55 & 0.82 \\
+Start & 0.14 & 0.03 & 0.12 & 0.17 \\
+Middle & 0.02 & 0.02 & 0.00 & 0.04 \\
+End & 0.04 & 0.04 & 0.00 & 0.07 \\
 \midrule
 \multicolumn{5}{c}{\textit{AWQ}} \\
-\midrule
-Start & --- & --- & --- & --- \\
-Middle & --- & --- & --- & --- \\
-End & --- & --- & --- & --- \\
-\midrule
-\multicolumn{5}{c}{\textit{HQQ}} \\
 \midrule
 Start & --- & --- & --- & --- \\
 Middle & --- & --- & --- & --- \\
@@ -312,11 +305,10 @@ End & --- & --- & --- & --- \\
 \textbf{Model} & \textbf{Context} & \textbf{Answer} & \textbf{Avg Retrieval} & \textbf{Avg Context} \\
  & \textbf{Sufficiency} & \textbf{Coverage} & \textbf{Score} & \textbf{Length (words)} \\
 \midrule
-FP16 Baseline & 0.757 & 0.716 & 0.785 & 1237.1 \\
+FP16 Baseline & 0.223 & 0.716 & 0.262 & 1237.1 \\
 NF4 & 0.796 & 0.756 & 0.800 & 1308.45 \\
-GPTQ & 0.745 & 0.705 & 0.772 & 1215.3 \\
+GPTQ & 0.223 & 0.705 & 0.262 & 1215.3 \\
 AWQ & 0.796 & 0.756 & 0.800 & 1308.45 \\
-HQQ & --- & --- & --- & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -333,19 +325,17 @@ HQQ & --- & --- & --- & --- \\
 \midrule
 \multicolumn{6}{c}{\textit{With RAG}} \\
 \midrule
-FP16 Baseline & 0.0 & 0.183 & 0.414 & 0.234 & 0.169 \\
-NF4 & 0.0 & 0.205 & 0.539 & 0.244 & 0.177 \\
-GPTQ & 0.0 & 0.165 & 0.475 & 0.215 & 0.162 \\
-AWQ & 0.0 & 0.191 & 0.476 & 0.243 & 0.181 \\
-HQQ & --- & --- & --- & --- & --- \\
+FP16 Baseline & 0.00 & 0.058 & 0.332 & 0.234 & 0.169 \\
+NF4 & 0.00 & 0.205 & 0.539 & 0.244 & 0.177 \\
+GPTQ & 0.00 & 0.081 & 0.432 & 0.215 & 0.162 \\
+AWQ & 0.00 & 0.191 & 0.476 & 0.243 & 0.181 \\
 \midrule
 \multicolumn{6}{c}{\textit{Without RAG (Baseline)}} \\
 \midrule
-FP16 Baseline & 0.0 & 0.172 & --- & --- & --- \\
-NF4 & 0.0 & 0.181 & --- & --- & --- \\
-GPTQ & 0.0 & 0.155 & --- & --- & --- \\
-AWQ & 0.0 & 0.165 & --- & --- & --- \\
-HQQ & --- & --- & --- & --- & --- \\
+FP16 Baseline & 0.00 & 0.082 & --- & --- & --- \\
+NF4 & 0.00 & 0.181 & --- & --- & --- \\
+GPTQ & 0.00 & 0.084 & --- & --- & --- \\
+AWQ & 0.00 & 0.165 & --- & --- & --- \\
 \midrule
 \textit{Exp. w/ RAG} & \textit{0.55--0.65} & \textit{0.70--0.80} & \textit{0.75--0.85} & \textit{0.60--0.70} & \textit{0.55--0.65} \\
 \textit{Exp. w/o RAG} & \textit{0.20--0.35} & \textit{0.30--0.45} & \textit{-} & \textit{0.25--0.40} & \textit{0.22--0.37} \\
@@ -364,11 +354,10 @@ HQQ & --- & --- & --- & --- & --- \\
 \toprule
 \textbf{Model} & \textbf{F1 Gain} & \textbf{F1 Gain (\%)} & \textbf{EM Gain} \\
 \midrule
-FP16 Baseline & 0.011 & 6.2\% & 0.0 \\
-NF4 & 0.024 & 13.2\% & 0.0 \\
-GPTQ & 0.010 & 6.5\% & 0.0 \\
-AWQ & 0.025 & 15.4\% & 0.0 \\
-HQQ & --- & --- & --- \\
+FP16 Baseline & $-0.024$ & $-28.9\%$ & 0.00 \\
+NF4 & 0.024 & 13.2\% & 0.00 \\
+GPTQ & $-0.003$ & $-4.1\%$ & 0.00 \\
+AWQ & 0.025 & 15.4\% & 0.00 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -388,7 +377,6 @@ FP16 Baseline & 23.68 & 6531.95 & 7559.32 & -13.6\% \\
 NF4 & 27.97 & 10443.94 & 9964.96 & +4.8\% \\
 GPTQ & 25.50 & 8850.0 & 8200.0 & +7.9\% \\
 AWQ & 26.11 & 9993.86 & 7744.15 & +29.1\% \\
-HQQ & 27.0 & 10500.0 & 10000.0 & +5.0\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -405,7 +393,7 @@ HQQ & 27.0 & 10500.0 & 10000.0 & +5.0\% \\
 \midrule
 Corpus & SQuADv2 \\
 Documents Indexed & 500 \\
-Test Questions & 100 \\
+Test Questions & 45 \\
 Retrieval Top-K & 3 \\
 Chunk Size & 512 tokens \\
 Chunk Overlap & 50 tokens \\
@@ -438,27 +426,27 @@ BoolQ Verification & Accuracy & 0.79 \\
 \midrule
 \multicolumn{3}{c}{\textbf{Performance}} \\
 \midrule
-Inference & Throughput (tokens/s) & 15.97 \\
-Latency & ms/token & 62.48 \\
-Memory & Peak (MB) & 7010.65 \\
+Inference & Throughput (tokens/s) & 15.40 \\
+Latency & ms/token & 64.92 \\
+Memory & Peak (MB) & 6930.64 \\
 Model Size & GB & 13.49 \\
 \midrule
 \multicolumn{3}{c}{\textbf{Language Modeling}} \\
 \midrule
-WikiText-2 & Perplexity & 12.788 \\
-UltraChat & Perplexity & 13.2 \\
+WikiText-2 & Perplexity & 8.14 \\
+UltraChat & Perplexity & 7.56 \\
 \midrule
 \multicolumn{3}{c}{\textbf{Context Length}} \\
 \midrule
-Degradation & Slope per 1K tokens & $-0.035$ \\
-4096 tokens & Mean F1 & 0.67 \\
+Degradation & Slope per 1K tokens & $-0.065$ \\
+1024 tokens & Mean F1 & 0.06 \\
 \midrule
 \multicolumn{3}{c}{\textbf{RAG System}} \\
 \midrule
-Answer Quality & F1 Score & 0.183 \\
-Retrieval Quality & Context Sufficiency & 0.757 \\
-RAG Improvement & F1 Gain (\%) & 6.2\% \\
-Faithfulness & Token Overlap & 0.414 \\
+Answer Quality & F1 Score & 0.058 \\
+Retrieval Quality & Context Sufficiency & 0.223 \\
+RAG Improvement & F1 Gain (\%) & $-28.9\%$ \\
+Faithfulness & Token Overlap & 0.332 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -493,9 +481,9 @@ Faithfulness & Token Overlap & 0.414 \\
 \subsubsection*{Dataset Details}
 
 \begin{itemize}
-    \item \textbf{WikiText-2}: 100 samples, 512 max tokens, validation split
-    \item \textbf{UltraChat}: 50 samples, 512 max tokens, train\_sft split
-    \item \textbf{SQuAD v2}: 100 questions, 500 documents indexed
+    \item \textbf{WikiText-2}: 100 samples, 1024 max tokens, validation split
+    \item \textbf{UltraChat (C4)}: 100 samples, 1024 max tokens, train\_sft split
+    \item \textbf{SQuAD v2}: 45 questions, 500 documents indexed
     \item \textbf{Context Length}: 25 samples per length, positions: start/middle/end
 \end{itemize}
 
