@@ -207,10 +207,10 @@ UltraChat & 50 & 20,000--25,000 \\
 \midrule
 \multicolumn{5}{c}{\textit{AWQ}} \\
 \midrule
-512 tokens & --- & --- & --- & --- \\
-1024 tokens & --- & --- & --- & --- \\
-2048 tokens & --- & --- & --- & --- \\
-4096 tokens & --- & --- & --- & --- \\
+512 tokens & 0.30 & 0.33 & 0.22 & 0.133760 \\
+1024 tokens & 0.30 & 0.33 & 0.22 & 0.000000 \\
+2048 tokens & 0.30 & 0.33 & 0.22 & 0.000000 \\
+4096 tokens & 0.30 & 0.33 & 0.22 & 0.000000 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -243,8 +243,8 @@ R-squared & 0.027 & Weak linear fit \\
 \midrule
 \multicolumn{3}{c}{\textit{AWQ}} \\
 \midrule
-Slope per 1K tokens & --- & --- \\
-R-squared & --- & --- \\
+Slope per 1K tokens & 0.000000 & Performance gain/stable \\
+R-squared & 0.350725  & Fit quality (Linear) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -280,9 +280,9 @@ End & 0.04 & 0.04 & 0.00 & 0.07 \\
 \midrule
 \multicolumn{5}{c}{\textit{AWQ}} \\
 \midrule
-Start & --- & --- & --- & --- \\
-Middle & --- & --- & --- & --- \\
-End & --- & --- & --- & --- \\
+Start & 0.283902  & 0.257486  & 0.000000  & 1.000000 \\
+Middle & 0.339849  & 0.205990  & 0.083333  & 1.000000 \\
+End & 0.227972  & 0.138104  & 0.000000  & 0.500000 \\
 \midrule
 \textit{Exp. Start} & \textit{0.72--0.80} & \textit{0.08--0.12} & \textit{0.55--0.65} & \textit{0.85--0.92} \\
 \textit{Exp. Middle} & \textit{0.65--0.75} & \textit{0.10--0.15} & \textit{0.48--0.58} & \textit{0.80--0.88} \\
@@ -308,7 +308,7 @@ End & --- & --- & --- & --- \\
 FP16 Baseline & 0.701 & 0.716 & 0.262 & 1237.1 \\
 NF4 & 0.796 & 0.756 & 0.800 & 1308.45 \\
 GPTQ & 0.223 & 0.705 & 0.262 & 1215.3 \\
-AWQ & 0.796 & 0.756 & 0.800 & 1308.45 \\
+AWQ & 0.043956 & 0.455000 & N/A (Dense) & 111.280000 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -328,14 +328,14 @@ AWQ & 0.796 & 0.756 & 0.800 & 1308.45 \\
 FP16 Baseline & 0.003 & 0.184 & 0.421 & 0.165 & 0.157 \\
 NF4 & 0.00 & 0.205 & 0.539 & 0.244 & 0.177 \\
 GPTQ & 0.00 & 0.081 & 0.432 & 0.215 & 0.162 \\
-AWQ & 0.00 & 0.191 & 0.476 & 0.243 & 0.181 \\
+AWQ & 0.020000 & 0.133760 & 0.043956 & 0.125280 & 0.125054 \\
 \midrule
 \multicolumn{6}{c}{\textit{Without RAG (Baseline)}} \\
 \midrule
 FP16 Baseline & 0.00 & 0.068& --- & 0.065 & --- \\
 NF4 & 0.00 & 0.181 & --- & --- & --- \\
 GPTQ & 0.00 & 0.084 & --- & --- & --- \\
-AWQ & 0.00 & 0.165 & --- & --- & --- \\
+AWQ & 0.000000 & 0.009705 & --- & 0.009332 & 0.008676 \\
 \midrule
 \textit{Exp. w/ RAG} & \textit{0.55--0.65} & \textit{0.70--0.80} & \textit{0.75--0.85} & \textit{0.60--0.70} & \textit{0.55--0.65} \\
 \textit{Exp. w/o RAG} & \textit{0.20--0.35} & \textit{0.30--0.45} & \textit{-} & \textit{0.25--0.40} & \textit{0.22--0.37} \\
@@ -357,7 +357,7 @@ AWQ & 0.00 & 0.165 & --- & --- & --- \\
 FP16 Baseline & $0.116$ & $169.8\%$ & 0.003 \\
 NF4 & 0.024 & 13.2\% & 0.00 \\
 GPTQ & $-0.003$ & $-4.1\%$ & 0.00 \\
-AWQ & 0.025 & 15.4\% & 0.00 \\
+AWQ & 0.123733 & 1671.5\% & 0.020000 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -376,7 +376,7 @@ AWQ & 0.025 & 15.4\% & 0.00 \\
 FP16 Baseline & 7.93 & 1994.73 & 1902.74 & 5.3\% \\
 NF4 & 27.97 & 10443.94 & 9964.96 & +4.8\% \\
 GPTQ & 25.50 & 8850.0 & 8200.0 & +7.9\% \\
-AWQ & 26.11 & 9993.86 & 7744.15 & +29.1\% \\
+AWQ & 0.00 & 3618.89 & 7895.15 & -54.2\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -494,4 +494,3 @@ Faithfulness & Token Overlap & 0.332 \\
     \item \textbf{Context Length}: greedy decoding, 20 max tokens
     \item \textbf{RAG}: temperature 0.3, top-p 0.9, 64 max tokens, repetition penalty 1.15
 \end{itemize}
-
