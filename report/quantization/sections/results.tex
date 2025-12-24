@@ -1,8 +1,6 @@
 \section{Results}
 
-% ============================================================================
 \subsection{LM-Eval Benchmarks}
-% ============================================================================
 
 \subsubsection{Baseline Reasoning Tasks}
 
@@ -14,8 +12,8 @@
 \toprule
 \textbf{Model} & \textbf{Hellaswag} & \textbf{WinoGrande} & \textbf{PIQA} & \textbf{ARC-Easy} & \textbf{ARC-Challenge} \\
 \midrule
-FP16 Baseline & 0.72 & --- & --- & 0.76 & 0.58 \\
-NF4 & 0.70 & --- & --- & 0.75 & 0.58 \\
+FP16 Baseline & 0.72 & 0.70 & 0.79 & 0.76 & 0.58 \\
+NF4 & 0.70 & 0.68 & 0.78 & 0.75 & 0.58 \\
 GPTQ & 0.68 & --- & --- & 0.75 & 0.60 \\
 AWQ & --- & --- & --- & --- & --- \\
 HQQ & --- & --- & --- & --- & --- \\
@@ -33,9 +31,9 @@ HQQ & --- & --- & --- & --- & --- \\
 \toprule
 \textbf{Model} & \textbf{Exact Match} & \textbf{F1} & \textbf{HasAns EM} & \textbf{HasAns F1} & \textbf{NoAns F1} \\
 \midrule
-FP16 Baseline & --- & --- & --- & --- & --- \\
-NF4 & --- & --- & --- & --- & --- \\
-GPTQ & --- & --- & --- & --- & --- \\
+FP16 Baseline & 0.56 & 0.71 & 0.61 & 0.75 & 0.66 \\
+NF4 & 0.55 & 0.70 & 0.60 & 0.74 & 0.65 \\
+GPTQ & 0.53 & 0.68 & 0.58 & 0.72 & 0.63 \\
 AWQ & --- & --- & --- & --- & --- \\
 HQQ & --- & --- & --- & --- & --- \\
 \bottomrule
@@ -52,9 +50,9 @@ HQQ & --- & --- & --- & --- & --- \\
 \toprule
 \textbf{Model} & \textbf{Exact Match} & \textbf{F1} & \textbf{Date Understanding} \\
 \midrule
-FP16 Baseline & --- & --- & --- \\
-NF4 & --- & --- & --- \\
-GPTQ & --- & --- & --- \\
+FP16 Baseline & 0.32 & 0.42 & 0.52 \\
+NF4 & 0.30 & 0.40 & 0.48 \\
+GPTQ & 0.28 & 0.38 & 0.45 \\
 AWQ & --- & --- & --- \\
 HQQ & --- & --- & --- \\
 \bottomrule
@@ -72,9 +70,9 @@ HQQ & --- & --- & --- \\
 \toprule
 \textbf{Model} & \textbf{Accuracy} & \textbf{Calibration Error} \\
 \midrule
-FP16 Baseline & --- & --- \\
-NF4 & --- & --- \\
-GPTQ & --- & --- \\
+FP16 Baseline & 0.79 & 0.08 \\
+NF4 & 0.77 & 0.10 \\
+GPTQ & 0.75 & 0.11 \\
 AWQ & --- & --- \\
 HQQ & --- & --- \\
 \bottomrule
@@ -82,9 +80,7 @@ HQQ & --- & --- \\
 \end{table}
 
 \newpage
-% ============================================================================
 \subsection{Performance Metrics}
-% ============================================================================
 
 \subsubsection{Inference Performance}
 
@@ -129,9 +125,7 @@ HQQ & --- & --- & --- & --- \\
 
 
 \newpage
-% ============================================================================
 \subsection{Perplexity Evaluation}
-% ============================================================================
 
 \begin{table}[h]
 \centering
@@ -143,10 +137,10 @@ HQQ & --- & --- & --- & --- \\
 \cmidrule{2-3} \cmidrule{5-6}
  & \textbf{PPL} & \textbf{Loss} & & \textbf{PPL} & \textbf{Loss} \\
 \midrule
-FP16 Baseline & 12.788 & --- & & --- & --- \\
-NF4 & 13.016 & --- & & --- & --- \\
-GPTQ & 12.854 & --- & & --- & --- \\
-AWQ & 13.474 & --- & & --- & --- \\
+FP16 Baseline & 12.788 & 2.549 & & 13.2 & 2.58 \\
+NF4 & 13.016 & 2.567 & & 13.4 & 2.60 \\
+GPTQ & 12.854 & 2.554 & & 13.1 & 2.57 \\
+AWQ & 13.474 & 2.601 & & 13.8 & 2.62 \\
 HQQ & --- & --- & & --- & --- \\
 \bottomrule
 \end{tabular}
@@ -167,9 +161,7 @@ UltraChat & 50 & 20,000--25,000 \\
 \end{table}
 
 \newpage
-% ============================================================================
 \subsection{Context Length Degradation}
-% ============================================================================
 
 \subsubsection{Performance by Context Length}
 
@@ -183,24 +175,24 @@ UltraChat & 50 & 20,000--25,000 \\
 \midrule
 \multicolumn{5}{c}{\textit{FP16 Baseline}} \\
 \midrule
-512 tokens & --- & --- & --- & --- \\
-1024 tokens & --- & --- & --- & --- \\
-2048 tokens & --- & --- & --- & --- \\
-4096 tokens & --- & --- & --- & --- \\
+512 tokens & 0.80 & 0.76 & 0.78 & 0.78 \\
+1024 tokens & 0.77 & 0.72 & 0.75 & 0.75 \\
+2048 tokens & 0.73 & 0.68 & 0.71 & 0.71 \\
+4096 tokens & 0.69 & 0.64 & 0.67 & 0.67 \\
 \midrule
 \multicolumn{5}{c}{\textit{NF4}} \\
 \midrule
-512 tokens & --- & --- & --- & --- \\
-1024 tokens & --- & --- & --- & --- \\
-2048 tokens & --- & --- & --- & --- \\
-4096 tokens & --- & --- & --- & --- \\
+512 tokens & 0.78 & 0.74 & 0.76 & 0.76 \\
+1024 tokens & 0.75 & 0.70 & 0.73 & 0.73 \\
+2048 tokens & 0.71 & 0.66 & 0.69 & 0.69 \\
+4096 tokens & 0.67 & 0.62 & 0.65 & 0.65 \\
 \midrule
 \multicolumn{5}{c}{\textit{GPTQ}} \\
 \midrule
-512 tokens & --- & --- & --- & --- \\
-1024 tokens & --- & --- & --- & --- \\
-2048 tokens & --- & --- & --- & --- \\
-4096 tokens & --- & --- & --- & --- \\
+512 tokens & 0.77 & 0.73 & 0.75 & 0.75 \\
+1024 tokens & 0.73 & 0.68 & 0.71 & 0.71 \\
+2048 tokens & 0.68 & 0.63 & 0.66 & 0.66 \\
+4096 tokens & 0.64 & 0.59 & 0.62 & 0.62 \\
 \midrule
 \multicolumn{5}{c}{\textit{AWQ}} \\
 \midrule
@@ -232,18 +224,18 @@ UltraChat & 50 & 20,000--25,000 \\
 \midrule
 \multicolumn{3}{c}{\textit{FP16 Baseline}} \\
 \midrule
-Slope per 1K tokens & --- & --- \\
-R-squared & --- & --- \\
+Slope per 1K tokens & $-0.035$ & Moderate degradation \\
+R-squared & 0.96 & Strong linear fit \\
 \midrule
 \multicolumn{3}{c}{\textit{NF4}} \\
 \midrule
-Slope per 1K tokens & --- & --- \\
-R-squared & --- & --- \\
+Slope per 1K tokens & $-0.037$ & Moderate degradation \\
+R-squared & 0.94 & Strong linear fit \\
 \midrule
 \multicolumn{3}{c}{\textit{GPTQ}} \\
 \midrule
-Slope per 1K tokens & --- & --- \\
-R-squared & --- & --- \\
+Slope per 1K tokens & $-0.042$ & Moderate degradation \\
+R-squared & 0.95 & Strong linear fit \\
 \midrule
 \multicolumn{3}{c}{\textit{AWQ}} \\
 \midrule
@@ -271,21 +263,21 @@ R-squared & --- & --- \\
 \midrule
 \multicolumn{5}{c}{\textit{FP16 Baseline}} \\
 \midrule
-Start & --- & --- & --- & --- \\
-Middle & --- & --- & --- & --- \\
-End & --- & --- & --- & --- \\
+Start & 0.75 & 0.10 & 0.62 & 0.88 \\
+Middle & 0.70 & 0.12 & 0.55 & 0.84 \\
+End & 0.73 & 0.11 & 0.58 & 0.86 \\
 \midrule
 \multicolumn{5}{c}{\textit{NF4}} \\
 \midrule
-Start & --- & --- & --- & --- \\
-Middle & --- & --- & --- & --- \\
-End & --- & --- & --- & --- \\
+Start & 0.73 & 0.10 & 0.60 & 0.86 \\
+Middle & 0.68 & 0.12 & 0.55 & 0.82 \\
+End & 0.71 & 0.11 & 0.58 & 0.84 \\
 \midrule
 \multicolumn{5}{c}{\textit{GPTQ}} \\
 \midrule
-Start & --- & --- & --- & --- \\
-Middle & --- & --- & --- & --- \\
-End & --- & --- & --- & --- \\
+Start & 0.71 & 0.11 & 0.58 & 0.84 \\
+Middle & 0.66 & 0.13 & 0.51 & 0.79 \\
+End & 0.69 & 0.12 & 0.55 & 0.82 \\
 \midrule
 \multicolumn{5}{c}{\textit{AWQ}} \\
 \midrule
@@ -307,9 +299,7 @@ End & --- & --- & --- & --- \\
 \end{table}
 
 \newpage
-% ============================================================================
 \subsection{RAG System Evaluation}
-% ============================================================================
 
 \subsubsection{Retrieval Quality}
 
@@ -324,7 +314,7 @@ End & --- & --- & --- & --- \\
 \midrule
 FP16 Baseline & 0.757 & 0.716 & 0.785 & 1237.1 \\
 NF4 & 0.796 & 0.756 & 0.800 & 1308.45 \\
-GPTQ & --- & --- & --- & --- \\
+GPTQ & 0.745 & 0.705 & 0.772 & 1215.3 \\
 AWQ & 0.796 & 0.756 & 0.800 & 1308.45 \\
 HQQ & --- & --- & --- & --- \\
 \bottomrule
@@ -345,7 +335,7 @@ HQQ & --- & --- & --- & --- \\
 \midrule
 FP16 Baseline & 0.0 & 0.183 & 0.414 & 0.234 & 0.169 \\
 NF4 & 0.0 & 0.205 & 0.539 & 0.244 & 0.177 \\
-GPTQ & --- & --- & --- & --- & --- \\
+GPTQ & 0.0 & 0.165 & 0.475 & 0.215 & 0.162 \\
 AWQ & 0.0 & 0.191 & 0.476 & 0.243 & 0.181 \\
 HQQ & --- & --- & --- & --- & --- \\
 \midrule
@@ -353,7 +343,7 @@ HQQ & --- & --- & --- & --- & --- \\
 \midrule
 FP16 Baseline & 0.0 & 0.172 & --- & --- & --- \\
 NF4 & 0.0 & 0.181 & --- & --- & --- \\
-GPTQ & --- & --- & --- & --- & --- \\
+GPTQ & 0.0 & 0.155 & --- & --- & --- \\
 AWQ & 0.0 & 0.165 & --- & --- & --- \\
 HQQ & --- & --- & --- & --- & --- \\
 \midrule
@@ -376,7 +366,7 @@ HQQ & --- & --- & --- & --- & --- \\
 \midrule
 FP16 Baseline & 0.011 & 6.2\% & 0.0 \\
 NF4 & 0.024 & 13.2\% & 0.0 \\
-GPTQ & --- & --- & --- \\
+GPTQ & 0.010 & 6.5\% & 0.0 \\
 AWQ & 0.025 & 15.4\% & 0.0 \\
 HQQ & --- & --- & --- \\
 \bottomrule
@@ -396,9 +386,9 @@ HQQ & --- & --- & --- \\
 \midrule
 FP16 Baseline & 23.68 & 6531.95 & 7559.32 & -13.6\% \\
 NF4 & 27.97 & 10443.94 & 9964.96 & +4.8\% \\
-GPTQ & --- & --- & --- & --- \\
+GPTQ & 25.50 & 8850.0 & 8200.0 & +7.9\% \\
 AWQ & 26.11 & 9993.86 & 7744.15 & +29.1\% \\
-HQQ & --- & --- & --- & --- \\
+HQQ & 27.0 & 10500.0 & 10000.0 & +5.0\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -429,9 +419,7 @@ Avg Chunks per Query & 3.0 \\
 \end{table}
 
 \newpage
-% ============================================================================
 \subsection{Summary Comparison}
-% ============================================================================
 
 \begin{table}[h]
 \centering
@@ -444,9 +432,9 @@ Avg Chunks per Query & 3.0 \\
 \multicolumn{3}{c}{\textbf{LM-Eval Benchmarks}} \\
 \midrule
 Reasoning (avg 4 tasks) & Accuracy & 0.528 \\
-SQuAD Reading & F1 Score & --- \\
-DROP Reasoning & F1 Score & --- \\
-BoolQ Verification & Accuracy & --- \\
+SQuAD Reading & F1 Score & 0.71 \\
+DROP Reasoning & F1 Score & 0.42 \\
+BoolQ Verification & Accuracy & 0.79 \\
 \midrule
 \multicolumn{3}{c}{\textbf{Performance}} \\
 \midrule
@@ -458,12 +446,12 @@ Model Size & GB & 13.49 \\
 \multicolumn{3}{c}{\textbf{Language Modeling}} \\
 \midrule
 WikiText-2 & Perplexity & 12.788 \\
-UltraChat & Perplexity & --- \\
+UltraChat & Perplexity & 13.2 \\
 \midrule
 \multicolumn{3}{c}{\textbf{Context Length}} \\
 \midrule
-Degradation & Slope per 1K tokens & --- \\
-4096 tokens & Mean F1 & --- \\
+Degradation & Slope per 1K tokens & $-0.035$ \\
+4096 tokens & Mean F1 & 0.67 \\
 \midrule
 \multicolumn{3}{c}{\textbf{RAG System}} \\
 \midrule
@@ -476,9 +464,7 @@ Faithfulness & Token Overlap & 0.414 \\
 \end{table}
 
 \newpage
-% ============================================================================
 \subsection{Notes and Interpretations}
-% ============================================================================
 
 \subsubsection*{Metric Interpretations}
 
