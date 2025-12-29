@@ -1,0 +1,1295 @@
+{
+  "model_config": {
+    "name": "TheBloke/Mistral-7B-Instruct-v0.1-GPTQ",
+    "quantization": "gptq",
+    "variant": "instruct"
+  },
+  "set_name": "set_d",
+  "samples": [
+    {
+      "sample_id": 0,
+      "question": "What is the original meaning of the word Norman?",
+      "clean_context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "distracted_context": "In the off @-@ season the Blue Jackets ' approach to building their team changed , moving from a team of young developing players into one with established players . The first deal General Manager Sco The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"N AML which arises from a pre @-@ existing myelodysplastic syndrome ( MDS ) or myeloproliferative disease ( so @-@ called secondary AML ) has a worse prognosis , as does treatment @-@ related AML arisin orthman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\". 2012 : What Gandhi Says About Nonviolence , Resistance and Courage , OR Books , New York : 2012 , ISBN 978 @-@ 1 @-@ 935928 @-@ 79 @-@ 9",
+      "ground_truth": "Viking",
+      "ground_truth_variants": [
+        "Viking",
+        "Norseman, Viking",
+        "Norseman, Viking"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The original meaning of the word Norman is \"Norseman, Viking\". The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r.",
+      "clean_generation_time_ms": 1670.6356039994716,
+      "distracted_prediction": "The word Norman comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"N AML which arises from a pre @-@ existing myelodysplastic syndrome ( MDS ) or myeloproliferative disease ( so @-@ called secondary AML ) has a worse prognosis , as does treatment @-@ related AML arisin orthman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or.",
+      "distracted_generation_time_ms": 3013.6196769999515
+    },
+    {
+      "sample_id": 1,
+      "question": "When was the Latin version of the word Norman first recorded?",
+      "clean_context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "distracted_context": "Following the release of the record , Townsend and several other musician friends he knew in Vancouver recorded his first solo album in 1996 entitled Punky <unk> \u2013 Cooked on <unk> . Written and record The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"N Airspace is shared by CAT , military and GA users . It is divided into controlled airspace , in which aircraft must always be under the control of an air traffic controller , and uncontrolled airspace orthman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\". The rioting was sparked by allegations of sexual assault on Han women by Uyghurs , and rumours of an incident in which two female Han workers were sexually assaulted by six Uyghur co @-@ workers at th",
+      "ground_truth": "9th century",
+      "ground_truth_variants": [
+        "9th century",
+        "9th century",
+        "9th century"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Latin version of the word Norman was first recorded in the 9th century.",
+      "clean_generation_time_ms": 557.7113960007409,
+      "distracted_prediction": "The Latin version of the word Norman was first recorded in the 9th century.",
+      "distracted_generation_time_ms": 644.4841020002059
+    },
+    {
+      "sample_id": 2,
+      "question": "When did the Normans attack Dyrrachium?",
+      "clean_context": "The further decline of Byzantine state-of-affairs paved the road to a third attack in 1185, when a large Norman army invaded Dyrrachium, owing to the betrayal of high Byzantine officials. Some time later, Dyrrachium\u2014one of the most important naval bases of the Adriatic\u2014fell again to Byzantine hands.",
+      "distracted_context": "Nicole is Roman Harris ' ( Conrad Coleby ) daughter and she was often mentioned on @-@ screen before producers decided to introduce her into the serial . In January 2008 it was announced that ex @-@ N The further decline of Byzantine state-of-affairs paved the road to a third attack in 1185, when a large Norman army invaded Dyrrachium, owing to the  Living in Ramgarh , the jovial Veeru and cynical Jai find themselves growing fond of the villagers . Veeru is attracted to Basanti ( Hema Malini ) , a feisty , talkative young woman who makes her livi betrayal of high Byzantine officials. Some time later, Dyrrachium\u2014one of the most important naval bases of the Adriatic\u2014fell again to Byzantine hands. Furtado said in her diary on her official website that she recorded a remix of \" Maneater \" with rapper Lil Wayne ; it was only released as part of a compilation album , Timbaland 's Remix & Soundtrac",
+      "ground_truth": "1185",
+      "ground_truth_variants": [
+        "1185",
+        "in 1185",
+        "1185"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Normans attacked Dyrrachium three times: in 1014, 1085, and 1185.",
+      "clean_generation_time_ms": 817.7531660003297,
+      "distracted_prediction": "The Normans attacked Dyrrachium in 1185.",
+      "distracted_generation_time_ms": 657.7879770002255
+    },
+    {
+      "sample_id": 3,
+      "question": "What was the naval base called?",
+      "clean_context": "The further decline of Byzantine state-of-affairs paved the road to a third attack in 1185, when a large Norman army invaded Dyrrachium, owing to the betrayal of high Byzantine officials. Some time later, Dyrrachium\u2014one of the most important naval bases of the Adriatic\u2014fell again to Byzantine hands.",
+      "distracted_context": "Releases of the third North American single , \" Say It Right \" , and the third Europe single , \" All Good Things ( Come to an End ) \" , took place in November and December , and the third Latin Americ The further decline of Byzantine state-of-affairs paved the road to a third attack in 1185, when a large Norman army invaded Dyrrachium, owing to the  Fey was an extra in a 1998 episode , and after watching herself , decided to diet and lost 30 pounds . She told The New York Times , \" I was a completely normal weight , but I was here in New York Cit betrayal of high Byzantine officials. Some time later, Dyrrachium\u2014one of the most important naval bases of the Adriatic\u2014fell again to Byzantine hands. The Galveston Ballet is a regional pre @-@ professional ballet company and academy serving Galveston county . The company presents one full @-@ length classical ballet in the spring of each year and o",
+      "ground_truth": "Dyrrachium",
+      "ground_truth_variants": [
+        "Dyrrachium",
+        "Dyrrachium",
+        "Dyrrachium"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The naval base was called the Port of Corinth, which was located in the city of Corinth in modern-day Greece.",
+      "clean_generation_time_ms": 718.5059889998229,
+      "distracted_prediction": "The naval base was called Dyrrachium.",
+      "distracted_generation_time_ms": 497.4984170003154
+    },
+    {
+      "sample_id": 4,
+      "question": "Where was Dyrrachium located?",
+      "clean_context": "The further decline of Byzantine state-of-affairs paved the road to a third attack in 1185, when a large Norman army invaded Dyrrachium, owing to the betrayal of high Byzantine officials. Some time later, Dyrrachium\u2014one of the most important naval bases of the Adriatic\u2014fell again to Byzantine hands.",
+      "distracted_context": "In 1923 , Barker sent her flower fairy paintings to various publishers . Blackie paid \u00a3 25 for 24 paintings with accompanying verses , but it wasn 't until publication of Flower Fairies of the Summer  The further decline of Byzantine state-of-affairs paved the road to a third attack in 1185, when a large Norman army invaded Dyrrachium, owing to the  Wheeler had been keen to return to excavation in Britain . Based on the one he had organised in India , Wheeler developed an archaeological training course , which he ran at Verulamium in the summer o betrayal of high Byzantine officials. Some time later, Dyrrachium\u2014one of the most important naval bases of the Adriatic\u2014fell again to Byzantine hands. Fingal was designed and built as a merchantman by J & G Thomson 's Clyde Bank Iron Shipyard at Govan in Glasgow , Scotland , and was completed early in 1861 . She was described by Midshipman Dabney Sc",
+      "ground_truth": "the Adriatic",
+      "ground_truth_variants": [
+        "the Adriatic",
+        "the Adriatic",
+        "Adriatic"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Dyrrachium is a city in southern Greece, near the coast of the Ionian Sea. It is located in the region of Epirus and today has a population of around 50,000 people.",
+      "clean_generation_time_ms": 1107.998872999815,
+      "distracted_prediction": "Dyrrachium was located in what is now Greece, in the western part of the country near the modern city of Corfu. During the Middle Ages, it was a major port and center of trade in the Mediterranean region.",
+      "distracted_generation_time_ms": 1252.6469790000192
+    },
+    {
+      "sample_id": 5,
+      "question": "Where was Ralph earl of?",
+      "clean_context": "Even before the Norman Conquest of England, the Normans had come into contact with Wales. Edward the Confessor had set up the aforementioned Ralph as earl of Hereford and charged him with defending the Marches and warring with the Welsh. In these original ventures, the Normans failed to make any headway into Wales.",
+      "distracted_context": "The term \" leukemia \" was coined by Rudolf Virchow , the renowned German pathologist , in 1856 . As a pioneer in the use of the light microscope in pathology , Virchow was the first to describe the ab Even before the Norman Conquest of England, the Normans had come into contact with Wales. Edward the Confessor had set up the aforementioned Ralph as earl of  The rioting was sparked by allegations of sexual assault on Han women by Uyghurs , and rumours of an incident in which two female Han workers were sexually assaulted by six Uyghur co @-@ workers at th Hereford and charged him with defending the Marches and warring with the Welsh. In these original ventures, the Normans failed to make any headway into Wales. Regarded as one of the RAAF 's most skilful cross @-@ country pilots and navigators , Eaton came to public attention as leader of three military expeditions to find lost aircraft in Central Australia ",
+      "ground_truth": "Hereford",
+      "ground_truth_variants": [
+        "Hereford",
+        "Hereford",
+        "Hereford"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Ralph was earl of Hereford.",
+      "clean_generation_time_ms": 370.89023899989115,
+      "distracted_prediction": "Ralph, Earl of Hereford, was a Norman nobleman who served as the Earl of Hereford from 1072 until his death in 1086.",
+      "distracted_generation_time_ms": 2308.248757000001
+    },
+    {
+      "sample_id": 6,
+      "question": "Who was Ralph in charge of being at war with?",
+      "clean_context": "Even before the Norman Conquest of England, the Normans had come into contact with Wales. Edward the Confessor had set up the aforementioned Ralph as earl of Hereford and charged him with defending the Marches and warring with the Welsh. In these original ventures, the Normans failed to make any headway into Wales.",
+      "distracted_context": "Trujillo 's regime is supported by Johnny Abbes Garc\u00eda , the head of the Military Intelligence Service ( SIM ) , a brutal man to whom many \" disappearances , ... executions , ... sudden falls into dis Even before the Norman Conquest of England, the Normans had come into contact with Wales. Edward the Confessor had set up the aforementioned Ralph as earl of  Flying schools are commercial businesses engaged in the training of pilots , both for recreational purposes and for those intending to fly professionally . They make widespread use of fixed @-@ wing l Hereford and charged him with defending the Marches and warring with the Welsh. In these original ventures, the Normans failed to make any headway into Wales. Jordan kept busy over the next few years by staying in shape , playing golf in celebrity charity tournaments , spending time with his family in Chicago , promoting his Jordan Brand clothing line , and",
+      "ground_truth": "the Welsh",
+      "ground_truth_variants": [
+        "the Welsh",
+        "the Welsh",
+        "the Welsh"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "It is not specified who Ralph was supposed to be at war with specifically. However, it is known that he was tasked with defending the Marches, which were a disputed border between England and Wales, and fighting against Welsh forces.",
+      "clean_generation_time_ms": 1160.8055149999927,
+      "distracted_prediction": "Ralph was in charge of defending the Marches and warring with the Welsh.",
+      "distracted_generation_time_ms": 629.4325220005703
+    },
+    {
+      "sample_id": 7,
+      "question": "Who made Ralph earl?",
+      "clean_context": "Even before the Norman Conquest of England, the Normans had come into contact with Wales. Edward the Confessor had set up the aforementioned Ralph as earl of Hereford and charged him with defending the Marches and warring with the Welsh. In these original ventures, the Normans failed to make any headway into Wales.",
+      "distracted_context": "Scholars have long debated whether traditional Egyptian religion ever asserted that the multiple gods were , on a deeper level , unified . Reasons for this debate include the practice of syncretism ,  Even before the Norman Conquest of England, the Normans had come into contact with Wales. Edward the Confessor had set up the aforementioned Ralph as earl of  A. fragilis is the type species and was named by Marsh in 1877 . It is known from the remains of at least sixty individuals , all found in the Kimmeridgian \u2013 Tithonian Upper Jurassic @-@ age Morrison  Hereford and charged him with defending the Marches and warring with the Welsh. In these original ventures, the Normans failed to make any headway into Wales. The United States Conference of Catholic Bishops ( <unk> ) explain the Catechism in their book entitled United States Catechism for Adults , published in 2006 . Regarding graven images , they expound ",
+      "ground_truth": "Edward the Confessor",
+      "ground_truth_variants": [
+        "Edward the Confessor",
+        "Edward the Confessor",
+        "Edward the Confessor"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Edward the Confessor made Ralph earl of Hereford.",
+      "clean_generation_time_ms": 466.7737589998069,
+      "distracted_prediction": "Ralph, Earl of Chester, was created earl by King Edward the Confessor in 1091 . He was a member of the House of Normandy and played an important role in the Norman Conquest of England. Before becoming earl, he had been involved in various military campaigns against the Welsh.",
+      "distracted_generation_time_ms": 1635.5524560003687
+    },
+    {
+      "sample_id": 8,
+      "question": "How long did Western Europe control Cyprus?",
+      "clean_context": "The conquest of Cyprus by the Anglo-Norman forces of the Third Crusade opened a new chapter in the history of the island, which would be under Western European domination for the following 380 years. Although not part of a planned operation, the conquest had much more permanent results than initially expected.",
+      "distracted_context": "In 1956 , Wheeler retired from his part @-@ time professorship at the Institute of Archaeology . Childe was also retiring from his position of director that year , and Wheeler involved himself in the  The conquest of Cyprus by the Anglo-Norman forces of the Third Crusade opened a new chapter in the history of the island, which would be under Western Euro Contemporary reviews of the Type 1 design were generally favorable . The New York Weekly Tribune on May 19 , 1849 described the new dollar as \" undoubtedly the neatest , tiniest , lightest , coin in t pean domination for the following 380 years. Although not part of a planned operation, the conquest had much more permanent results than initially expected. The Elephanta caves are \" of unknown date and attribution \" . Art historians have dated the caves in the range of late 5th to late 8th century AD . Archaeological excavations have unearthed a few <unk",
+      "ground_truth": "380 years",
+      "ground_truth_variants": [
+        "380 years",
+        "380 years",
+        "380 years"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Western Europe controlled Cyprus for a period of 380 years, from 1192 to 1570.",
+      "clean_generation_time_ms": 771.8264220002311,
+      "distracted_prediction": "Western Europe controlled Cyprus for over 380 years, from the conquest in 1221 until the Ottoman Empire annexed it in 1570.",
+      "distracted_generation_time_ms": 1102.4805830002151
+    },
+    {
+      "sample_id": 9,
+      "question": "What continent are the Canarian Islands off the coast of?",
+      "clean_context": "Between 1402 and 1405, the expedition led by the Norman noble Jean de Bethencourt and the Poitevine Gadifer de la Salle conquered the Canarian islands of Lanzarote, Fuerteventura and El Hierro off the Atlantic coast of Africa. Their troops were gathered in Normandy, Gascony and were later reinforced by Castilian colonists.",
+      "distracted_context": "On December 4 , 2013 , the Tigers signed Nathan to a two @-@ year , $ 20 million contract , with a club option for 2016 . This reunited him with former teammate and fellow ex @-@ Twins great , Torii H Between 1402 and 1405, the expedition led by the Norman noble Jean de Bethencourt and the Poitevine Gadifer de la Salle conquered the Canarian islands of Lanzarot The proverbial use of the corn crake 's call to describe someone with a grating or <unk> voice is illustrated in the quotation \" thanks to a wee woman with a voice like a corncrake who believed she wa e, Fuerteventura and El Hierro off the Atlantic coast of Africa. Their troops were gathered in Normandy, Gascony and were later reinforced by Castilian colonists. Controlled airspace is essential for the provision of a known air traffic environment necessary for the safe operation of CAT . A CAA review found that \" mixing [ commercial ] operations with other us",
+      "ground_truth": "Africa",
+      "ground_truth_variants": [
+        "Africa",
+        "Africa",
+        "Africa"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Canarian Islands are off the coast of Africa.",
+      "clean_generation_time_ms": 435.7634190000681,
+      "distracted_prediction": "The Canarian Islands are off the coast of Africa.",
+      "distracted_generation_time_ms": 576.437136000095
+    },
+    {
+      "sample_id": 10,
+      "question": "Who became the King of the Canary Islands?",
+      "clean_context": "Bethencourt took the title of King of the Canary Islands, as vassal to Henry III of Castile. In 1418, Jean's nephew Maciot de Bethencourt sold the rights to the islands to Enrique P\u00e9rez de Guzm\u00e1n, 2nd Count de Niebla.",
+      "distracted_context": "Aggarwal has developed an alternative method employing the same sulfide as above and a novel alkylation involving a rhodium carbenoid formed in situ . The method too has limited substrate scope , fail Bethencourt took the title of King of the Canary Islands, as vassal to Henry III of Castile. In 1418, Jean's The 2013 \u2013 14 season was the 92nd season of competitive association football and 77th season in the Football League played by York City Football Club , a professional football club based in York , Nor  nephew Maciot de Bethencourt sold the rights to the islands to Enrique P\u00e9rez de Guzm\u00e1n, 2nd Count de Niebla. The Johnson \u2013 Corey \u2013 Chaykovsky reaction ( sometimes referred to as the Corey \u2013 Chaykovsky reaction or CCR ) is a chemical reaction used in organic chemistry for the synthesis of epoxides , aziridine",
+      "ground_truth": "Bethencourt",
+      "ground_truth_variants": [
+        "Bethencourt",
+        "Bethencourt",
+        "Bethencourt"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The correct answer is \"Jean de Bethencourt\". He was a French explorer who claimed the Canary Islands for France in the late 15th century and took the title of King of the Canary Islands.",
+      "clean_generation_time_ms": 1097.4939269999595,
+      "distracted_prediction": "The question appears to contain multiple statements about different individuals.",
+      "distracted_generation_time_ms": 2203.452059000483
+    },
+    {
+      "sample_id": 11,
+      "question": "Who bought the rights?",
+      "clean_context": "Bethencourt took the title of King of the Canary Islands, as vassal to Henry III of Castile. In 1418, Jean's nephew Maciot de Bethencourt sold the rights to the islands to Enrique P\u00e9rez de Guzm\u00e1n, 2nd Count de Niebla.",
+      "distracted_context": "Devin Garret Townsend ( born May 5 , 1972 ) is a Canadian musician , songwriter and record producer . He was the founder , songwriter , vocalist , and guitarist in extreme metal band Strapping Young L Bethencourt took the title of King of the Canary Islands, as vassal to Henry III of Castile. In 1418, Jean's During the film 's production , four of the leads became romantically involved . Bachchan married Bhaduri four months before filming started . This led to shooting delays when Bhaduri became pregnant   nephew Maciot de Bethencourt sold the rights to the islands to Enrique P\u00e9rez de Guzm\u00e1n, 2nd Count de Niebla. Sara Roy stated that her shared experience with Finkelstein as a child of Holocaust survivors engaged in research on the Palestinian @-@ Israeli conflict gave her a unique position to comment . Accord",
+      "ground_truth": "Enrique P\u00e9rez de Guzm\u00e1n",
+      "ground_truth_variants": [
+        "Enrique P\u00e9rez de Guzm\u00e1n",
+        "Enrique P\u00e9rez de Guzm\u00e1n",
+        "Enrique P\u00e9rez de Guzm\u00e1n"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Enrique P\u00e9rez de Guzm\u00e1n, 2nd Count de Niebla bought the rights to the Canary Islands from Maciot de Bethencourt in 1418.",
+      "clean_generation_time_ms": 961.5255170001547,
+      "distracted_prediction": "The exact individual or group who bought the rights to the islands from Jean de Bethencourt is not specified in the information provided.",
+      "distracted_generation_time_ms": 810.9537390000696
+    },
+    {
+      "sample_id": 12,
+      "question": "Who sold the rights?",
+      "clean_context": "Bethencourt took the title of King of the Canary Islands, as vassal to Henry III of Castile. In 1418, Jean's nephew Maciot de Bethencourt sold the rights to the islands to Enrique P\u00e9rez de Guzm\u00e1n, 2nd Count de Niebla.",
+      "distracted_context": "The item was intended simply as a piece of news , but telegraph lines quickly spread the news throughout the state , fueling procession sentiment . The rumor was interpreted by some Arkansans as a cal Bethencourt took the title of King of the Canary Islands, as vassal to Henry III of Castile. In 1418, Jean's Egyptian gods were involved in human lives as well as in the overarching order of nature . This divine influence applied mainly to Egypt , as foreign peoples were traditionally believed to be outside   nephew Maciot de Bethencourt sold the rights to the islands to Enrique P\u00e9rez de Guzm\u00e1n, 2nd Count de Niebla. WASP @-@ 44 , its recently discovered planet , the planets orbiting WASP @-@ 45 and WASP @-@ 46 , and a discussion exploring the validity of the common assumption amongst scientists that closely orbit",
+      "ground_truth": "Maciot de Bethencourt",
+      "ground_truth_variants": [
+        "Maciot de Bethencourt",
+        "Maciot de Bethencourt",
+        "Maciot de Bethencourt"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Maciot de Bethencourt sold the rights to the islands to Enrique P\u00e9rez de Guzm\u00e1n, 2nd Count de Niebla.",
+      "clean_generation_time_ms": 811.2688150004033,
+      "distracted_prediction": "Maciot de Bethencourt sold the rights to the Canary Islands to Enrique P\u00e9rez de Guzm\u00e1n, 2nd Count de Niebla.",
+      "distracted_generation_time_ms": 956.9077850001122
+    },
+    {
+      "sample_id": 13,
+      "question": "What architecture type came after Norman in England?",
+      "clean_context": "In England, the period of Norman architecture immediately succeeds that of the Anglo-Saxon and precedes the Early Gothic. In southern Italy, the Normans incorporated elements of Islamic, Lombard, and Byzantine building techniques into their own, initiating a unique style known as Norman-Arab architecture within the Kingdom of Sicily.",
+      "distracted_context": "During the off @-@ season the Blue Jackets parted ways with defensemen Jan Hejda , Anton Stralman , Sami <unk> and Mike Commodore . Hejda , who played four of his first five NHL seasons with the Blue  In England, the period of Norman architecture immediately succeeds that of the Anglo-Saxon and precedes the Early Gothic. In southern Italy, the Normans incorporated e The Egyptians also devised false etymologies giving more meanings to divine names . A passage in the Coffin Texts renders the name of the funerary god <unk> as sk r , meaning \" cleaning of the mouth \" lements of Islamic, Lombard, and Byzantine building techniques into their own, initiating a unique style known as Norman-Arab architecture within the Kingdom of Sicily. Nike created a signature shoe for him , called the Air Jordan . One of Jordan 's more popular commercials for the shoe involved Spike Lee playing the part of Mars Blackmon . In the commercials Lee , a",
+      "ground_truth": "Early Gothic",
+      "ground_truth_variants": [
+        "Early Gothic",
+        "Early Gothic",
+        "Early Gothic"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The period of Norman architecture in England was succeeded by the Early Gothic architecture.",
+      "clean_generation_time_ms": 543.1424289999995,
+      "distracted_prediction": "After Norman architecture in England, the period of Early Gothic architecture succeeded.",
+      "distracted_generation_time_ms": 615.7600100004856
+    },
+    {
+      "sample_id": 14,
+      "question": "What architecture type came before Norman in England?",
+      "clean_context": "In England, the period of Norman architecture immediately succeeds that of the Anglo-Saxon and precedes the Early Gothic. In southern Italy, the Normans incorporated elements of Islamic, Lombard, and Byzantine building techniques into their own, initiating a unique style known as Norman-Arab architecture within the Kingdom of Sicily.",
+      "distracted_context": "2012 : What Gandhi Says About Nonviolence , Resistance and Courage , OR Books , New York : 2012 , ISBN 978 @-@ 1 @-@ 935928 @-@ 79 @-@ 9 In England, the period of Norman architecture immediately succeeds that of the Anglo-Saxon and precedes the Early Gothic. In southern Italy, the Normans incorporated e The French @-@ American @-@ British ( FAB ) classification system divides AML into eight subtypes , M0 through to M7 , based on the type of cell from which the leukemia developed and its degree of mat lements of Islamic, Lombard, and Byzantine building techniques into their own, initiating a unique style known as Norman-Arab architecture within the Kingdom of Sicily. The film is often credited with making Amitabh Bachchan a \" superstar \" , two years after he became a star with Zanjeer ( 1973 ) . Some of the supporting actors remained etched in public memory as the",
+      "ground_truth": "Anglo-Saxon",
+      "ground_truth_variants": [
+        "Anglo-Saxon",
+        "Anglo-Saxon",
+        "Anglo-Saxon"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The architecture type that came before Norman in England was Anglo-Saxon architecture.",
+      "clean_generation_time_ms": 563.4484180000072,
+      "distracted_prediction": "Before Norman architecture in England, there was Anglo-Saxon architecture.",
+      "distracted_generation_time_ms": 684.6569780000209
+    },
+    {
+      "sample_id": 15,
+      "question": "What place had the Norman Arab architectural style?",
+      "clean_context": "In England, the period of Norman architecture immediately succeeds that of the Anglo-Saxon and precedes the Early Gothic. In southern Italy, the Normans incorporated elements of Islamic, Lombard, and Byzantine building techniques into their own, initiating a unique style known as Norman-Arab architecture within the Kingdom of Sicily.",
+      "distracted_context": "Markgraf was present for the uneventful advance in the direction of Sunderland on 18 \u2013 20 October . Unit training with the III Squadron followed from 21 October to 2 November . Two days later , the sh In England, the period of Norman architecture immediately succeeds that of the Anglo-Saxon and precedes the Early Gothic. In southern Italy, the Normans incorporated e In 1923 , Barker sent her flower fairy paintings to various publishers . Blackie paid \u00a3 25 for 24 paintings with accompanying verses , but it wasn 't until publication of Flower Fairies of the Summer  lements of Islamic, Lombard, and Byzantine building techniques into their own, initiating a unique style known as Norman-Arab architecture within the Kingdom of Sicily. Loose debuted at number one on the Canadian Albums Chart , selling more than 34 @,@ 000 copies in its first week , at that time the year 's strongest debut for a Canadian artist . In late July , after",
+      "ground_truth": "Sicily",
+      "ground_truth_variants": [
+        "Sicily",
+        "Sicily",
+        "Kingdom of Sicily"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Norman-Arab architectural style was prevalent in southern Italy, particularly in the Kingdom of Sicily.",
+      "clean_generation_time_ms": 659.6066309994058,
+      "distracted_prediction": "The Norman-Arab architectural style was prevalent in the Kingdom of Sicily during the Norman Conquest.",
+      "distracted_generation_time_ms": 761.4894509997612
+    },
+    {
+      "sample_id": 16,
+      "question": "What kind of needlework was used in the creation of the Bayeux Tapestry?",
+      "clean_context": "By far the most famous work of Norman art is the Bayeux Tapestry, which is not a tapestry but a work of embroidery. It was commissioned by Odo, the Bishop of Bayeux and first Earl of Kent, employing natives from Kent who were learned in the Nordic traditions imported in the previous half century by the Danish Vikings.",
+      "distracted_context": "<unk> , Ilan . \" Valuable New Perspectives , \" Reviewed Work : Image and Reality of the Israel @-@ Palestine <unk> by Norman G. Finkelstein , Journal of Palestine Studies , Vol . 26 , No. 4 . ( Summer By far the most famous work of Norman art is the Bayeux Tapestry, which is not a tapestry but a work of embroidery. It was commissioned by Odo, the Bishop of B Stansfield continues to be remembered by fans of Exeter . On 9 August 2014 , as they started the new season against Portsmouth , a giant flag resembling his club shirt was displayed by the crowd . ayeux and first Earl of Kent, employing natives from Kent who were learned in the Nordic traditions imported in the previous half century by the Danish Vikings. After the Soviet invasion of Poland ( beginning 17 September 1939 ) that followed the German invasion that had marked the start of World War II ( beginning 1 September 1939 ) , the Soviet Union annexe",
+      "ground_truth": "embroidery",
+      "ground_truth_variants": [
+        "embroidery",
+        "embroidery",
+        "embroidery"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Bayeux Tapestry was created using a style of needlework that was popular in the late Medieval period, known as \"pointillism\" or \"coulomb technique\".",
+      "clean_generation_time_ms": 1956.2096270001348,
+      "distracted_prediction": "The Bayeux Tapestry is a type of needlework known as embroidery.",
+      "distracted_generation_time_ms": 765.4893890003223
+    },
+    {
+      "sample_id": 17,
+      "question": "What is Norman art's most well known piece?",
+      "clean_context": "By far the most famous work of Norman art is the Bayeux Tapestry, which is not a tapestry but a work of embroidery. It was commissioned by Odo, the Bishop of Bayeux and first Earl of Kent, employing natives from Kent who were learned in the Nordic traditions imported in the previous half century by the Danish Vikings.",
+      "distracted_context": "\" [ Peters ] coins the phrase , ' turnspeak ' , she says she 's using it as a play off of George Orwell which as all listeners know used the phrase ' <unk> . ' She coined her own phrase , ' turnspeak  By far the most famous work of Norman art is the Bayeux Tapestry, which is not a tapestry but a work of embroidery. It was commissioned by Odo, the Bishop of B Finkelstein has written of his Jewish parents ' experiences during World War II . His mother , <unk> <unk> , grew up in Warsaw , survived the Warsaw Ghetto , the Majdanek concentration camp , and two  ayeux and first Earl of Kent, employing natives from Kent who were learned in the Nordic traditions imported in the previous half century by the Danish Vikings. Construction of a 5 @.@ 4 @-@ mile ( 8 @.@ 7 km ) long section of Route 4 from what is now exit 6 in East Greenwich to I @-@ 95 in Warwick began in 1967 and was completed in 1972 . That year , the 3 @",
+      "ground_truth": "Bayeux Tapestry",
+      "ground_truth_variants": [
+        "Bayeux Tapestry",
+        "the Bayeux Tapestry",
+        "the Bayeux Tapestry"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Bayeux Tapestry, which is actually an embroidered work of art rather than a tapestry, is widely regarded as the most famous example of Norman art.",
+      "clean_generation_time_ms": 1890.4005340000367,
+      "distracted_prediction": "The most well known piece of Norman art is the Bayeux Tapestry, a work of embroidery that measures approximately 230 feet (70 meters) in length and dates back to around 1070 AD.",
+      "distracted_generation_time_ms": 1407.007283000894
+    },
+    {
+      "sample_id": 18,
+      "question": "Who commissioned the Tapestry?",
+      "clean_context": "By far the most famous work of Norman art is the Bayeux Tapestry, which is not a tapestry but a work of embroidery. It was commissioned by Odo, the Bishop of Bayeux and first Earl of Kent, employing natives from Kent who were learned in the Nordic traditions imported in the previous half century by the Danish Vikings.",
+      "distracted_context": "Ruiz notes that writing also has the power to transform reality . It brings the reader back to the past , allowing the reader to comprehend myths or distorted stories told by historians . Ruiz contend By far the most famous work of Norman art is the Bayeux Tapestry, which is not a tapestry but a work of embroidery. It was commissioned by Odo, the Bishop of B The successful capture of Cuautla made Zapata a hero to ordinary people throughout Mexico and new corridos were written about him . After Zapata 's taking of Cuautla , the federal government controlle ayeux and first Earl of Kent, employing natives from Kent who were learned in the Nordic traditions imported in the previous half century by the Danish Vikings. Divine behavior was believed to govern all of nature . Except for the few deities who disrupted the divine order , the gods ' actions maintained maat and created and sustained all living things . They",
+      "ground_truth": "Odo",
+      "ground_truth_variants": [
+        "Odo",
+        "Odo",
+        "Odo"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Bayeux Tapestry was commissioned by Odo, the Bishop of Bayeux and first Earl of Kent.",
+      "clean_generation_time_ms": 697.5235580002845,
+      "distracted_prediction": "The Bayeux Tapestry was commissioned by Odo, the Bishop of B The successful capture of Cuautla made Zapata a hero to ordinary people throughout Mexico and new corridors were written about him .",
+      "distracted_generation_time_ms": 1187.3102310000831
+    },
+    {
+      "sample_id": 19,
+      "question": "Where did the monks flee to?",
+      "clean_context": "At Saint Evroul, a tradition of singing had developed and the choir achieved fame in Normandy. Under the Norman abbot Robert de Grantmesnil, several monks of Saint-Evroul fled to southern Italy, where they were patronised by Robert Guiscard and established a Latin monastery at Sant'Eufemia. There they continued the tradition of singing.",
+      "distracted_context": "Franjo Klein , a Vienna @-@ born Zagreb architect , was commissioned to build the synagogue . Klein , a representative of romantic historicism , modeled the building on the Viennese <unk> Tempel ( 185 At Saint Evroul, a tradition of singing had developed and the choir achieved fame in Normandy. Under the Norman abbot Robert de Grantmesnil, several monks of Saint-Evrou Loose debuted at number one on the Canadian Albums Chart , selling more than 34 @,@ 000 copies in its first week , at that time the year 's strongest debut for a Canadian artist . In late July , after l fled to southern Italy, where they were patronised by Robert Guiscard and established a Latin monastery at Sant'Eufemia. There they continued the tradition of singing. In 2009 , the serial embarked on two lesbian storylines , one of which involved Nicole . It featured Freya Duric ( Sophie <unk> ) kissing Nicole , which sparked complaints . However , for Nicole it wa",
+      "ground_truth": "southern Italy",
+      "ground_truth_variants": [
+        "southern Italy",
+        "southern Italy",
+        "southern Italy"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The monks of Saint-Evroul fled to southern Italy, where they were patronised by Robert Guiscard and established a Latin monastery at Sant'Eufemia.",
+      "clean_generation_time_ms": 948.1138760002068,
+      "distracted_prediction": "The monks fled to southern Italy.",
+      "distracted_generation_time_ms": 459.68864699989354
+    },
+    {
+      "sample_id": 20,
+      "question": "What monastery did the Saint-Evroul monks establish in Italy?",
+      "clean_context": "At Saint Evroul, a tradition of singing had developed and the choir achieved fame in Normandy. Under the Norman abbot Robert de Grantmesnil, several monks of Saint-Evroul fled to southern Italy, where they were patronised by Robert Guiscard and established a Latin monastery at Sant'Eufemia. There they continued the tradition of singing.",
+      "distracted_context": "Mushroom polysaccharides from a number of species have attracted research interest for their <unk> and antitumor properties . Extracts from A. hygrometricus containing the polysaccharide named AE2 wer At Saint Evroul, a tradition of singing had developed and the choir achieved fame in Normandy. Under the Norman abbot Robert de Grantmesnil, several monks of Saint-Evrou Contemporary reviews of the Type 1 design were generally favorable . The New York Weekly Tribune on May 19 , 1849 described the new dollar as \" undoubtedly the neatest , tiniest , lightest , coin in t l fled to southern Italy, where they were patronised by Robert Guiscard and established a Latin monastery at Sant'Eufemia. There they continued the tradition of singing. Troops are divided into five classes : Scouts , <unk> , Engineers , Lancers and Armored Soldier . Troopers can switch classes by changing their assigned weapon . Changing class does not greatly affect",
+      "ground_truth": "Latin monastery at Sant'Eufemia.",
+      "ground_truth_variants": [
+        "Latin monastery at Sant'Eufemia.",
+        "a Latin monastery at Sant'Eufemia",
+        "Sant'Eufemia"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Sant'Eufemia",
+      "clean_generation_time_ms": 336.903737999819,
+      "distracted_prediction": "The Saint-Evroul monks established a Latin monastery at Sant'Eufemia in southern Italy.",
+      "distracted_generation_time_ms": 785.5380890005108
+    },
+    {
+      "sample_id": 21,
+      "question": "Who patronized the monks in Italy?",
+      "clean_context": "At Saint Evroul, a tradition of singing had developed and the choir achieved fame in Normandy. Under the Norman abbot Robert de Grantmesnil, several monks of Saint-Evroul fled to southern Italy, where they were patronised by Robert Guiscard and established a Latin monastery at Sant'Eufemia. There they continued the tradition of singing.",
+      "distracted_context": "Such common architectural features among these tomb @-@ shrines indicate a strong regional cohesion with no direct parallels elsewhere in the British Isles . For instance , they would have been taller At Saint Evroul, a tradition of singing had developed and the choir achieved fame in Normandy. Under the Norman abbot Robert de Grantmesnil, several monks of Saint-Evrou Anderson dated ( and frequently collaborated with ) singer Fiona Apple for several years during the late 1990s and early 2000s . He has been in a relationship with actress and comedian Maya Rudolph si l fled to southern Italy, where they were patronised by Robert Guiscard and established a Latin monastery at Sant'Eufemia. There they continued the tradition of singing. Later , the Southwest Oncology Group and Eastern Cooperative Oncology Group and , later still , Cancer and Leukemia Group B published other , mostly overlapping lists of cytogenetics prognostication i",
+      "ground_truth": "Robert Guiscard",
+      "ground_truth_variants": [
+        "Robert Guiscard",
+        "Robert Guiscard",
+        "Robert Guiscard"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The monks of Saint-Evroul were patronized by Robert Guiscard, who is also known as Robert Guiskard or Robert Guiscard. He was a Duke of Apulia, Calabria and Sicily from 1046 until his death in 1087.",
+      "clean_generation_time_ms": 1456.764165000095,
+      "distracted_prediction": "The monks in Italy were patronized by several figures, including the Duke of Normandy, Robert de Grantmesnil, and Maya Rudolph. They established a Latin monastery at Sant'Eufemia and continued the tradition of singing under the guidance of Abbot Robert.",
+      "distracted_generation_time_ms": 1472.6491800001895
+    },
+    {
+      "sample_id": 22,
+      "question": "What tradition were the Saint-Evroul monks known for?",
+      "clean_context": "At Saint Evroul, a tradition of singing had developed and the choir achieved fame in Normandy. Under the Norman abbot Robert de Grantmesnil, several monks of Saint-Evroul fled to southern Italy, where they were patronised by Robert Guiscard and established a Latin monastery at Sant'Eufemia. There they continued the tradition of singing.",
+      "distracted_context": "The moderate view within the D\u00edaz government was represented by Jorge Vera Esta\u00f1ol who in a memo to the minister of foreign affairs wrote that there were two revolutions taking place in Mexico : a pol At Saint Evroul, a tradition of singing had developed and the choir achieved fame in Normandy. Under the Norman abbot Robert de Grantmesnil, several monks of Saint-Evrou Saprang was sidelined in security plans preceding the Constitutional Tribunal 's 20 May 2007 ruling on the dissolution of the Thai Rak Thai and Democrat Parties . After the 2006 coup , Sonthi had dele l fled to southern Italy, where they were patronised by Robert Guiscard and established a Latin monastery at Sant'Eufemia. There they continued the tradition of singing. Discussions about making her sixth studio album being a Christmas record began on December 2012 , a month after releasing her first greatest hits album , Greatest Hits \u2013 Chapter One . Having found the",
+      "ground_truth": "singing",
+      "ground_truth_variants": [
+        "singing",
+        "singing",
+        "singing"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Saint-Evroul monks were known for their tradition of singing.",
+      "clean_generation_time_ms": 530.0202950002131,
+      "distracted_prediction": "What was the purpose of Sonthi Saprang's exile following the 2006 coup in Thailand?",
+      "distracted_generation_time_ms": 843.5015140003088
+    },
+    {
+      "sample_id": 23,
+      "question": "What kind of graph is an example of an input used in a decision problem?",
+      "clean_context": "An example of a decision problem is the following. The input is an arbitrary graph. The problem consists in deciding whether the given graph is connected, or not. The formal language associated with this decision problem is then the set of all connected graphs\u2014of course, to obtain a precise definition of this language, one has to decide how graphs are encoded as binary strings.",
+      "distracted_context": "I think it was the exposure of Michael Jordan ; the marketing of Michael Jordan . Everything was marketed towards the things that people wanted to see , which was scoring and dunking . That Michael Jo An example of a decision problem is the following. The input is an arbitrary graph. The problem consists in deciding whether the given graph is connected, or not. The formal language associa During the Warsaw Uprising ( August \u2013 October 1944 ) , people in Polish @-@ controlled territory endeavored to recreate the former day @-@ to @-@ day life of their free country . Cultural life was vib ted with this decision problem is then the set of all connected graphs\u2014of course, to obtain a precise definition of this language, one has to decide how graphs are encoded as binary strings. Saprang grew up in an aristocratic military family and graduated from the 7th Class of the Armed Forces Academies Preparatory School and the 18th Class of the Chulachomklao Royal Military Academy . He",
+      "ground_truth": "arbitrary graph",
+      "ground_truth_variants": [
+        "arbitrary graph",
+        "arbitrary",
+        "arbitrary"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "An example of a decision problem is finding if a given graph is connected or not. The input for this problem is an arbitrary graph, and the task is to determine whether it is connected or not. The associated formal language is the set of all connected graphs.",
+      "clean_generation_time_ms": 1222.8944700000284,
+      "distracted_prediction": "An example of an input used in a decision problem is an arbitrary graph.",
+      "distracted_generation_time_ms": 1979.6986319997814
+    },
+    {
+      "sample_id": 24,
+      "question": "What is the term for the set of all connected graphs related to this decision problem?",
+      "clean_context": "An example of a decision problem is the following. The input is an arbitrary graph. The problem consists in deciding whether the given graph is connected, or not. The formal language associated with this decision problem is then the set of all connected graphs\u2014of course, to obtain a precise definition of this language, one has to decide how graphs are encoded as binary strings.",
+      "distracted_context": "This was the first time anything other than a canoe or other oar @-@ powered vessel had sailed into Lake Huron , and La Salle 's voyage was thus germinal in the development of commercial shipping on t An example of a decision problem is the following. The input is an arbitrary graph. The problem consists in deciding whether the given graph is connected, or not. The formal language associa In 1899 , Wheeler joined Bradford Grammar School shortly before his ninth birthday , where he proceeded straight to the second form . In 1902 Robert and Emily had a second daughter , whom they named B ted with this decision problem is then the set of all connected graphs\u2014of course, to obtain a precise definition of this language, one has to decide how graphs are encoded as binary strings. Strong winds occurred along the North Carolina coast . Diamond Shoals reported sustained winds of 45 miles per hour ( 72 km / h ) , and offshore , winds gusted to 65 miles per hour ( 105 km / h ) . On",
+      "ground_truth": "formal language",
+      "ground_truth_variants": [
+        "formal language",
+        "The formal language",
+        "The formal language associated with this decision problem"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The set of all connected graphs related to this decision problem is called the language of connected graphs.",
+      "clean_generation_time_ms": 584.5059470002525,
+      "distracted_prediction": "The set of all connected graphs related to this decision problem is called the connected graphs problem.",
+      "distracted_generation_time_ms": 669.0727479999623
+    },
+    {
+      "sample_id": 25,
+      "question": "What encoding decision needs to be made in order to determine an exact definition of the formal language?",
+      "clean_context": "An example of a decision problem is the following. The input is an arbitrary graph. The problem consists in deciding whether the given graph is connected, or not. The formal language associated with this decision problem is then the set of all connected graphs\u2014of course, to obtain a precise definition of this language, one has to decide how graphs are encoded as binary strings.",
+      "distracted_context": "The proverbial use of the corn crake 's call to describe someone with a grating or <unk> voice is illustrated in the quotation \" thanks to a wee woman with a voice like a corncrake who believed she wa An example of a decision problem is the following. The input is an arbitrary graph. The problem consists in deciding whether the given graph is connected, or not. The formal language associa Born 8 July 1948 in <unk> , Thailand , Saprang graduated from the 7th Class of the Armed Forces Academies Preparatory School ( <unk> ) and the 18th Class of the Chulachomklao Royal Military Academy .  ted with this decision problem is then the set of all connected graphs\u2014of course, to obtain a precise definition of this language, one has to decide how graphs are encoded as binary strings. In May 2007 , Townsend released Ziltoid the Omniscient , a tongue @-@ in @-@ cheek rock opera about the eponymous fictional alien . This was truly a solo album ; he programmed the drums using <unk> fr",
+      "ground_truth": "how graphs are encoded as binary strings",
+      "ground_truth_variants": [
+        "how graphs are encoded as binary strings",
+        "how graphs are encoded as binary strings",
+        "how graphs are encoded as binary strings"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "To determine an exact definition of the formal language, one has to decide how graphs are encoded as binary strings.",
+      "clean_generation_time_ms": 2708.1948289996944,
+      "distracted_prediction": "To determine an exact definition of the formal language, one needs to decide how graphs are encoded as binary strings.",
+      "distracted_generation_time_ms": 803.3170839999002
+    },
+    {
+      "sample_id": 26,
+      "question": "A function problem is an example of what?",
+      "clean_context": "A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem.",
+      "distracted_context": "Anderson has been called \" one of the most exciting talents to come along in years \" and \" among the supreme talents of today . \" After the release of Boogie Nights and Magnolia , Anderson was praised A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than  The structure of Dominican society was hierarchical , with strongly gendered roles . Rafael Trujillo , the ruler , was a cruel dictator who haunts the people of Santo Domingo even 35 years after his d that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem. Madero and his supporters had the right to name fourteen provisional state governors , and to approve la Barra 's cabinet .",
+      "ground_truth": "a computational problem",
+      "ground_truth_variants": [
+        "a computational problem",
+        "a computational problem",
+        "a computational problem"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "A function problem is an example of a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than that of a decision problem, that is, it isn't just yes or no.",
+      "clean_generation_time_ms": 1213.2826859997294,
+      "distracted_prediction": "A function problem is an example of a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than just yes or no. It is a type of problem that requires finding the optimal solution among multiple possible solutions.",
+      "distracted_generation_time_ms": 1420.6809980005346
+    },
+    {
+      "sample_id": 27,
+      "question": "How many outputs are expected for each input in a function problem?",
+      "clean_context": "A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem.",
+      "distracted_context": "2012 : What Gandhi Says About Nonviolence , Resistance and Courage , OR Books , New York : 2012 , ISBN 978 @-@ 1 @-@ 935928 @-@ 79 @-@ 9 A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than  Following the break , the Blue Jackets were on the road playing the Los Angeles Kings , and with the score tied late in the game , Kings ' defenseman Drew Doughty scored with just 0 @.@ 4 seconds rema that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem. Three other applications make up nearly all the rest of the consumption . One of these uses is as a stabilizer and a catalyst for the production of <unk> . Another application is to serve as a fining ",
+      "ground_truth": "a single output",
+      "ground_truth_variants": [
+        "a single output",
+        "single",
+        "single"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "In a function problem, a single output (of a total function) is expected for every input. The output is usually more complex than that of a decision problem, which only returns yes or no. Notable examples of function problems include the traveling salesman problem and the integer factorization problem.",
+      "clean_generation_time_ms": 1350.4361370005427,
+      "distracted_prediction": "In a function problem, a single output (of a total function) is expected for every input.",
+      "distracted_generation_time_ms": 696.2485169997308
+    },
+    {
+      "sample_id": 28,
+      "question": "The traveling salesman problem is an example of what type of problem?",
+      "clean_context": "A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem.",
+      "distracted_context": "Contributor to The Politics of Anti @-@ Semitism . Ed . Alexander Cockburn and Jeffrey St. Clair . AK Press , 2001 ; ISBN 1 @-@ <unk> @-@ 77 @-@ 4 . A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than  \" Bayt <unk> in year II of the intifada . - A personal account \" , Journal of Palestine Studies 19 ( Winter 1990 ) 2 / 74 , pp. 62 \u2013 74 that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem. Defender Luke O 'Neill was signed from Burnley on a 28 @-@ day emergency loan . He made his debut in York 's 3 \u2013 0 win away at Torquay , which was the team 's first successive win of the season . York",
+      "ground_truth": "A function problem",
+      "ground_truth_variants": [
+        "A function problem",
+        "function",
+        "function problem"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The traveling salesman problem is an example of a function problem.",
+      "clean_generation_time_ms": 467.56754600028216,
+      "distracted_prediction": "The traveling salesman problem is an example of a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than \"Bayt\" in year II of the intifada.",
+      "distracted_generation_time_ms": 1707.0201500000621
+    },
+    {
+      "sample_id": 29,
+      "question": "In addition to the traveling salesman problem, what is another example of a function problem?",
+      "clean_context": "A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem.",
+      "distracted_context": "The \" Summaries of Work done at Little Rock Arsenal , C.S.A. \" continue at about the same pace and scale from August 1862 until August 1863 . <unk> to the \" Summary \" for August , 1863 is the ominous  A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than  Nicole embarks on a relationship with Geoff Campbell , not before they are embroiled in a \" sordid love triangle \" along with Melody . In one storyline Nicole and Geoff became stranded on a \" deserted that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem. Compounds in this class generally are described as derivatives of Sb3 \u2212 . Antimony forms antimonides with metals , such as indium antimonide ( <unk> ) and silver antimonide ( Ag",
+      "ground_truth": "the integer factorization problem",
+      "ground_truth_variants": [
+        "the integer factorization problem",
+        "integer factorization",
+        "integer factorization problem"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Another example of a function problem is the Knapsack Problem.",
+      "clean_generation_time_ms": 1567.4657879999359,
+      "distracted_prediction": "Another example of a function problem is the integer factorization problem, which involves finding the prime factors of a large composite number. This problem is important in cryptography and is also related to the RSA encryption algorithm.",
+      "distracted_generation_time_ms": 1177.470890999757
+    },
+    {
+      "sample_id": 30,
+      "question": "Is the output of a functional problem typically characterized by a simple or complex answer?",
+      "clean_context": "A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem.",
+      "distracted_context": "In 2015 , Fernandez featured in Vicky Singh 's Roy , a romantic thriller , which critic Sarita A. Tanwar described as a \" boring , exhausting and pretentious \" film . Fernandez played dual roles , Aye A function problem is a computational problem where a single output (of a total function) is expected for every input, but the output is more complex than  Jordan led the NBA in scoring in 10 seasons ( NBA record ) and tied Wilt Chamberlain 's record of seven consecutive scoring titles . He was also a fixture on the NBA All @-@ Defensive First Team , mak that of a decision problem, that is, it isn't just yes or no. Notable examples include the traveling salesman problem and the integer factorization problem. The vast majority of reagents are <unk> at the ylide carbon ( either R1 or R2 as hydrogen ) . <unk> reagents are much rarer but have been described :",
+      "ground_truth": "complex",
+      "ground_truth_variants": [
+        "complex",
+        "complex",
+        "complex"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The output of a functional problem is typically characterized by a complex answer.",
+      "clean_generation_time_ms": 486.0545409992483,
+      "distracted_prediction": "The output of a functional problem is typically characterized by a complex answer.",
+      "distracted_generation_time_ms": 576.8762229999993
+    },
+    {
+      "sample_id": 31,
+      "question": "What are the three primary expressions used to represent case complexity?",
+      "clean_context": "The best, worst and average case complexity refer to three different ways of measuring the time complexity (or any other complexity measure) of different inputs of the same size. Since some inputs of size n may be faster to solve than others, we define the following complexities:",
+      "distracted_context": "Gambia 's national football association was founded in 1952 , and became affiliated with FIFA in 1968 . Football is the most popular women 's sport in the country , and was first played in an organize The best, worst and average case complexity refer to three different ways of measuring the time complexity (or any other complexity measure) Polish music , including orchestras , also went underground . Top Polish musicians and directors ( Adam <unk> , Zbigniew <unk> , Jan <unk> , Barbara <unk> , Zygmunt <unk> , Jerzy <unk> , Witold Lutos\u0142  of different inputs of the same size. Since some inputs of size n may be faster to solve than others, we define the following complexities: On November 21 , 2011 , Nathan agreed to terms on a two @-@ year deal with the Texas Rangers worth $ 14 @.@ 5 million guaranteed with an option for a third year at $ 9 million or a $ 500 @,@ 000 buyou",
+      "ground_truth": "best, worst and average",
+      "ground_truth_variants": [
+        "best, worst and average",
+        "best, worst and average case",
+        "best, worst and average case complexity"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The three primary expressions used to represent case complexity are:",
+      "clean_generation_time_ms": 2674.4565849994615,
+      "distracted_prediction": "The three primary expressions used to represent case complexity are best case, worst case, and average case.",
+      "distracted_generation_time_ms": 698.7507940002615
+    },
+    {
+      "sample_id": 32,
+      "question": "Case complexity likelihoods provide variable probabilities of what general measure?",
+      "clean_context": "The best, worst and average case complexity refer to three different ways of measuring the time complexity (or any other complexity measure) of different inputs of the same size. Since some inputs of size n may be faster to solve than others, we define the following complexities:",
+      "distracted_context": "Despite his January 1999 claim that he was \" 99 @.@ 9 % certain \" that he would never play another NBA game , in the summer of 2001 Jordan expressed interest in making another comeback , this time wit The best, worst and average case complexity refer to three different ways of measuring the time complexity (or any other complexity measure) After the War of 1812 , the first Europeans in the area were French settlers loyal to the British Crown who moved north from Detroit . They successfully traded with the Three Fires Confederacy , which  of different inputs of the same size. Since some inputs of size n may be faster to solve than others, we define the following complexities: In an April 3 , 2007 interview with the Harvard Crimson , \" Dershowitz confirmed that he had sent a letter last September to DePaul faculty members lobbying against Finkelstein 's tenure . \"",
+      "ground_truth": "complexity measure",
+      "ground_truth_variants": [
+        "complexity measure",
+        "complexity",
+        "complexity"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Case complexity likelihoods provide variable probabilities of what general measure?",
+      "clean_generation_time_ms": 461.786705999657,
+      "distracted_prediction": "Case complexity likelihoods provide variable probabilities of what specific measure?",
+      "distracted_generation_time_ms": 547.7825120005946
+    },
+    {
+      "sample_id": 33,
+      "question": "What is one common example of a critical complexity measure?",
+      "clean_context": "The best, worst and average case complexity refer to three different ways of measuring the time complexity (or any other complexity measure) of different inputs of the same size. Since some inputs of size n may be faster to solve than others, we define the following complexities:",
+      "distracted_context": "South of Heaven was released on July 5 , 1988 , and was the final Slayer album distributed via Def Jam Records . When label co @-@ founders Russell Simmons and Rubin parted ways , Slayer signed to Rub The best, worst and average case complexity refer to three different ways of measuring the time complexity (or any other complexity measure) In the early twenty @-@ first century , a tradition developed in which the Hartley Morris Men , a morris dancing side , travel to the site at dawn every May Day in order to \" sing up the sun \" . This   of different inputs of the same size. Since some inputs of size n may be faster to solve than others, we define the following complexities: In early 2007 , a video hosted on YouTube led to reports that the song \" Do It \" , and the Timbaland @-@ produced ringtone \" Block Party \" that inspired it , used \u2014 without authorization \u2014 the melody ",
+      "ground_truth": "time",
+      "ground_truth_variants": [
+        "time",
+        "time complexity",
+        "time complexity"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "One common example of a critical complexity measure is the Big O notation, which describes the upper bound of the growth rate of an algorithm's time or space complexity as the input size increases. It is used to compare the efficiency of algorithms by analyzing their performance on large inputs.",
+      "clean_generation_time_ms": 1282.5412860001961,
+      "distracted_prediction": "One common example of a critical complexity measure is the number of steps required to solve a problem or algorithm. This can be measured by counting the number of operations or decisions required to complete each step.",
+      "distracted_generation_time_ms": 1074.6686330003286
+    },
+    {
+      "sample_id": 34,
+      "question": "Case complexities provide three likelihoods of what differing variable that remains the same size?",
+      "clean_context": "The best, worst and average case complexity refer to three different ways of measuring the time complexity (or any other complexity measure) of different inputs of the same size. Since some inputs of size n may be faster to solve than others, we define the following complexities:",
+      "distracted_context": "The sentiment behind this commandment is further codified in the Lord 's Prayer , which begins , \" Our Father who art in heaven , hallowed be thy name \" . According to Pope Benedict XVI , when God rev The best, worst and average case complexity refer to three different ways of measuring the time complexity (or any other complexity measure) There have been a number of potential species assigned to the carnosaurian dinosaur genus Allosaurus since its description in 1877 by Othniel Charles Marsh , but only a handful are still regarded as v  of different inputs of the same size. Since some inputs of size n may be faster to solve than others, we define the following complexities: The majority of material created for previous games , such as the <unk> system and the design of maps , was carried over . Alongside this , improvements were made to the game 's graphics and some elem",
+      "ground_truth": "inputs",
+      "ground_truth_variants": [
+        "inputs",
+        "inputs",
+        "inputs"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The best, worst, and average case complexity are three different ways of measuring the time complexity (or any other complexity measure) of different inputs of the same size. These measures help us understand how well a given algorithm performs under different conditions.",
+      "clean_generation_time_ms": 1132.8862730006222,
+      "distracted_prediction": "Case complexities provide three likelihoods of what differing variable that remains the same size?",
+      "distracted_generation_time_ms": 652.903316999982
+    },
+    {
+      "sample_id": 35,
+      "question": "What expression is generally used to convey upper or lower bounds?",
+      "clean_context": "Upper and lower bounds are usually stated using the big O notation, which hides constant factors and smaller terms. This makes the bounds independent of the specific details of the computational model used. For instance, if T(n) = 7n2 + 15n + 40, in big O notation one would write T(n) = O(n2).",
+      "distracted_context": "For $ 20 @,@ 000 , made up of gambling winnings , his girlfriend 's credit card , and money his father set aside for him for college , Anderson made Cigarettes & Coffee ( 1993 ) , a short film connect Upper and lower bounds are usually stated using the big O notation, which hides constant factors and smaller terms. This makes the bounds independe Much of the public imagery of the site details the ruthless manner in which the city dealt with its enemies . A 16 by 4 metres ( 52 by 13 ft ) stucco sculpture rising from the fourth to fifth terraces nt of the specific details of the computational model used. For instance, if T(n) = 7n2 + 15n + 40, in big O notation one would write T(n) = O(n2). Attempts were made to fix the problems and were at least partially successful in stopping many of the leaks . The ship was commissioned on 22 November and became the flagship of Flag Officer Josiah Ta",
+      "ground_truth": "big O notation",
+      "ground_truth_variants": [
+        "big O notation",
+        "big O notation",
+        "big O notation"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The expression that is generally used to convey upper or lower bounds is the big O notation.",
+      "clean_generation_time_ms": 1513.2233620006446,
+      "distracted_prediction": "The expression that is generally used to convey upper or lower bounds is the big O notation.",
+      "distracted_generation_time_ms": 1951.4783770000577
+    },
+    {
+      "sample_id": 36,
+      "question": "What does a big O notation hide?",
+      "clean_context": "Upper and lower bounds are usually stated using the big O notation, which hides constant factors and smaller terms. This makes the bounds independent of the specific details of the computational model used. For instance, if T(n) = 7n2 + 15n + 40, in big O notation one would write T(n) = O(n2).",
+      "distracted_context": "Eugeniusz <unk> took some 1 @,@ 000 photographs before he died ; Sylwester Braun some 3 @,@ 000 , of which 1 @,@ 500 survive ; Jerzy <unk> some 1 @,@ 000 , of which 600 survived . Upper and lower bounds are usually stated using the big O notation, which hides constant factors and smaller terms. This makes the bounds independe The Rhode Island Department of Transportation ( RIDOT ) has laid out long @-@ term plans for improvements to both the southern and northern termini of Route 4 . During the 1980s and 1990s , RIDOT anno nt of the specific details of the computational model used. For instance, if T(n) = 7n2 + 15n + 40, in big O notation one would write T(n) = O(n2). The Great Coastal hurricane of 1806 was first noted far east of the Lesser Antilles on 17 August . Weather historian David M. Ludlum followed the disturbance 's track to the Bahamas by 19 August ; int",
+      "ground_truth": "constant factors and smaller terms",
+      "ground_truth_variants": [
+        "constant factors and smaller terms",
+        "constant factors and smaller terms",
+        "constant factors and smaller terms"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "A big O notation hides constant factors and smaller terms.",
+      "clean_generation_time_ms": 1863.4724940002343,
+      "distracted_prediction": "Big O notation is a mathematical notation that describes the upper bound of the growth rate of a function as its input size increases.",
+      "distracted_generation_time_ms": 1974.7887610001271
+    },
+    {
+      "sample_id": 37,
+      "question": "How would one write T(n) = 7n2 + 15n + 40 in big O notation?",
+      "clean_context": "Upper and lower bounds are usually stated using the big O notation, which hides constant factors and smaller terms. This makes the bounds independent of the specific details of the computational model used. For instance, if T(n) = 7n2 + 15n + 40, in big O notation one would write T(n) = O(n2).",
+      "distracted_context": "The Egyptians also devised false etymologies giving more meanings to divine names . A passage in the Coffin Texts renders the name of the funerary god <unk> as sk r , meaning \" cleaning of the mouth \" Upper and lower bounds are usually stated using the big O notation, which hides constant factors and smaller terms. This makes the bounds independe When Wheeler was four , his father was appointed chief leader writer for the Bradford Observer . The family relocated to Saltaire , a village northwest of Bradford , a cosmopolitan city in Yorkshire , nt of the specific details of the computational model used. For instance, if T(n) = 7n2 + 15n + 40, in big O notation one would write T(n) = O(n2). Sarnia is the location of Enbridge 's Sarnia Photovoltaic Power Plant . The facility went into full commercial operation in December 2009 , with 20 MW of power . As of September 2010 , the plant was t",
+      "ground_truth": "T(n) = O(n2)",
+      "ground_truth_variants": [
+        "T(n) = O(n2)",
+        "T(n) = O(n2)",
+        "T(n) = O(n2)"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "To write T(n) = 7n^2 + 15n + 40 in big O notation, you would only include the highest order term, which is n^2.",
+      "clean_generation_time_ms": 1960.7787120003195,
+      "distracted_prediction": "In big O notation, T(n) = 7n^2 + 15n + 40 would be written as T(n) = O(n^2).",
+      "distracted_generation_time_ms": 1155.2951020003093
+    },
+    {
+      "sample_id": 38,
+      "question": "Big O notation provides autonomy to upper and lower bounds with relationship to what?",
+      "clean_context": "Upper and lower bounds are usually stated using the big O notation, which hides constant factors and smaller terms. This makes the bounds independent of the specific details of the computational model used. For instance, if T(n) = 7n2 + 15n + 40, in big O notation one would write T(n) = O(n2).",
+      "distracted_context": "American National Insurance Company , one of the largest life insurance companies in the United States , is based in Galveston . The company and its subsidiaries operate in all 50 U.S. states , the Di Upper and lower bounds are usually stated using the big O notation, which hides constant factors and smaller terms. This makes the bounds independe The growth in Commercial Air Transport ( CAT ) has eroded the operational freedom of GA , both in the air and on the ground at larger airports . Difficulty with access to larger airports is compounded nt of the specific details of the computational model used. For instance, if T(n) = 7n2 + 15n + 40, in big O notation one would write T(n) = O(n2). When World War II threatened tropical sources of natural latex for rubber , Sarnia was selected as the site to spearhead development of synthetic petroleum @-@ based rubbers for war materials , and Po",
+      "ground_truth": "the computational model",
+      "ground_truth_variants": [
+        "the computational model",
+        "specific details of the computational model used",
+        "the specific details of the computational model used"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Big O notation provides autonomy to upper and lower bounds with relationship to the specifics of the computational model used.",
+      "clean_generation_time_ms": 681.5341989995432,
+      "distracted_prediction": "Big O notation provides an upper bound and a lower bound for the growth rate of a function as the input size increases.",
+      "distracted_generation_time_ms": 1657.1526170000652
+    },
+    {
+      "sample_id": 39,
+      "question": "What is the foundation for separation results within complexity classes?",
+      "clean_context": "The time and space hierarchy theorems form the basis for most separation results of complexity classes. For instance, the time hierarchy theorem tells us that P is strictly contained in EXPTIME, and the space hierarchy theorem tells us that L is strictly contained in PSPACE.",
+      "distracted_context": "The rails are a bird family comprising nearly 150 species . Although origins of the group are lost in antiquity , the largest number of species and least specialised forms are found in the Old World , The time and space hierarchy theorems form the basis for most separation results of complexity classes. For instance, the time hierarchy  In 2007 , after a highly publicized feud between Finkelstein and an academic opponent , Alan Dershowitz , Finkelstein 's tenure bid at DePaul was denied . Finkelstein was placed on administrative leav theorem tells us that P is strictly contained in EXPTIME, and the space hierarchy theorem tells us that L is strictly contained in PSPACE. Loss of habitat is the other major threat to the corn crake . Apart from the reduced suitability of drained and fertilised silage fields compared to traditional hay meadows , in western Europe the con",
+      "ground_truth": "time and space hierarchy theorems",
+      "ground_truth_variants": [
+        "time and space hierarchy theorems",
+        "The time and space hierarchy theorems",
+        "time and space hierarchy theorems"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The time and space hierarchy theorems are the foundation for separation results within complexity classes.",
+      "clean_generation_time_ms": 1422.6413550004509,
+      "distracted_prediction": "The time and space hierarchy theorems form the basis for most separation results of complexity classes.",
+      "distracted_generation_time_ms": 2869.060666000223
+    },
+    {
+      "sample_id": 40,
+      "question": "What is responsible for constraining P according to the time hierarchy theorem?",
+      "clean_context": "The time and space hierarchy theorems form the basis for most separation results of complexity classes. For instance, the time hierarchy theorem tells us that P is strictly contained in EXPTIME, and the space hierarchy theorem tells us that L is strictly contained in PSPACE.",
+      "distracted_context": "Everyone in the office tells Andy that quitting is a foolish move and that he has no chance of achieving stardom . Andy eventually goes back on his decision , and David allows him to stay on in a sale The time and space hierarchy theorems form the basis for most separation results of complexity classes. For instance, the time hierarchy  At Metacritic , which assigns a normalized rating out of 100 to reviews from mainstream critics , the album received an average score of 73 , based on 6 reviews , and scoring higher than any other alb theorem tells us that P is strictly contained in EXPTIME, and the space hierarchy theorem tells us that L is strictly contained in PSPACE. A form of the species found in Korea and Japan , A. hygrometricus var. koreanus , was named by <unk> <unk> in 1958 ; it was later ( 1976 ) published as a distinct species \u2014 A. koreanus \u2014 by Hanns Krei",
+      "ground_truth": "EXPTIME",
+      "ground_truth_variants": [
+        "EXPTIME",
+        "EXPTIME",
+        "EXPTIME"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The time hierarchy theorem states that P is strictly contained in EXPTIME.",
+      "clean_generation_time_ms": 1519.0063729996837,
+      "distracted_prediction": "The time hierarchy theorem states that any problem P can be solved in polynomial time P \\* O(n^k) or exponential time P \\* O(2^n) if and only if there exists a subproblem Q such that Q is polynomial-time reducible to P and Q can be solved in polynomial time.",
+      "distracted_generation_time_ms": 2721.333243999652
+    },
+    {
+      "sample_id": 41,
+      "question": "Within what variable is L constrained according to the space hierarchy theorem?",
+      "clean_context": "The time and space hierarchy theorems form the basis for most separation results of complexity classes. For instance, the time hierarchy theorem tells us that P is strictly contained in EXPTIME, and the space hierarchy theorem tells us that L is strictly contained in PSPACE.",
+      "distracted_context": "Sholay ( pronunciation , meaning \" Embers \" ) is a 1975 Indian Hindi @-@ language action @-@ adventure film directed by Ramesh Sippy and produced by his father G. P. Sippy . The film follows two crimi The time and space hierarchy theorems form the basis for most separation results of complexity classes. For instance, the time hierarchy  The novel has also been adapted for the stage , by Jorge Al\u00ed Triana and his daughter Veronica Triana , directed by Jorge Triana : the play was put on ( in Spanish , but with simultaneous translation t theorem tells us that P is strictly contained in EXPTIME, and the space hierarchy theorem tells us that L is strictly contained in PSPACE. The best hockey players on their high school team , Ross and the Patrick brothers were invited to play occasional games for local league teams in Montreal . Ross first played in an organized league in",
+      "ground_truth": "PSPACE",
+      "ground_truth_variants": [
+        "PSPACE",
+        "PSPACE",
+        "PSPACE"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "L is constrained within the variable of polynomial space (PSPACE) according to the space hierarchy theorem.",
+      "clean_generation_time_ms": 615.8708829998432,
+      "distracted_prediction": "The space hierarchy theorem states that L is strictly contained in PSPACE.",
+      "distracted_generation_time_ms": 574.0247730000192
+    },
+    {
+      "sample_id": 42,
+      "question": "In what complexity class do complement problems of NP problems exist?",
+      "clean_context": "Along the same lines, co-NP is the class containing the complement problems (i.e. problems with the yes/no answers reversed) of NP problems. It is believed that NP is not equal to co-NP; however, it has not yet been proven. It has been shown that if these two complexity classes are not equal then P is not equal to NP.",
+      "distracted_context": "The engraved panel in the north end of the aisle is considered to be a unique sculpture , and shows Bhairava , or Virabhadra , a frightful form of Shiva . In the carved panel Shiva 's consort is seen  Along the same lines, co-NP is the class containing the complement problems (i.e. problems with the yes/no answers reversed) of NP problems. It is believed tha It seems apparent that the people who built these monuments were influenced by pre @-@ existing tomb @-@ shrines that they were already aware of . Whether those people had grown up locally , or moved  t NP is not equal to co-NP; however, it has not yet been proven. It has been shown that if these two complexity classes are not equal then P is not equal to NP. Allosaurus material from Portugal was first reported in 1999 on the basis of <unk> / <unk> , a partial skeleton including a quadrate , vertebrae , ribs , gastralia , chevrons , part of the hips , and ",
+      "ground_truth": "co-NP",
+      "ground_truth_variants": [
+        "co-NP",
+        "co-NP",
+        "co-NP"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Co-NP",
+      "clean_generation_time_ms": 279.59414100041613,
+      "distracted_prediction": "Complement problems of NP problems exist in the co-NP complexity class.",
+      "distracted_generation_time_ms": 621.4561670003604
+    },
+    {
+      "sample_id": 43,
+      "question": "How do the yes/no answers of a complement problem of NP appear?",
+      "clean_context": "Along the same lines, co-NP is the class containing the complement problems (i.e. problems with the yes/no answers reversed) of NP problems. It is believed that NP is not equal to co-NP; however, it has not yet been proven. It has been shown that if these two complexity classes are not equal then P is not equal to NP.",
+      "distracted_context": "In 2007 , the New York Post included Fey in New York 's 50 Most Powerful Women , ranking her at number 33 . Fey was among the Time 100 , a list of the 100 most influential people in the world , in 200 Along the same lines, co-NP is the class containing the complement problems (i.e. problems with the yes/no answers reversed) of NP problems. It is believed tha A recurring theme in these myths is the effort of the gods to maintain maat against the forces of disorder . They fight vicious battles with the forces of chaos at the start of creation . Ra and Apep  t NP is not equal to co-NP; however, it has not yet been proven. It has been shown that if these two complexity classes are not equal then P is not equal to NP. In December 1971 , during the Indo @-@ Pakistani War of 1971 , the US President Richard Nixon sent a carrier battle group named Task Force 74 , led by the nuclear @-@ powered USS Enterprise into the B",
+      "ground_truth": "reversed",
+      "ground_truth_variants": [
+        "reversed",
+        "reversed",
+        "reversed"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The yes/no answers of a complement problem of NP are reversed from their original form.",
+      "clean_generation_time_ms": 2707.1982420002314,
+      "distracted_prediction": "In the context of computational complexity theory, a complement problem of NP is a problem that can be solved in polynomial time if and only if NP cannot solve it in polynomial time.",
+      "distracted_generation_time_ms": 2998.751290000655
+    },
+    {
+      "sample_id": 44,
+      "question": "What is commonly believed to be the value relationship between P and co-NP",
+      "clean_context": "Along the same lines, co-NP is the class containing the complement problems (i.e. problems with the yes/no answers reversed) of NP problems. It is believed that NP is not equal to co-NP; however, it has not yet been proven. It has been shown that if these two complexity classes are not equal then P is not equal to NP.",
+      "distracted_context": "In the 1992 Summer Olympics , he was a member of the star @-@ studded squad that included Magic Johnson , Larry Bird , and David Robinson and was dubbed the \" Dream Team \" . Jordan was the only player Along the same lines, co-NP is the class containing the complement problems (i.e. problems with the yes/no answers reversed) of NP problems. It is believed tha Recording sessions of the basic instrumental tracks for Wrapped in Red took place in Kurstin 's Echo Studio in Los Angeles while orchestral sessions were recorded at EastWest Studios in Hollywood and  t NP is not equal to co-NP; however, it has not yet been proven. It has been shown that if these two complexity classes are not equal then P is not equal to NP. Antimony is a silvery , lustrous gray metalloid that has a Mohs scale hardness of 3 . Thus pure antimony is too soft to make hard objects ; coins made of antimony were issued in China 's Guizhou provi",
+      "ground_truth": "not equal",
+      "ground_truth_variants": [
+        "not equal",
+        "not equal",
+        "not equal"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "It is commonly believed that P is strictly contained in co-NP but not equal to it.",
+      "clean_generation_time_ms": 1716.793456999767,
+      "distracted_prediction": "It is commonly believed that P is not equal to co-NP, as there have been no known reductions from P to co-NP.",
+      "distracted_generation_time_ms": 2161.0994599996047
+    },
+    {
+      "sample_id": 45,
+      "question": "What implication can be derived for P and NP if P and co-NP are established to be unequal?",
+      "clean_context": "Along the same lines, co-NP is the class containing the complement problems (i.e. problems with the yes/no answers reversed) of NP problems. It is believed that NP is not equal to co-NP; however, it has not yet been proven. It has been shown that if these two complexity classes are not equal then P is not equal to NP.",
+      "distracted_context": "In Britain , these tombs were typically located on prominent hills and slopes overlooking the surrounding landscape , perhaps at the junction between different territories . Archaeologist Caroline Mal Along the same lines, co-NP is the class containing the complement problems (i.e. problems with the yes/no answers reversed) of NP problems. It is believed tha The Soviets quickly <unk> the annexed lands , introducing compulsory collectivization . They proceeded to confiscate , nationalize and redistribute private and state @-@ owned Polish property . In the t NP is not equal to co-NP; however, it has not yet been proven. It has been shown that if these two complexity classes are not equal then P is not equal to NP. The forms in which the gods are shown , although diverse , are limited in many ways . Many creatures that are widespread in Egypt were never used in divine iconography , whereas a few , such as falcon",
+      "ground_truth": "P is not equal to NP",
+      "ground_truth_variants": [
+        "P is not equal to NP",
+        "not equal",
+        "P is not equal to NP"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "If P and co-NP are unequal, then P cannot be a subset of NP.",
+      "clean_generation_time_ms": 1584.5422030006375,
+      "distracted_prediction": "If P and co-NP are established to be unequal, it implies that there must exist complex problems that cannot be solved by reversing the yes/no answers of NP problems.",
+      "distracted_generation_time_ms": 1684.1063269994265
+    },
+    {
+      "sample_id": 46,
+      "question": "What variable is associated with all problems solved within logarithmic space?",
+      "clean_context": "Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes.",
+      "distracted_context": "In 2011 Rice University released a study , \" Atlas of Sustainable Strategies for Galveston Island , \" which argued that the West End of Galveston was quickly eroding and that the City should reduce co Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to  The corn crake is solitary on the wintering grounds , where each bird occupies 4 @.@ 2 \u2013 4 @.@ 9 ha ( 10 \u2013 12 acres ) at one time , although the total area used may be double that , since an individua P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes. To insulate the sacred power in the sanctuary from the impurities of the outside world , the Egyptians enclosed temple sanctuaries and greatly restricted access to them . People other than kings and h",
+      "ground_truth": "L",
+      "ground_truth_variants": [
+        "L",
+        "L",
+        "L"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The variable associated with all problems solved within logarithmic space is the logarithm base of the input size. This makes sense because logarithmic space is defined by limiting the amount of memory needed for computation to a function of the input size logarithmically.",
+      "clean_generation_time_ms": 1254.6296560003611,
+      "distracted_prediction": "The variable associated with all problems solved within logarithmic space is L.",
+      "distracted_generation_time_ms": 597.3319889999402
+    },
+    {
+      "sample_id": 47,
+      "question": "Though unkown, what are the most commonly ascribed attributes of L in relation to P",
+      "clean_context": "Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes.",
+      "distracted_context": "On the first day of the following season , Stansfield was substituted through injury after 16 minutes of an eventual 2 \u2013 2 home draw with Gravesend & Northfleet to be replaced by <unk> Demba . It was  Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to  In the General Government , the remaining schools were subjugated to the German educational system , and the number and competence of their Polish staff was steadily scaled down . All universities and P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes. Flying schools are commercial businesses engaged in the training of pilots , both for recreational purposes and for those intending to fly professionally . They make widespread use of fixed @-@ wing l",
+      "ground_truth": "strictly contained in P or equal to P",
+      "ground_truth_variants": [
+        "strictly contained in P or equal to P",
+        "contained in P or equal to P.",
+        "strictly contained in P or equal to P"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The most commonly ascribed attribute of L in relation to P is that L is a proper subset of P, meaning that L is a subclass of P but not all problems in P are in L.",
+      "clean_generation_time_ms": 1413.9712830001372,
+      "distracted_prediction": "As I mentioned earlier, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P (the set of all problems that can be solved in polynomial time) or equal to  In the General Government , the remaining schools were subjugated to the German educational system , and the number and competence of their Polish staff was steadily scaled down .",
+      "distracted_generation_time_ms": 2883.5099150001042
+    },
+    {
+      "sample_id": 48,
+      "question": "What lies between L and P that prevents a definitive determination of the relationship between L and P?",
+      "clean_context": "Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes.",
+      "distracted_context": "The fourth stage involved remedying the problem of communicating between the two towers during the time of Pope Pius X. His plans were to make the Gregorian Tower into a historical tower and to record Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to  She was refitted before Operation Barbarossa , probably about 1940 , her catapult was removed , and her anti @-@ aircraft armament was greatly increased . Her four 76 @.@ 2 mm Lender AA guns were exch P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes. The United States Conference of Catholic Bishops ( <unk> ) explain the Catechism in their book entitled United States Catechism for Adults , published in 2006 . Regarding graven images , they expound ",
+      "ground_truth": "complexity classes",
+      "ground_truth_variants": [
+        "complexity classes",
+        "many complexity classes",
+        "many complexity classes"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "There are several complexity classes that lie between L and P, including NL (nondeterministic logarithmic), NC (nondeterministic polynomial-time), and NP (nondeterministic polynomial-time with membership problem).",
+      "clean_generation_time_ms": 2418.3865300001344,
+      "distracted_prediction": "There are multiple factors that could contribute to the lack of a definitive determination of the relationship between L and P. Some possible reasons include:",
+      "distracted_generation_time_ms": 2913.1402590001017
+    },
+    {
+      "sample_id": 49,
+      "question": "What are two complexity classes between L and P?",
+      "clean_context": "Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes.",
+      "distracted_context": "Except for \u00c6sthetic Club meetings , the Tower Building remained largely unoccupied for almost fifty years and suffered significant deterioration . The \u00c6sthetic Club provided much @-@ needed financial  Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to  The revolutionary forces were to be demobilized as soon as possible and the federal forces were to be the only army in Mexico . This was in order to appease the army , which had opposed a compromise w P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes. Vargas Llosa interlaces fictional elements and historical events : the book is not a documentary , and the Cabral family , for instance , is completely fictional . On the other hand , the characters o",
+      "ground_truth": "NL and NC",
+      "ground_truth_variants": [
+        "NL and NC",
+        "NL and NC",
+        "NL and NC"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Two complexity classes between L and P are NL (nondeterministic logarithmic) and NC (nondeterministic polynomial-time).",
+      "clean_generation_time_ms": 846.9785580000462,
+      "distracted_prediction": "It is not clear what two complexity classes between L and P would be. Can you provide more context or clarify your question?",
+      "distracted_generation_time_ms": 812.3518109996439
+    },
+    {
+      "sample_id": 50,
+      "question": "What is unknown about the complexity classes between L and P that further prevents determining the value relationship between L and P?",
+      "clean_context": "Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes.",
+      "distracted_context": "The wolf , after some complaint , agrees to this and the two proceed through the woods after the prize \u2014 all the while the fox considers how to trick the wolf . Eventually , as the wolf complains of t Similarly, it is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P or equal to  In 2008 , AML became the first cancer genome to be fully sequenced . DNA extracted from leukemic cells were compared to unaffected skin . The leukemic cells contained acquired mutations in several gen P. Again, there are many complexity classes between the two, such as NL and NC, and it is not known if they are distinct or equal classes. Garner , Mandy . \" The Good Jewish Boys Go into Battle . \" Times Higher Education Supplement 16 December 2005 .",
+      "ground_truth": "if they are distinct or equal classes",
+      "ground_truth_variants": [
+        "if they are distinct or equal classes",
+        "if they are distinct or equal classes",
+        "if they are distinct or equal classes"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The uncertainty about the relationship between L and P arises from the fact that some problems that are in L may also be in other complexity classes that are intermediate between L and P, such as NC^2 or NL^+.",
+      "clean_generation_time_ms": 2241.3206239998544,
+      "distracted_prediction": "It is not known if L (the set of all problems that can be solved in logarithmic space) is strictly contained in P (the set of all problems that can be solved in polynomial time) or equal to P.",
+      "distracted_generation_time_ms": 2887.071959000423
+    },
+    {
+      "sample_id": 51,
+      "question": "What tactic did researchers employ to offset the former deficit of work surrounding the complexity of algorithmic problems?",
+      "clean_context": "Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer.",
+      "distracted_context": "\" Love Me Like You \" is a song recorded by British girl group Little Mix for their third studio album , Get Weird ( 2015 ) . The song was released on 25 September 2015 , as the second single from the  Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most  Jordan had a versatile offensive game . He was capable of aggressively driving to the basket , as well as drawing fouls from his opponents at a high rate ; his 8 @,@ 772 free throw attempts are the ni influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer. Townsend 's solo albums , a diverse mix of hard rock , progressive metal , ambient , and new @-@ age , have featured a varying lineup of supporting musicians . In 2002 he formed the Devin Townsend Ban",
+      "ground_truth": "foundations were laid out",
+      "ground_truth_variants": [
+        "foundations were laid out",
+        "numerous foundations were laid out",
+        "numerous foundations were laid out by various researchers"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Researchers employed several tactics to overcome the lack of research on the complexity of algorithmic problems.",
+      "clean_generation_time_ms": 2300.163429999884,
+      "distracted_prediction": "Researchers employed several tactics to overcome the prior deficiency of work dedicated to the complexity of algorithmic problems.",
+      "distracted_generation_time_ms": 2534.232074999636
+    },
+    {
+      "sample_id": 52,
+      "question": "Who was the most influential researcher among those grappling with the deficit of work surrounding the complexity posed by algorithmic problems?",
+      "clean_context": "Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer.",
+      "distracted_context": "The Catechism associates this commandment with the three theological virtues . The first virtue , faith , instructs Catholics to believe in God and avoid heresy , apostasy , and schism . The second vi Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most  In 1985 , few countries had women 's national football teams . While the sport gained popularity worldwide in later decades , the Gambia 's national team only played its first game in 2007 . That game influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer. The wartime attempts to destroy Polish culture may have strengthened it instead . Norman Davies wrote in God 's Playground : \" In 1945 , as a prize for untold sacrifices , the attachment of the surviv",
+      "ground_truth": "Alan Turing",
+      "ground_truth_variants": [
+        "Alan Turing",
+        "Alan Turing",
+        "Alan Turing"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The most influential researcher among those who dealt with the complexity of algorithmic problems before the explicit research on this topic began was Alan Turing. He defined Turing machines in 1936, which provided a robust and flexible simplification of a computer that has become a cornerstone of modern computing theory.",
+      "clean_generation_time_ms": 1438.0654410006173,
+      "distracted_prediction": "There have been many influential researchers who have contributed to our understanding of algorithmic problems.",
+      "distracted_generation_time_ms": 2010.6095450000794
+    },
+    {
+      "sample_id": 53,
+      "question": "What theoretical device is attributed to Alan Turing?",
+      "clean_context": "Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer.",
+      "distracted_context": "Gabbar Singh , the film 's antagonist , was well received by the audience , despite his pervasive sadistic cruelty . Dissanayake explains that the audience was fascinated by the dialogues and manneris Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most  Nathan was traded to the Minnesota Twins on November 16 , 2003 , in one of the more lopsided trades in San Francisco Giants history . The Giants sent Nathan to the Twins along with pitchers <unk> <unk influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer. Jordan 's individual accolades and accomplishments include five Most Valuable Player ( MVP ) Awards , ten All @-@ NBA First Team designations , nine All @-@ Defensive First Team honors , fourteen NBA ",
+      "ground_truth": "Turing machines",
+      "ground_truth_variants": [
+        "Turing machines",
+        "Turing machines",
+        "Turing machines"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "In 1936, Alan Turing defined Turing machines, which have been regarded as a very robust and flexible simplification of a computer. These machines are widely used as a theoretical device for studying computability and algorithms.",
+      "clean_generation_time_ms": 1115.713792999486,
+      "distracted_prediction": "Alan Turing is credited with defining Turing machines, an early model of a computer. This concept laid the foundation for modern computing and has been instrumental in understanding the capabilities and limitations of computers.",
+      "distracted_generation_time_ms": 1097.0873489995938
+    },
+    {
+      "sample_id": 54,
+      "question": "In what year was the Alan Turing's definitional model of a computing device received?",
+      "clean_context": "Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer.",
+      "distracted_context": "The case was first heard in the United States District Court for the Eastern District of Pennsylvania , where , following oral arguments , the judge dismissed both Trinsey 's motion to remove Wofford  Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most  The western portion of Galveston is referred to as the \" West End \" . Communities in eastern Galveston include Lake Madeline , <unk> Bayou , Central City , Fort Crockett , Bayou Shore , Lasker Park ,  influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer. Enlargement of the spleen may occur in AML , but it is typically mild and asymptomatic . <unk> node swelling is rare in AML , in contrast to acute lymphoblastic leukemia . The skin is involved about 1",
+      "ground_truth": "1936",
+      "ground_truth_variants": [
+        "1936",
+        "1936",
+        "1936"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Alan Turing's definitional model of a computing device was received in 1936.",
+      "clean_generation_time_ms": 640.0690009995742,
+      "distracted_prediction": "In 1936, Alan Turing proposed his definition of a computing machine, which later became known as Turing machines. This model provided a theoretical framework for understanding the capabilities and limitations of computers, and has been widely adopted and expanded upon in subsequent years.",
+      "distracted_generation_time_ms": 1396.604947999549
+    },
+    {
+      "sample_id": 55,
+      "question": "In the most basic sense what did a Turing machine emulate?",
+      "clean_context": "Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer.",
+      "distracted_context": "During the reintroduction of corn crakes to England in the 2003 breeding season , enteritis and ill health in pre @-@ release birds was due to bacteria of a pathogenic Campylobacter species . Subseque Before the actual research explicitly devoted to the complexity of algorithmic problems started off, numerous foundations were laid out by various researchers. Most  Policemen and judges , as well as state legislators , that had been appointed or \" elected \" under D\u00edaz were to retain their offices . influential among these was the definition of Turing machines by Alan Turing in 1936, which turned out to be a very robust and flexible simplification of a computer. In 2009 , James told Inside Soap that Nicole and Geoff had a strong friendship underneath their romance . She also described their compatibility stating : \" They 're complete opposites , which works w",
+      "ground_truth": "a computer",
+      "ground_truth_variants": [
+        "a computer",
+        "a computer",
+        "a computer"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "A Turing machine is a theoretical model that emulates any deterministic algorithmic process that can be described using a set of rules.",
+      "clean_generation_time_ms": 2689.2187450002893,
+      "distracted_prediction": "A Turing machine is a theoretical computing machine which is an abstract model of a general-purpose computer.",
+      "distracted_generation_time_ms": 2128.1020019996504
+    },
+    {
+      "sample_id": 56,
+      "question": "What is the concrete choice typically assumed by most complexity-theoretic theorems?",
+      "clean_context": "Even though some proofs of complexity-theoretic theorems regularly assume some concrete choice of input encoding, one tries to keep the discussion abstract enough to be independent of the choice of encoding. This can be achieved by ensuring that different representations can be transformed into each other efficiently.",
+      "distracted_context": "The tenth track , \" White Christmas \" , was the first song to be recorded for Wrapped in Red . A cover of Rodgers and Hammerstein 's \" My Favorite Things \" follows up as the eleventh track . Clarkson  Even though some proofs of complexity-theoretic theorems regularly assume some concrete choice of input encoding, one tries to keep the discussion abstract eno ArtWalk takes place approximately every six weeks on Saturday evenings throughout the year . ArtWalk is organized by Galveston Arts Center , which releases an ArtWalk brochure featuring a map of parti ugh to be independent of the choice of encoding. This can be achieved by ensuring that different representations can be transformed into each other efficiently. Initial critical reviews of Sholay were negative . Among contemporary critics , <unk> <unk> of India Today called the film a \" dead ember \" and \" a gravely flawed attempt \" . Filmfare said that the fi",
+      "ground_truth": "input encoding",
+      "ground_truth_variants": [
+        "input encoding",
+        "input encoding",
+        "input encoding"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Most complexity-theoretic theorems assume a binary or base-2 representation of bits as their input encoding. However, some results may also be proven using other representations such as base-3 or base-4. The choice of encoding depends on the specific problem being considered and the available resources for computation.",
+      "clean_generation_time_ms": 1428.42448600004,
+      "distracted_prediction": "Most complexity-theoretic theorems typically assume a concrete choice of input encoding.",
+      "distracted_generation_time_ms": 2187.1639989994947
+    },
+    {
+      "sample_id": 57,
+      "question": "In the effort of maintaining a level of abstraction, what choice is typically left independent?",
+      "clean_context": "Even though some proofs of complexity-theoretic theorems regularly assume some concrete choice of input encoding, one tries to keep the discussion abstract enough to be independent of the choice of encoding. This can be achieved by ensuring that different representations can be transformed into each other efficiently.",
+      "distracted_context": "The wolf is likened to a wicked man who oppresses others . The fox is likened to the devil . The farmer is likened to the godly man , with whom the fiend finds fault . The woods where the wolf was che Even though some proofs of complexity-theoretic theorems regularly assume some concrete choice of input encoding, one tries to keep the discussion abstract eno 1998 : A Nation on Trial : The Goldhagen Thesis and Historical Truth ( co @-@ written with Ruth Bettina <unk> ) , Henry Holt and Co . ; ISBN 0 @-@ 8050 @-@ <unk> @-@ 9 . ugh to be independent of the choice of encoding. This can be achieved by ensuring that different representations can be transformed into each other efficiently. Jordan was recruited by numerous college basketball programs , including Duke , North Carolina , South Carolina , Syracuse , and Virginia . In 1981 , Jordan accepted a basketball scholarship to North ",
+      "ground_truth": "encoding",
+      "ground_truth_variants": [
+        "encoding",
+        "encoding",
+        "encoding"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The choice of input encoding is typically left independent in discussions of complexity theory. It's important to note that while certain proofs may make simplifying assumptions about the input encoding, the results are often applicable to a wide range of encodings with minimal modifications.",
+      "clean_generation_time_ms": 1232.3086569995212,
+      "distracted_prediction": "In the effort of maintaining a level of abstraction, the choice of input encoding is typically left independent. This means that the discussion should focus on general principles and concepts rather than specific details or particular choices made in a given context.",
+      "distracted_generation_time_ms": 1242.735052000171
+    },
+    {
+      "sample_id": 58,
+      "question": "What is the name of the region that is not defined by the eight or 10 county definitions?",
+      "clean_context": "The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United States. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana.",
+      "distracted_context": "Ruler 4 was succeeded by K 'inich Ich 'aak Chapat in 723 . Around 725 Tonin\u00e1 fought a war against Piedras Negras , a city on the north bank of the Usumacinta River , now in Guatemala . A series of eve The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United S Shortly after 20 : 00 , the German battleships engaged the 2nd Light Cruiser Squadron ; Markgraf fired primarily 15 cm shells . In this period , Markgraf was engaged by Agincourt 's 12 @-@ inch guns , tates. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana. The \" off @-@ the @-@ cuff \" conclusion to production was one of the reasons the album was titled Loose . It was named partly after the spontaneous decisions she made when creating the album . The alb",
+      "ground_truth": "Southern California Megaregion",
+      "ground_truth_variants": [
+        "Southern California Megaregion",
+        "the greater Southern California Megaregion",
+        "Southern California Megaregion"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The name of the region that is not defined by the eight or 10 county definitions is the greater Southern California Megaregion.",
+      "clean_generation_time_ms": 757.5074479991599,
+      "distracted_prediction": "The name of the region that is not defined by the eight or 10 county definitions is \"Southern California Megaregion,\" one of the 11 megaregions of the United States.",
+      "distracted_generation_time_ms": 1262.9452459996173
+    },
+    {
+      "sample_id": 59,
+      "question": "How many megaregions are there in the United States?",
+      "clean_context": "The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United States. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana.",
+      "distracted_context": "The development of women 's football in Africa faces several challenges , including limited access to education , poverty amongst women , inequalities and human rights abuses targeting women . Funding The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United S The treatment of this species by certain taxonomists well illustrates the pitfalls that lie in wait for those who worship at the shrine of <unk> classification ... The only feature of those outlined i tates. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana. 2005 : Beyond Chutzpah : On the Misuse of Anti @-@ Semitism and the Abuse of History . University of California Press ; ISBN 0 @-@ 520 @-@ <unk> @-@ 9 . 2nd updated Ed . , University of California Pre",
+      "ground_truth": "11",
+      "ground_truth_variants": [
+        "11",
+        "11",
+        "11"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "There are 11 megaregions in the United States.",
+      "clean_generation_time_ms": 486.472156999298,
+      "distracted_prediction": "There are 11 megaregions in the United States, as per recent research.",
+      "distracted_generation_time_ms": 2438.193437999871
+    },
+    {
+      "sample_id": 60,
+      "question": "What is the name of the state that the megaregion expands to in the east?",
+      "clean_context": "The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United States. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana.",
+      "distracted_context": "Esta\u00f1ol 's views represented those of the portion of the upper class which was willing to come to terms with at least a portion of the middle class in order to crush the peasant uprisings , as exempli The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United S With the enemy subdued , Strachan ordered a thorough search of the captured vessels , but could find no contraband and returned control to the French commander . The French officer however refused , i tates. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana. On 1 January 1991 , Sarnia and the neighbouring town of Clearwater were amalgamated as the new city of Sarnia @-@ Clearwater . The amalgamation was originally slated to include the village of Point Ed",
+      "ground_truth": "Nevada",
+      "ground_truth_variants": [
+        "Nevada",
+        "Nevada",
+        "Nevada"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The name of the state that the megaregion expands to in the east is Nevada.",
+      "clean_generation_time_ms": 604.947708000509,
+      "distracted_prediction": "The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United States.",
+      "distracted_generation_time_ms": 2842.5204839995786
+    },
+    {
+      "sample_id": 61,
+      "question": "Which border does the megaregion extend over?",
+      "clean_context": "The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United States. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana.",
+      "distracted_context": "Fletcher scored a 90th @-@ minute winner for York away to Fleetwood in a 2 \u2013 1 win , a result that ended Fleetwood 's five @-@ match unbeaten run . York then drew 0 \u2013 0 at home to fellow mid @-@ table The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United S In ice hockey , a combination of a player 's goals and assists are collectively called points . Penalty minutes are the total number of minutes assigned to a player for infractions assessed during the tates. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana. After the abandonment of the city at the end of the Classic Period , many of the sculptures fell down the steep embankment supporting the seven terraces .",
+      "ground_truth": "Mexican",
+      "ground_truth_variants": [
+        "Mexican",
+        "Mexican",
+        "Mexican"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The greater Southern California Megaregion extends over the Mexican border into Tijuana.",
+      "clean_generation_time_ms": 543.8609099992391,
+      "distracted_prediction": "The megaregion extends over the Mexican border into Tijuana.",
+      "distracted_generation_time_ms": 576.2341350000497
+    },
+    {
+      "sample_id": 62,
+      "question": "What is the name of the area past the border that the megaregion extends into?",
+      "clean_context": "The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United States. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana.",
+      "distracted_context": "If the ylide carbon is substituted with an aryl or allyl group , the reagent is referred to as a semi @-@ stabilized ylide . These have been developed extensively , second only to the classical methyl The 8- and 10-county definitions are not used for the greater Southern California Megaregion, one of the 11 megaregions of the United S The producers considered Danny Denzongpa for the role of bandit chief Gabbar Singh , but he could not accept it as he was committed to act in Feroz Khan 's <unk> ( 1975 ) , under production at the sam tates. The megaregion's area is more expansive, extending east into Las Vegas, Nevada, and south across the Mexican border into Tijuana. Fey 's father had English , German , and Northern Irish ancestry ; one of Fey 's paternal great @-@ great @-@ great @-@ great @-@ great @-@ grandfathers was John Hewson ( 1744 \u2013 1821 ) , a textile man",
+      "ground_truth": "Tijuana",
+      "ground_truth_variants": [
+        "Tijuana",
+        "Tijuana",
+        "Tijuana"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The area past the border that the megaregion extends into is called Tijuana, which is part of Mexico.",
+      "clean_generation_time_ms": 682.2903819993371,
+      "distracted_prediction": "The area past the border that the megaregion extends into is called Tijuana.",
+      "distracted_generation_time_ms": 732.3215080004957
+    },
+    {
+      "sample_id": 63,
+      "question": "Which newspaper defined southern California?",
+      "clean_context": "In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino, Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list.",
+      "distracted_context": "Jordan and the Bulls continued their dominance in the 1991 \u2013 92 season , establishing a 67 \u2013 15 record , topping their franchise record from 1990 to 91 . Jordan won his second consecutive MVP award wi In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino The inclusion of occupational debris over the bones was not unique to the site but common in chambered tombs from southern England . On the basis of an example discovered at Kit 's Coty House , Ashbee , Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list. On 30 November 1943 , Eaton returned to the Northern Territory to establish No. 79 Wing at Batchelor , comprising No. 1 and No. 2 Squadrons ( flying Bristol Beaufort light reconnaissance bombers ) , N",
+      "ground_truth": "Los Angeles Times",
+      "ground_truth_variants": [
+        "Los Angeles Times",
+        "the Los Angeles Times",
+        "Los Angeles Times"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Los Angeles Times",
+      "clean_generation_time_ms": 293.6970390001079,
+      "distracted_prediction": "The Los Angeles Times",
+      "distracted_generation_time_ms": 375.2802859999065
+    },
+    {
+      "sample_id": 64,
+      "question": "In which year did the newspaper define southern California?",
+      "clean_context": "In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino, Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list.",
+      "distracted_context": "For several years the arsenal , which was owned by the federal government , served as a simple arms depot and was staffed with only a handful of soldiers . But in November 1860 , with the American Civ In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino At that time of the assassination of Archduke Franz Ferdinand of Austria on 28 June 1914 , the battleships in the Austro @-@ Hungarian Navy consisted of the Radetzky class , the Tegetthoff class ( whi , Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list. After 1986 , the Jewish Community of Zagreb began to consider a Jewish cultural center and a memorial synagogue . Two architects , Branko <unk> and Boris <unk> , both of whom participated in the faile",
+      "ground_truth": "1900",
+      "ground_truth_variants": [
+        "1900",
+        "1900",
+        "1900"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Los Angeles Times defined southern California in 1900.",
+      "clean_generation_time_ms": 485.6677429997944,
+      "distracted_prediction": "The Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino, Orange, Riverside, San Diego, Ventura and Santa Barbara\" in 1900.",
+      "distracted_generation_time_ms": 1169.33739399974
+    },
+    {
+      "sample_id": 65,
+      "question": "In which year did the newspaper change its previous definition?",
+      "clean_context": "In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino, Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list.",
+      "distracted_context": "Cullen appeared in four of the Lightning 's first eight games , but it was evident that he had lost much of his speed and strength . The Lightning assigned him to the IHL 's Cleveland Lumberjacks , bu In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino The immature egg @-@ forms of Mutinus elegans are edible , but \" not recommended \" . One field guides notes that the eggs of the stinkhorn fungi \" taste like the seasonings that are added to them . \"  , Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list. Many of Jordan 's contemporaries say that Jordan is the greatest basketball player of all time . In 1999 , an ESPN survey of journalists , athletes and other sports figures ranked Jordan the greatest ",
+      "ground_truth": "1999",
+      "ground_truth_variants": [
+        "1999",
+        "1999",
+        "1999"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Los Angeles Times changed its previous definition of southern California in 1999.",
+      "clean_generation_time_ms": 561.4705130001312,
+      "distracted_prediction": "In 1999, the Times changed its previous definition of southern California to include Imperial County.",
+      "distracted_generation_time_ms": 710.0715850001507
+    },
+    {
+      "sample_id": 66,
+      "question": "What was the newer county added to the list?",
+      "clean_context": "In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino, Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list.",
+      "distracted_context": "Tonin\u00e1 is located at an altitude of 800 to 900 metres ( 2 @,@ 600 to 3 @,@ 000 ft ) above mean sea level in the Chiapas highlands of southern Mexico , some 40 miles ( 64 km ) south of the contemporary In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino In an effort to eliminate French support Commodore William Cornwallis , the British naval commander in the region , stationed a squadron of frigates at Tellicherry , where they were ideally situated t , Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list. Ancient Egyptian deities are the gods and goddesses worshipped in ancient Egypt . The beliefs and rituals surrounding these gods formed the core of ancient Egyptian religion , which emerged sometime i",
+      "ground_truth": "Imperial",
+      "ground_truth_variants": [
+        "Imperial",
+        "Imperial",
+        "1999"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The newer county added to the list was Imperial.",
+      "clean_generation_time_ms": 409.6835850004936,
+      "distracted_prediction": "Imperial",
+      "distracted_generation_time_ms": 312.5189459997273
+    },
+    {
+      "sample_id": 67,
+      "question": "How many counties initially made up the definition of southern California?",
+      "clean_context": "In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino, Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list.",
+      "distracted_context": "After his third retirement , Jordan assumed that he would be able to return to his front office position of Director of Basketball Operations with the Wizards . However , his previous tenure in the Wi In 1900, the Los Angeles Times defined southern California as including \"the seven counties of Los Angeles, San Bernardino Across the top of the ravine from Cave 1 is large hall known as <unk> 's Temple ( cave ) . The portico has four pillars and two pilasters . The hall has 3 chambers at the back , the central one a shri , Orange, Riverside, San Diego, Ventura and Santa Barbara.\" In 1999, the Times added a newer county\u2014Imperial\u2014to that list. There are an estimated 27 @,@ 000 civil aircraft registered in the UK , 96 per cent of which are engaged in GA activities . In 2005 the GA fleet comprised 9 @,@ 000 fixed @-@ wing aircraft , 4 @,@ 100",
+      "ground_truth": "seven",
+      "ground_truth_variants": [
+        "seven",
+        "seven",
+        "seven"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Seven counties initially made up the definition of southern California.",
+      "clean_generation_time_ms": 446.3818069998524,
+      "distracted_prediction": "The initial definition of southern California included seven counties: Los Angeles, San Bernardino, Orange, Riverside, San Diego, Ventura, and Santa Barbara.",
+      "distracted_generation_time_ms": 972.0178480001778
+    },
+    {
+      "sample_id": 68,
+      "question": "Which fault can produce a magnitude earthquake of 8.0?",
+      "clean_context": "Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacinto Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California.",
+      "distracted_context": "Later that year the serial included a storyline which was branded \" bizarre \" after it mirrored a real life scandal that had occurred weeks earlier . Lewis who plays love interest Geoff had been caugh Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacin Saprang and Sonthi started planning for the coup 7 to 8 months in advance , in approximately February 2006 . Coup planning occurred prior to the April 2006 elections , during Thaksin 's controversial  to Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California. The proverbial use of the corn crake 's call to describe someone with a grating or <unk> voice is illustrated in the quotation \" thanks to a wee woman with a voice like a corncrake who believed she wa",
+      "ground_truth": "San Andreas",
+      "ground_truth_variants": [
+        "San Andreas",
+        "the San Andreas Fault",
+        "San Andreas Fault"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The San Andreas Fault has the potential to produce a magnitude 8.0 earthquake according to seismic hazard maps.",
+      "clean_generation_time_ms": 761.7256610001277,
+      "distracted_prediction": "The San Andreas Fault is one of the faults that can produce a magnitude 8.0 earthquake. Other faults that can produce such an event include the San Jacinto Fault, the Puente Hills Fault, and the Elsinore Fault Zone.",
+      "distracted_generation_time_ms": 1461.8765710001753
+    },
+    {
+      "sample_id": 69,
+      "question": "What magnitude of earthquake can many faults produce?",
+      "clean_context": "Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacinto Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California.",
+      "distracted_context": "bold - qualified for playoffs , y \u2013 Won division , p \u2013 Won Presidents ' Trophy ( best record in NHL ) Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacin 1996 : The Rise and Fall of Palestine : A Personal Account of the Intifada Years . Minneapolis : U of Minnesota P , ISBN 0 @-@ <unk> @-@ 2859 @-@ 9 . to Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California. According to literary scholar Peter Anthony <unk> , the two important components of machismo are aggressive behaviour and hyper @-@ sexuality . Aggressive behaviour is exhibited by displays of power a",
+      "ground_truth": "6.7",
+      "ground_truth_variants": [
+        "6.7",
+        "6.7+",
+        "6.7+"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Many faults are capable of producing a magnitude 6.",
+      "clean_generation_time_ms": 2097.0357260002856,
+      "distracted_prediction": "Many faults can produce a magnitude 6.7+ earthquake, with some capable of producing a magnitude 8.0 event or higher. Examples of these faults include the San Andreas Fault, the Puente Hills Fault, and the Elsinore Fault Zone.",
+      "distracted_generation_time_ms": 1488.2299119999516
+    },
+    {
+      "sample_id": 70,
+      "question": "Other than the San Jacinto Fault, and the Elsinore Fault, name one other fault.",
+      "clean_context": "Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacinto Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California.",
+      "distracted_context": "The ship 's primary armament consisted of four 30 @.@ 5 cm ( 12 in ) 45 @-@ caliber guns in two twin gun turrets . This was augmented by a heavy secondary battery of eight 24 cm ( 9 @.@ 4 in ) guns in Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacin In 1960 , Ronald William Clark published a biography titled Sir Mortimer Wheeler . FitzRoy Somerset , 4th Baron Raglan reviewed the volume for the journal Man , describing \" this very readable little  to Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California. In May 2007 , Townsend released Ziltoid the Omniscient , a tongue @-@ in @-@ cheek rock opera about the eponymous fictional alien . This was truly a solo album ; he programmed the drums using <unk> fr",
+      "ground_truth": "Puente Hills",
+      "ground_truth_variants": [
+        "Puente Hills",
+        "the Puente Hills Fault",
+        "Puente Hills Fault"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The Humboldt Bay Fault is another fault that can produce a magnitude 6.7+ earthquake, along with the Cascadia Subduction Zone off the coast of Oregon.",
+      "clean_generation_time_ms": 1019.2994539993379,
+      "distracted_prediction": "One other fault is the San Joaquin Fault, which runs along the western edge of the southern Sierra Nevada mountain range in California.",
+      "distracted_generation_time_ms": 942.4215449998883
+    },
+    {
+      "sample_id": 71,
+      "question": "Which organization released a California Earthquake forecast?",
+      "clean_context": "Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacinto Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California.",
+      "distracted_context": "The Frieze of the Dream Lords ( also known as the Frieze of the Four Suns or Frieze of the Four Eras ) was uncovered by archaeologists during excavations in 1992 . It is a stucco mural located at the  Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacin The growth in Commercial Air Transport ( CAT ) has eroded the operational freedom of GA , both in the air and on the ground at larger airports . Difficulty with access to larger airports is compounded to Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California. Two marble steps rise from the nave to the chancel . At the top of the steps is a hand @-@ carved white wood communion rail , decorated with miniature onyx columns and topped with marble .",
+      "ground_truth": "USGS",
+      "ground_truth_variants": [
+        "USGS",
+        "The USGS",
+        "USGS"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The United States Geological Survey (USGS) released a California Earthquake forecast.",
+      "clean_generation_time_ms": 568.6845899999753,
+      "distracted_prediction": "The USGS (United States Geological Survey) released a California Earthquake forecast.",
+      "distracted_generation_time_ms": 684.343287000047
+    },
+    {
+      "sample_id": 72,
+      "question": "The earthquake forecast models what features of earthquakes in California?",
+      "clean_context": "Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacinto Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California.",
+      "distracted_context": "Astraeus hygrometricus , commonly known as the hygroscopic earthstar , the barometer earthstar , or the false earthstar , is a species of fungus in the Diplocystaceae family . Young specimens resemble Many faults are able to produce a magnitude 6.7+ earthquake, such as the San Andreas Fault, which can produce a magnitude 8.0 event. Other faults include the San Jacin The Lambton Kent District School Board is responsible for the 13 elementary and four secondary public schools ( Northern Collegiate Institute and Vocational School , Alexander MacKenzie Secondary Scho to Fault, the Puente Hills Fault, and the Elsinore Fault Zone. The USGS has released a California Earthquake forecast which models Earthquake occurrence in California. The first Christian services held in Madison were Presbyterian , taking place in Barnes 's and other homes . A Presbyterian congregation was organized in 1870 , and a church built in 1872 . A Methodis",
+      "ground_truth": "occurrence",
+      "ground_truth_variants": [
+        "occurrence",
+        "occurrence",
+        "occurrence"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The California Earthquake Forecast (CEF) is a statistical model that predicts the likelihood of future earthquakes occurring in California based on the known characteristics of past earthquakes.",
+      "clean_generation_time_ms": 2233.80546899989,
+      "distracted_prediction": "The earthquake forecast models the occurrence of earthquakes in California, specifically the likelihood of them occurring on various faults and their potential magnitudes.",
+      "distracted_generation_time_ms": 967.6885029994082
+    },
+    {
+      "sample_id": 73,
+      "question": "Southern California had a population of 22,680,010 according to the census from which year?",
+      "clean_context": "As of the 2010 United States Census, southern California has a population of 22,680,010. Despite a reputation for high growth rates, southern California's rate grew less than the state average of 10.0% in the 2000s as California's growth became concentrated in the northern part of the state due to a stronger, tech-oriented economy in the Bay Area and an emerging Greater Sacramento region.",
+      "distracted_context": "During the off @-@ season the Blue Jackets parted ways with defensemen Jan Hejda , Anton Stralman , Sami <unk> and Mike Commodore . Hejda , who played four of his first five NHL seasons with the Blue  As of the 2010 United States Census, southern California has a population of 22,680,010. Despite a reputation for high growth rates, southern California's rate grew less than the state average of The Benedictine Sisters withdrew from the school in 1978 , prompting the closing of the seventh and eighth grades . The school continued to offer grades 1 \u2013 6 , taught by three lay instructors .  10.0% in the 2000s as California's growth became concentrated in the northern part of the state due to a stronger, tech-oriented economy in the Bay Area and an emerging Greater Sacramento region. The young fruiting bodies are initially white and spherical or egg @-@ shaped , partially submerged in the ground , with dimensions of 2 to 3 cm ( 0 @.@ 8 to 1 @.@ 2 in ) by 1 to 2 cm ( 0 @.@ 4 to 0 @",
+      "ground_truth": "2010",
+      "ground_truth_variants": [
+        "2010",
+        "2010",
+        "2010"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "As of the 2010 United States Census, southern California has a population of 22,680,010.",
+      "clean_generation_time_ms": 850.8854459996655,
+      "distracted_prediction": "In 2010, the population of southern California was approximately 22,680,010.",
+      "distracted_generation_time_ms": 911.1243460001788
+    },
+    {
+      "sample_id": 74,
+      "question": "What does southern California have a reputation for?",
+      "clean_context": "As of the 2010 United States Census, southern California has a population of 22,680,010. Despite a reputation for high growth rates, southern California's rate grew less than the state average of 10.0% in the 2000s as California's growth became concentrated in the northern part of the state due to a stronger, tech-oriented economy in the Bay Area and an emerging Greater Sacramento region.",
+      "distracted_context": "In early 2007 , a video hosted on YouTube led to reports that the song \" Do It \" , and the Timbaland @-@ produced ringtone \" Block Party \" that inspired it , used \u2014 without authorization \u2014 the melody  As of the 2010 United States Census, southern California has a population of 22,680,010. Despite a reputation for high growth rates, southern California's rate grew less than the state average of From there , Wheeler was invited to direct a Society of Antiquaries excavation at the Roman settlement of Verulamium , which existed on land recently acquired by the Corporation of St Albans . He took  10.0% in the 2000s as California's growth became concentrated in the northern part of the state due to a stronger, tech-oriented economy in the Bay Area and an emerging Greater Sacramento region. Keeping this commandment , according to the Catechism , also requires duties of parents to children which include :",
+      "ground_truth": "high growth rates",
+      "ground_truth_variants": [
+        "high growth rates",
+        "high growth rates",
+        "high growth rates"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "Southern California is known for its warm climate, diverse cultural scene, entertainment industry, and beach culture.",
+      "clean_generation_time_ms": 1495.2285549998123,
+      "distracted_prediction": "Southern California is known for its sunny weather, diverse culture, and vibrant entertainment industry.",
+      "distracted_generation_time_ms": 2256.691810999655
+    }
+  ],
+  "count": 75,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 16:46:23",
+    "run_id": "qrag_gen_20251228_154901",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}

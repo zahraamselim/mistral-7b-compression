@@ -1,0 +1,1679 @@
+{
+  "model_config": {
+    "name": "TheBloke/Mistral-7B-Instruct-v0.1-GPTQ",
+    "quantization": "gptq",
+    "variant": "instruct"
+  },
+  "set_name": "set_a",
+  "samples": [
+    {
+      "sample_id": 0,
+      "question": "What year did Guns N Roses perform a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective?",
+      "context": "Arnold Schwarzenegger is an actor who has appeared in over 30 films, and has also ventured into directing and producing.  He began his acting career primarily with small roles in film and television.  For his first film role, he was credited as \"Arnold Strong\", but was credited with his birth name thereafter.  He has appeared mainly in action, and comedy films.  In addition to films and television, he has appeared in music videos for AC/DC, Bon Jovi, and Guns N' Roses.",
+      "context_length_tokens": 117,
+      "ground_truth": "1999",
+      "ground_truth_variants": [
+        "1999"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The year that Guns N' Roses performed a promo for the movie starring Arnold Schwarzenegger as a former New York Police detective is 1987.",
+      "rag_generation_time_ms": 1149.8828280000453,
+      "no_rag_prediction": "The year 2013 saw Guns N Roses performing a promotional campaign for the movie \"Arnold Scwarzenegger\". However, it's important to note that this movie was not released in 2013.",
+      "no_rag_generation_time_ms": 1179.9693310003931
+    },
+    {
+      "sample_id": 1,
+      "question": "What screenwriter with credits for \"Evolution\" co-wrote a film starring Nicolas Cage and T\u00e9a Leoni?",
+      "context": "Ungod is the debut album released in 1994 on Columbia Records by the American industrial rock band Stabbing Westward.  The album was recorded in six weeks of 1993 in Chiswick, England, and released on February 15, 1994.  With adequate album sales and touring with the likes of Depeche Mode a second album was warranted, \"Wither Blister Burn & Peel\".  The guitar line in the chorus of the song \"Ungod\" was later used in Filter's song \"Hey Man, Nice Shot.\"  Stuart Zechman, who was also playing guitar for Filter at the time, took the riff and showed it to Stabbing Westward who ended up using it as well.  The song \"Nothing\" appeared in the \"Bad Boys\" movie starring Will Smith, Martin Lawrence and T\u00e9a Leoni, but was not featured on the official soundtrack album.  The song also accompanied the credits of the film \"Johnny Mnemonic\" and was included on the film's soundtrack, along with the song \"Lost\".  \"Lost\", \"Lies\" and \"Can't Happen Here\" were used in the film \"Mortal Kombat\", but Stabbing Westward refused to include it in the official soundtrack.  The \"Thread Mix\" of \"Violent Mood Swings\" was included in the Clerks soundtrack.",
+      "context_length_tokens": 315,
+      "ground_truth": "David Weissman",
+      "ground_truth_variants": [
+        "David Weissman"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The screenwriter with credits for \"Evolution\" who co-wrote a film starring Nicolas Cage and T\u00e9a Leoni is David Seltzer.",
+      "rag_generation_time_ms": 1117.4918790002266,
+      "no_rag_prediction": "The screenwriter who co-wrote \"Evolution\" and also wrote the film starring Nicolas Cage and T\u00e9a Leoni is David Koepp.",
+      "no_rag_generation_time_ms": 860.7015440002215
+    },
+    {
+      "sample_id": 2,
+      "question": "What Viking groups were conquered by Rollo?",
+      "context": "Before Rollo's arrival, its populations did not differ from Picardy or the \u00cele-de-France, which were considered \"Frankish\". Earlier Viking settlers had begun arriving in the 880s, but were divided between colonies in the east (Roumois and Pays de Caux) around the low Seine valley and in the west in the Cotentin Peninsula, and were separated by traditional pagii, where the population remained about the same with almost no foreign settlers. Rollo's contingents who raided and ultimately settled Normandy and parts of the Atlantic coast included Danes, Norwegians, Norse\u2013Gaels, Orkney Vikings, possibly Swedes, and Anglo-Danes from the English Danelaw under Norse control.",
+      "context_length_tokens": 169,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "Rollo's contingents who raided and ultimately settled Normandy and parts of the Atlantic coast included Danes, Norwegians, Norse\u2013Gaels, Orkney Vikings, possibly Swedes, and Anglo-Danes from the English Danelaw under Norse control.",
+      "rag_generation_time_ms": 1478.80217599959,
+      "no_rag_prediction": "The answer is that",
+      "no_rag_generation_time_ms": 286.19889200035686
+    },
+    {
+      "sample_id": 3,
+      "question": "When was the Latin version of the word Norman first recorded?",
+      "context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "context_length_tokens": 98,
+      "ground_truth": "9th century",
+      "ground_truth_variants": [
+        "9th century",
+        "9th century",
+        "9th century"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Latin version of the word Norman was first recorded in the 9th century.",
+      "rag_generation_time_ms": 557.0848389997991,
+      "no_rag_prediction": "The Latin version of the word \"Norman\" was first recorded in the 10th century. It comes from the Old French word \"Norman,\" which itself is derived from the Latin term \"Normannus\" or \"Northman.\"",
+      "no_rag_generation_time_ms": 1055.7535429998097
+    },
+    {
+      "sample_id": 4,
+      "question": "How many yards longer was the 80-yard punt than the touchdown pass from Russell to Johnnie Lee Higgins?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "51",
+      "ground_truth_variants": [
+        "51",
+        "51",
+        "51",
+        "51"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The 80-yard punt return for a touchdown was 59 yards longer than the 21-yard touchdown pass from Russell to Johnnie Lee Higgins.",
+      "rag_generation_time_ms": 1101.1478909995276,
+      "no_rag_prediction": "The touchdown pass from Russell to Johnnie Lee Higgins was 24 yards and the 80-yard punt was 56 yards. Therefore, the 80-yard punt was 32 yards longer than the touchdown pass.",
+      "no_rag_generation_time_ms": 1090.6196670002828
+    },
+    {
+      "sample_id": 5,
+      "question": "Which other Mexican Formula One race car driver has held the podium besides the Force India driver born in 1990?",
+      "context": "The 2009 Singapore Grand Prix (formally the 2009 Formula 1 SingTel Singapore Grand Prix) was a Formula One motor race held at the Marina Bay Street Circuit in Singapore on 27 September 2009.  The 61-lap race was the fourteenth round of the 2009 Formula One season.  It was the second Singapore Grand Prix to be part of a Formula One Championship and the tenth Singapore Grand Prix overall.  It was also the second Formula One race to be held at night.  The race was won by McLaren-Mercedes driver and reigning World Champion Lewis Hamilton.  Toyota's Timo Glock finished second and 2008 race winner Fernando Alonso took third position, making this the only race of the season with neither a Brawn nor a Red Bull driver on the podium.  This was also the last race of 2009 for Glock, as he was injured during qualifying for the Japanese Grand Prix and was replaced by test driver Kamui Kobayashi.  Heikki Kovalainen scored his last ever World Championship points at this race.",
+      "context_length_tokens": 250,
+      "ground_truth": "Pedro Rodr\u00edguez",
+      "ground_truth_variants": [
+        "Pedro Rodr\u00edguez"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Sergio Perez is the other Mexican Formula One race car driver who has held the podium besides Esteban Gutierrez.",
+      "rag_generation_time_ms": 2308.9430809995974,
+      "no_rag_prediction": "The current Formula One driver from Mexico who has been on the podium is Sergio Perez, who drives for Red Bull Racing. He won his first Grand Prix at the 2016 Austrian Grand Prix and has since won a total of three races.",
+      "no_rag_generation_time_ms": 1148.9485769998282
+    },
+    {
+      "sample_id": 6,
+      "question": "When were the Normans in Normandy?",
+      "context": "The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse (\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.",
+      "context_length_tokens": 178,
+      "ground_truth": "10th and 11th centuries",
+      "ground_truth_variants": [
+        "10th and 11th centuries",
+        "in the 10th and 11th centuries",
+        "10th and 11th centuries",
+        "10th and 11th centuries"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans arrived in Normandy in the late 9th century after invading the region as raiders and pirates.",
+      "rag_generation_time_ms": 2293.9138900001126,
+      "no_rag_prediction": "The Normans were a group of Germanic tribes that originated in what is now the Netherlands and northern France.",
+      "no_rag_generation_time_ms": 1644.5538660000238
+    },
+    {
+      "sample_id": 7,
+      "question": "How many field goals were scored in the game?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "5",
+      "ground_truth_variants": [
+        "5",
+        "5"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "In the game between the Oakland Raiders and the Houston Texans, there were four field goals scored overall.  The Raiders got two field goals, while the Texans got two field goals as well.",
+      "rag_generation_time_ms": 1299.6817149996787,
+      "no_rag_prediction": "Without additional context, I cannot provide an answer to this question. Can you please provide more information about the game or the specific event you are referring to?",
+      "no_rag_generation_time_ms": 659.885019000285
+    },
+    {
+      "sample_id": 8,
+      "question": "What part of France were the Normans located?",
+      "context": "The descendants of Rollo's Vikings and their Frankish wives would replace the Norse religion and Old Norse language with Catholicism (Christianity) and the Gallo-Romance language of the local people, blending their maternal Frankish heritage with Old Norse traditions and customs to synthesize a unique \"Norman\" culture in the north of France. The Norman language was forged by the adoption of the indigenous langue d'o\u00efl branch of Romance by a Norse-speaking ruling class, and it developed into the regional language that survives today.",
+      "context_length_tokens": 125,
+      "ground_truth": "north",
+      "ground_truth_variants": [
+        "north",
+        "the north",
+        "north"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans were primarily found in the northwestern region of France, including Normandy, which is where they originated from.",
+      "rag_generation_time_ms": 795.0572780000584,
+      "no_rag_prediction": "The Normans were originally from northern France and their territory was known as Normandy. They invaded England in 1066 and established the Norman Conquest, which lasted until 1204.",
+      "no_rag_generation_time_ms": 886.3172060000579
+    },
+    {
+      "sample_id": 9,
+      "question": "When did the Frankish identity emerge?",
+      "context": "The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse (\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.",
+      "context_length_tokens": 178,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Frankish identity emerged in the 5th century during the fall of the Western Roman Empire and the establishment of the Merovingian Kingdoms.",
+      "rag_generation_time_ms": 2430.8413689996087,
+      "no_rag_prediction": "This is a basic example of (8). It's important to note that in general, the sum of the $k$-th and $(k+1)$-th terms of the sequence must be equal to $2^k$ for such a sequence to satisfy this recurrence.",
+      "no_rag_generation_time_ms": 1397.3699099997248
+    },
+    {
+      "sample_id": 10,
+      "question": "How many yards longer was the longest field goal than the shortest?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "29",
+      "ground_truth_variants": [
+        "29",
+        "29"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The difference between the longest and shortest field goals is 32 yards (53 - 21).",
+      "rag_generation_time_ms": 853.3338240004014,
+      "no_rag_prediction": "1. What is the remainder when 2093 is divided by 56?",
+      "no_rag_generation_time_ms": 582.422783999391
+    },
+    {
+      "sample_id": 11,
+      "question": "When was the Duchy of Normandy founded?",
+      "context": "In the course of the 10th century, the initially destructive incursions of Norse war bands into the rivers of France evolved into more permanent encampments that included local women and personal property. The Duchy of Normandy, which began in 911 as a fiefdom, was established by the treaty of Saint-Clair-sur-Epte between King Charles III of West Francia and the famed Viking ruler Rollo, and was situated in the former Frankish kingdom of Neustria. The treaty offered Rollo and his men the French lands between the river Epte and the Atlantic coast in exchange for their protection against further Viking incursions. The area corresponded to the northern part of present-day Upper Normandy down to the river Seine, but the Duchy would eventually extend west beyond the Seine. The territory was roughly equivalent to the old province of Rouen, and reproduced the Roman administrative structure of Gallia Lugdunensis II (part of the former Gallia Lugdunensis).",
+      "context_length_tokens": 222,
+      "ground_truth": "911",
+      "ground_truth_variants": [
+        "911",
+        "911",
+        "911"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Duchy of Normandy was founded in 911 by the treaty of Saint-Clair-sur-Epte between King Charles III of West Francia and Rollo, the leader of the Norse war bands invading the region.",
+      "rag_generation_time_ms": 1379.3868869997823,
+      "no_rag_prediction": "The Duchy of Normandy was founded in 911 AD by Rollo, a Viking chieftain who had been invited to invade and conquer much of northern France. After defeating several French armies, Rollo was granted lands in exchange for his services, and he established himself as the first Duke of Normandy.",
+      "no_rag_generation_time_ms": 1446.4352449995204
+    },
+    {
+      "sample_id": 12,
+      "question": "Who scored the first touchdown of the game?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "Chaz Schilens",
+      "ground_truth_variants": [
+        "Chaz Schilens",
+        "JaMarcus Russell"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "In the Week 16 matchup between the Oakland Raiders and the Houston Texans, the first touchdown was scored by fullback Vonta Leach of the Houston Texans after completing a 1-yard touchdown run in the first quarter.",
+      "rag_generation_time_ms": 1471.5238970002247,
+      "no_rag_prediction": "I'm sorry, I don't have that information. Can you please provide more context or specify which game you are referring to?",
+      "no_rag_generation_time_ms": 600.205699000071
+    },
+    {
+      "sample_id": 13,
+      "question": "How many field goals did Kris Brown kick?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "2",
+      "ground_truth_variants": [
+        "2",
+        "3",
+        "3",
+        "3",
+        "3"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "Kris Brown kicked two field goals in the game against the Houston Texans.",
+      "rag_generation_time_ms": 698.8131439993595,
+      "no_rag_prediction": "I don't think there is a reason to assume that the 10% reduction in overall carbon emissions from 2005-2009 would have been achieved by reducing emissions from 2008-2009 alone.",
+      "no_rag_generation_time_ms": 2492.9518709996046
+    },
+    {
+      "sample_id": 14,
+      "question": "How many yards was the shortest field goal in the game?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "24",
+      "ground_truth_variants": [
+        "24",
+        "24"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The shortest field goal in the game was a 24-yard field goal scored by the Raiders in the second quarter.",
+      "rag_generation_time_ms": 941.4620130000912,
+      "no_rag_prediction": "The shortest field goal in the game, which I believe was scored by the Seahawks against the Rams, was 23 yards.",
+      "no_rag_generation_time_ms": 661.7427390001467
+    },
+    {
+      "sample_id": 15,
+      "question": "Brown State Fishing Lake is in a country that has a population of how many inhabitants ?",
+      "context": "Fishing Lake is a lake in the Canadian province of Saskatchewan.  The lake is located between highway 5 and highway 16, 22\u00a0km north of the town of Foam Lake, Saskatchewan, and 24\u00a0km east of the town of Wadena, Saskatchewan.  The lake does not have an effective outlet channel, and so is prone to flooding.  Record floods in 2007 resulted in a plan by the Government of Saskatchewan to lower the level of the lake by digging a drainage channel.  The Fishing Lake First Nation opposed this plan, and instead flood control berms were constructed.",
+      "context_length_tokens": 152,
+      "ground_truth": "9,984",
+      "ground_truth_variants": [
+        "9,984"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Canada has a population of approximately 38 million inhabitants.",
+      "rag_generation_time_ms": 521.6022049999083,
+      "no_rag_prediction": "The country where Brown State Fishing Lake is located is not specified, so I cannot provide the population of that country.",
+      "no_rag_generation_time_ms": 551.952271999653
+    },
+    {
+      "sample_id": 16,
+      "question": "Roger O. Egeberg was Assistant Secretary for Health and Scientific Affairs during the administration of a president that served during what years?",
+      "context": "Assistant Secretary of State (A/S) is a title used for many executive positions in the United States Department of State, ranking below the Under Secretaries.  A set of six Assistant Secretaries reporting to the Under Secretary for Political Affairs manage diplomatic missions within their designated geographic regions, plus one Assistant Secretary dealing with international organizations.  Assistant Secretaries usually manage individual bureaus of the Department of State.  When the manager of a bureau or another agency holds a title other than Assistant Secretary, such as \"Director,\" it can be said to be of \"Assistant Secretary equivalent rank.\"  Assistant Secretaries typically have a set of deputies, referred to as Deputy Assistant Secretaries (DAS).",
+      "context_length_tokens": 145,
+      "ground_truth": "1969 until 1974",
+      "ground_truth_variants": [
+        "1969 until 1974"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Roger O. Egeberg served as Assistant Secretary for Health and Scientific Affairs from 1976 to 1980 under President Jimmy Carter.",
+      "rag_generation_time_ms": 937.8246360001867,
+      "no_rag_prediction": "Roger O. Egeberg served as Assistant Secretary for Health and Scientific Affairs during the administration of President Jimmy Carter, who served from 1977 to 1981.",
+      "no_rag_generation_time_ms": 935.5790520003211
+    },
+    {
+      "sample_id": 17,
+      "question": "What was replace with the Norse religion?",
+      "context": "The descendants of Rollo's Vikings and their Frankish wives would replace the Norse religion and Old Norse language with Catholicism (Christianity) and the Gallo-Romance language of the local people, blending their maternal Frankish heritage with Old Norse traditions and customs to synthesize a unique \"Norman\" culture in the north of France. The Norman language was forged by the adoption of the indigenous langue d'o\u00efl branch of Romance by a Norse-speaking ruling class, and it developed into the regional language that survives today.",
+      "context_length_tokens": 125,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Norse religion, which was polytheistic and included gods such as Odin, Thor, Freyr, and Loki, was replaced with Christianity, a monotheistic religion that emerged from the Middle East and spread throughout Europe during the early and late medieval periods.",
+      "rag_generation_time_ms": 1347.1130449997872,
+      "no_rag_prediction": "The Norse religion, also known as Germanic paganism, was replaced by Christianity through a process of conversion and conquest.",
+      "no_rag_generation_time_ms": 572.728664999886
+    },
+    {
+      "sample_id": 18,
+      "question": "What is France a region of?",
+      "context": "The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse (\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.",
+      "context_length_tokens": 178,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "France is a country located in Western Europe.",
+      "rag_generation_time_ms": 2456.8250010006523,
+      "no_rag_prediction": "France is a country located in western Europe. It is one of the largest countries in Europe and has a diverse range of regions, including:",
+      "no_rag_generation_time_ms": 2464.665612999852
+    },
+    {
+      "sample_id": 19,
+      "question": "The arena where the Lewiston Maineiacs played their home games can seat how many people?",
+      "context": "The Billings Bulls were a junior ice hockey organization based in Billings, Montana.  They most recently played home games at the 550-seat Centennial Ice Arena and due to the arena's small size, the Bulls frequently sold out games.  They previously played their home games in the Metrapark which had a max capacity of 9,000 for hockey games.  However, a negotiating dispute with arena officials and local county commissioners resulted in the team losing its lease.",
+      "context_length_tokens": 108,
+      "ground_truth": "3,677 seated",
+      "ground_truth_variants": [
+        "3,677 seated"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The arena where the Lewiston Maineiacs played their home games is the Centennial Coliseum, which has a seating capacity of 4,786 for hockey games.",
+      "rag_generation_time_ms": 1023.8116980008272,
+      "no_rag_prediction": "To answer the question, is it possible to determine if a player has made a mistake or not by analyzing their performance on the field?",
+      "no_rag_generation_time_ms": 2107.1245769999223
+    },
+    {
+      "sample_id": 20,
+      "question": "Were Scott Derrickson and Ed Wood of the same nationality?",
+      "context": "Ed Wood is a 1994 American biographical period comedy-drama film directed and produced by Tim Burton, and starring Johnny Depp as cult filmmaker Ed Wood.  The film concerns the period in Wood's life when he made his best-known films as well as his relationship with actor Bela Lugosi, played by Martin Landau.  Sarah Jessica Parker, Patricia Arquette, Jeffrey Jones, Lisa Marie, and Bill Murray are among the supporting cast.",
+      "context_length_tokens": 105,
+      "ground_truth": "yes",
+      "ground_truth_variants": [
+        "yes"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "No, they were not of the same nationality.  Ed Wood was an American, born in California in 1923.  Scott Derrickson, on the other hand, is a Canadian born in Nova Scotia in 1960.",
+      "rag_generation_time_ms": 1332.5774889999593,
+      "no_rag_prediction": "Scott Derrickson is an American filmmaker, while Ed Wood was a Canadian filmmaker.",
+      "no_rag_generation_time_ms": 463.55835199938156
+    },
+    {
+      "sample_id": 21,
+      "question": "What was the name of the Norman castle?",
+      "context": "Some Normans joined Turkish forces to aid in the destruction of the Armenians vassal-states of Sassoun and Taron in far eastern Anatolia. Later, many took up service with the Armenian state further south in Cilicia and the Taurus Mountains. A Norman named Oursel led a force of \"Franks\" into the upper Euphrates valley in northern Syria. From 1073 to 1074, 8,000 of the 20,000 troops of the Armenian general Philaretus Brachamius were Normans\u2014formerly of Oursel\u2014led by Raimbaud. They even lent their ethnicity to the name of their castle: Afranji, meaning \"Franks.\" The known trade between Amalfi and Antioch and between Bari and Tarsus may be related to the presence of Italo-Normans in those cities while Amalfi and Bari were under Norman rule in Italy.",
+      "context_length_tokens": 213,
+      "ground_truth": "Afranji",
+      "ground_truth_variants": [
+        "Afranji",
+        "Afranji",
+        "Afranji"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The name of the Norman castle was Afranji, which means \"Franks.\"",
+      "rag_generation_time_ms": 630.4015470004742,
+      "no_rag_prediction": "The name of the Norman castle is not specified in the prompt. Can you please provide more context or information about the specific castle you are referring to?",
+      "no_rag_generation_time_ms": 627.8981460000068
+    },
+    {
+      "sample_id": 22,
+      "question": "What science fantasy young adult series, told in first person, has a set of companion books narrating the stories of enslaved worlds and alien species?",
+      "context": "The Andre Norton Award for Young Adult Science Fiction and Fantasy is an annual award presented by the Science Fiction and Fantasy Writers of America (SFWA) to the author of the best young adult or middle grade science fiction or fantasy book published in the United States in the preceding year.  It is named to honor prolific science fiction and fantasy author Andre Norton (1912\u20132005), and it was established by then SFWA president Catherine Asaro and the SFWA Young Adult Fiction committee and announced on February 20, 2005.  Any published young adult or middle grade science fiction or fantasy novel is eligible for the prize, including graphic novels.  There is no limit on word count.  The award is presented along with the Nebula Awards and follows the same rules for nominations and voting; as the awards are separate, works may be simultaneously nominated for both the Andre Norton award and a Nebula Award.",
+      "context_length_tokens": 203,
+      "ground_truth": "Animorphs",
+      "ground_truth_variants": [
+        "Animorphs"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The series you're referring to is likely \"The Expanse\" by James S.A. Corey (with Ty Franck).",
+      "rag_generation_time_ms": 874.5231880002393,
+      "no_rag_prediction": "The series you are referring to is \"The Broken Earth\" by N.",
+      "no_rag_generation_time_ms": 2324.570152999513
+    },
+    {
+      "sample_id": 23,
+      "question": "What was one of the Norman's major imports?",
+      "context": "The Normans thereafter adopted the growing feudal doctrines of the rest of France, and worked them into a functional hierarchical system in both Normandy and in England. The new Norman rulers were culturally and ethnically distinct from the old French aristocracy, most of whom traced their lineage to Franks of the Carolingian dynasty. Most Norman knights remained poor and land-hungry, and by 1066 Normandy had been exporting fighting horsemen for more than a generation. Many Normans of Italy, France and England eventually served as avid Crusaders under the Italo-Norman prince Bohemund I and the Anglo-Norman king Richard the Lion-Heart.",
+      "context_length_tokens": 157,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "Fighting horsemen",
+      "rag_generation_time_ms": 353.1439420003153,
+      "no_rag_prediction": "One of the Normans' major imports was wine.",
+      "no_rag_generation_time_ms": 1746.846244000153
+    },
+    {
+      "sample_id": 24,
+      "question": "Who was famed for their Christian spirit?",
+      "context": "The Norman dynasty had a major political, cultural and military impact on medieval Europe and even the Near East. The Normans were famed for their martial spirit and eventually for their Christian piety, becoming exponents of the Catholic orthodoxy into which they assimilated. They adopted the Gallo-Romance language of the Frankish land they settled, their dialect becoming known as Norman, Normaund or Norman French, an important literary language. The Duchy of Normandy, which they formed by treaty with the French crown, was a great fief of medieval France, and under Richard I of Normandy was forged into a cohesive and formidable principality in feudal tenure. The Normans are noted both for their culture, such as their unique Romanesque architecture and musical traditions, and for their significant military accomplishments and innovations. Norman adventurers founded the Kingdom of Sicily under Roger II after conquering southern Italy on the Saracens and Byzantines, and an expedition on behalf of their duke, William the Conqueror, led to the Norman conquest of England at the Battle of Hastings in 1066. Norman cultural and military influence spread from these new European centres to the Crusader states of the Near East, where their prince Bohemond I founded the Principality of Antioch in the Levant, to Scotland and Wales in Great Britain, to Ireland, and to the coasts of north Africa and the Canary Islands.",
+      "context_length_tokens": 317,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans were famed for their Christian spirit, particularly during the medieval period when they established themselves as a powerful force in Europe.",
+      "rag_generation_time_ms": 2243.495635999352,
+      "no_rag_prediction": "There are many religious figures throughout history who were known for their strong Christian spirit and devotion to their faith. Some examples include:",
+      "no_rag_generation_time_ms": 2460.2964760006216
+    },
+    {
+      "sample_id": 25,
+      "question": "Which writer was from England, Henry Roth or Robert Erskine Childers?",
+      "context": "Asgard is a 51 ft gaff rigged yacht.  She was owned by the English-born writer and Irish nationalist Erskine Childers and his wife Molly Childers.  She is most noted for her use in the Howth gun-running of 1914.",
+      "context_length_tokens": 64,
+      "ground_truth": "Robert Erskine Childers DSC",
+      "ground_truth_variants": [
+        "Robert Erskine Childers DSC"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Robert Erskine Childers was an English-born writer and Irish nationalist who owned the gaff rigged yacht \"Asgard\". He is most known for his role in the Howth gun-running of 1914.",
+      "rag_generation_time_ms": 1191.2235649997456,
+      "no_rag_prediction": "Robert Erskine Childers was an English writer.",
+      "no_rag_generation_time_ms": 293.4305789995051
+    },
+    {
+      "sample_id": 26,
+      "question": "What principality did William the conquerer found?",
+      "context": "The Norman dynasty had a major political, cultural and military impact on medieval Europe and even the Near East. The Normans were famed for their martial spirit and eventually for their Christian piety, becoming exponents of the Catholic orthodoxy into which they assimilated. They adopted the Gallo-Romance language of the Frankish land they settled, their dialect becoming known as Norman, Normaund or Norman French, an important literary language. The Duchy of Normandy, which they formed by treaty with the French crown, was a great fief of medieval France, and under Richard I of Normandy was forged into a cohesive and formidable principality in feudal tenure. The Normans are noted both for their culture, such as their unique Romanesque architecture and musical traditions, and for their significant military accomplishments and innovations. Norman adventurers founded the Kingdom of Sicily under Roger II after conquering southern Italy on the Saracens and Byzantines, and an expedition on behalf of their duke, William the Conqueror, led to the Norman conquest of England at the Battle of Hastings in 1066. Norman cultural and military influence spread from these new European centres to the Crusader states of the Near East, where their prince Bohemond I founded the Principality of Antioch in the Levant, to Scotland and Wales in Great Britain, to Ireland, and to the coasts of north Africa and the Canary Islands.",
+      "context_length_tokens": 317,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "William the Conqueror founded the Principality of Normandy in northern France in 933.",
+      "rag_generation_time_ms": 826.305565000439,
+      "no_rag_prediction": "The principalism of1124477680 is 9.",
+      "no_rag_generation_time_ms": 504.14851599998656
+    },
+    {
+      "sample_id": 27,
+      "question": "When did Dyrrachium  fall to the Normans?",
+      "context": "Robert Guiscard, an other Norman adventurer previously elevated to the dignity of count of Apulia as the result of his military successes, ultimately drove the Byzantines out of southern Italy. Having obtained the consent of pope Gregory VII and acting as his vassal, Robert continued his campaign conquering the Balkan peninsula as a foothold for western feudal lords and the Catholic Church. After allying himself with Croatia and the Catholic cities of Dalmatia, in 1081 he led an army of 30,000 men in 300 ships landing on the southern shores of Albania, capturing Valona, Kanina, Jericho (Orikumi), and reaching Butrint after numerous pillages. They joined the fleet that had previously conquered Corfu and attacked Dyrrachium from land and sea, devastating everything along the way. Under these harsh circumstances, the locals accepted the call of emperor Alexius I Comnenus to join forces with the Byzantines against the Normans. The Albanian forces could not take part in the ensuing battle because it had started before their arrival. Immediately before the battle, the Venetian fleet had secured a victory in the coast surrounding the city. Forced to retreat, Alexius ceded the command to a high Albanian official named Comiscortes in the service of Byzantium. The city's garrison resisted until February 1082, when Dyrrachium was betrayed to the Normans by the Venetian and Amalfitan merchants who had settled there. The Normans were now free to penetrate into the hinterland; they took Ioannina and some minor cities in southwestern Macedonia and Thessaly before appearing at the gates of Thessalonica. Dissension among the high ranks coerced the Normans to retreat to Italy. They lost Dyrrachium, Valona, and Butrint in 1085, after the death of Robert.",
+      "context_length_tokens": 442,
+      "ground_truth": "1082",
+      "ground_truth_variants": [
+        "1082",
+        "February 1082",
+        "February 1082"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "Dyrrachium fell to the Normans in 1082.",
+      "rag_generation_time_ms": 789.6617999995215,
+      "no_rag_prediction": "The city of Dyrrachium was conquered by the Normans in 1082. However, it's important to note that the Normans had already been present in southern Italy since the 9th century and had established many territories along the coast, including Sicily and Calabria.",
+      "no_rag_generation_time_ms": 1278.6081670001295
+    },
+    {
+      "sample_id": 28,
+      "question": "What treaty was established in the 9th century?",
+      "context": "In the course of the 10th century, the initially destructive incursions of Norse war bands into the rivers of France evolved into more permanent encampments that included local women and personal property. The Duchy of Normandy, which began in 911 as a fiefdom, was established by the treaty of Saint-Clair-sur-Epte between King Charles III of West Francia and the famed Viking ruler Rollo, and was situated in the former Frankish kingdom of Neustria. The treaty offered Rollo and his men the French lands between the river Epte and the Atlantic coast in exchange for their protection against further Viking incursions. The area corresponded to the northern part of present-day Upper Normandy down to the river Seine, but the Duchy would eventually extend west beyond the Seine. The territory was roughly equivalent to the old province of Rouen, and reproduced the Roman administrative structure of Gallia Lugdunensis II (part of the former Gallia Lugdunensis).",
+      "context_length_tokens": 222,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The treaty of Saint-Clair-sur-Epte",
+      "rag_generation_time_ms": 546.12891799934,
+      "no_rag_prediction": "The Treaty of Charlemagne, also known as the Peace of God, was established in 814 AD. It was a series of agreements between several Germanic kings and the Holy Roman Empire that aimed to establish peace and stability in Europe.",
+      "no_rag_generation_time_ms": 1007.7049479996276
+    },
+    {
+      "sample_id": 29,
+      "question": "Are the Laleli Mosque and Esma Sultan Mansion located in the same neighborhood?",
+      "context": "Esma Sultan (21 March 1873 \u2013 7 May 1899) was an Ottoman princess, the daughter of Sultan Abd\u00fclaziz and his wife Gevheri Kad\u0131n, herself the daughter of Salih Bey Svatnba.  She was the half-sister of Abd\u00fclmecid II, the last Caliph of the Muslim world.",
+      "context_length_tokens": 87,
+      "ground_truth": "no",
+      "ground_truth_variants": [
+        "no"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "No, the Laleli Mosque is located in Istanbul, Turkey, while the Esma Sultan Mansion is located in London, England.",
+      "rag_generation_time_ms": 838.3931730004406,
+      "no_rag_prediction": "I apologize, but I do not have access to information about the location of specific landmarks or buildings. Could you please provide me with more details or context so that I can assist you better?",
+      "no_rag_generation_time_ms": 850.5043340001066
+    },
+    {
+      "sample_id": 30,
+      "question": "What is the original meaning of the word Norman?",
+      "context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "context_length_tokens": 98,
+      "ground_truth": "Viking",
+      "ground_truth_variants": [
+        "Viking",
+        "Norseman, Viking",
+        "Norseman, Viking"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The original meaning of the word Norman was \"Norseman, Viking\". It comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r.",
+      "rag_generation_time_ms": 1539.691906000371,
+      "no_rag_prediction": "The original meaning of the word \"Norman\" refers to a person from Normandy, which is a region in France. The term can also refer to someone who follows the norms or standards of a particular group or society.",
+      "no_rag_generation_time_ms": 924.4435970003906
+    },
+    {
+      "sample_id": 31,
+      "question": "Are Giuseppe Verdi and Ambroise Thomas both Opera composers ?",
+      "context": "Bernhard B\u00f6tel (1883\u20131953) was a German operatic tenor and actor who had an active career in Germany and Austria during the first half of the 20th century.  He made recordings for several record labels during the early years of the recording industry, including His Master's Voice, Odeon Records, Polydor Records, Tri-Ergon, and Vox Records.  On the stage he sang a variety of roles in operas and operettas from leading parts to comprimario roles.  His stage repertoire included Belmonte in Wolfgang Amadeus Mozart's \"Die Entf\u00fchrung aus dem Serail\", Chapelou in Adolphe Adam's \"Le postillon de Lonjumeau\", Count Almaviva in Gioachino Rossini's \"The Barber of Seville\", Daniel in Franz Leh\u00e1r's \"The Merry Widow\", the Duke of Mantua in Giuseppe Verdi's \"Rigoletto\", Gabriel von Eisenstein in Johann Strauss II's \"Die Fledermaus\", Indigo in Strauss' \"Indigo und die vierzig R\u00e4uber\", Jen\u00edk in Bed\u0159ich Smetana's \"The Bartered Bride\", Paolino in Domenico Cimarosa's \"Il matrimonio segreto\", P\u00e2ris in Jacques Offenbach's \"La belle H\u00e9l\u00e8ne\", Pietro in Franz von Supp\u00e9's \"Boccaccio\", and Wilhelm Meister in Ambroise Thomas' \"Mignon\".",
+      "context_length_tokens": 353,
+      "ground_truth": "yes",
+      "ground_truth_variants": [
+        "yes"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Yes, they are both opera composers.  Giuseppe Verdi is widely regarded as one of the greatest Italian opera composers of all time, while Ambroise Thomas is known for his works in the genre of grand opera.",
+      "rag_generation_time_ms": 1385.5367250007475,
+      "no_rag_prediction": "Yes, Giuseppe Verdi and Ambroise Thomas are both well-known opera composers. Verdi is widely regarded as one of the greatest operatic composers of all time, with works such as \"La Traviata,\" \"Il Trovatore,\" and \"Rigoletto.\" Thomas, on the other hand, composed many popular operas, including \"Carmen,\" \"Mireille,\" and \"J\u00e9r\u00f4me.\"",
+      "no_rag_generation_time_ms": 1815.4536739994
+    },
+    {
+      "sample_id": 32,
+      "question": "How many more yards was Kris Browns's first field goal over his second?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "29",
+      "ground_truth_variants": [
+        "29",
+        "20",
+        "29",
+        "29",
+        "29"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "Kris Brown's first field goal was for 33 yards and his second field goal was for 30 yards, so he kicked a total of 63 yards.",
+      "rag_generation_time_ms": 1107.7511490002507,
+      "no_rag_prediction": "",
+      "no_rag_generation_time_ms": 93.15976100060652
+    },
+    {
+      "sample_id": 33,
+      "question": "How many yards difference is there between Sebastian Janikowski's longest field goal and his shortest field goal?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "3",
+      "ground_truth_variants": [
+        "3",
+        "3",
+        "3",
+        "3"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The difference between Sebastian Janikowski's longest field goal (53 yards) and his shortest field goal (24 yards) is 29 yards.",
+      "rag_generation_time_ms": 1054.3862249996891,
+      "no_rag_prediction": "Sebastian Janikowski's longest field goal was 59 yards, and his shortest field goal was 23 yards. So the difference is 59 - 23 = 36 yards.",
+      "no_rag_generation_time_ms": 937.1835379997719
+    },
+    {
+      "sample_id": 34,
+      "question": "Which Bengals receiver scored two touchdowns?",
+      "context": "Still searching for their first win, the Bengals flew to Texas Stadium for a Week 5 interconference duel with the Dallas Cowboys.  In the first quarter, Cincinnati trailed early as Cowboys kicker Nick Folk got a 30-yard field goal, along with RB Felix Jones getting a 33-yard TD run.  In the second quarter, Dallas increased its lead as QB Tony Romo completed a 4-yard TD pass to TE Jason Witten.  The Bengals would end the half with kicker Shayne Graham getting a 41-yard and a 31-yard field goal. In the third quarter, Cincinnati tried to rally as QB Carson Palmer completed an 18-yard TD pass to WR T. J. Houshmandzadeh.  In the fourth quarter, the Bengals got closer as Graham got a 40-yard field goal, yet the Cowboys answered with Romo completing a 57-yard TD pass to WR Terrell Owens.  Cincinnati tried to come back as Palmer completed a 10-yard TD pass to Houshmandzadeh (with a failed 2-point conversion), but Dallas pulled away with Romo completing a 15-yard TD pass to WR Patrick Crayton.",
+      "context_length_tokens": 291,
+      "ground_truth": "Houshmandzadeh",
+      "ground_truth_variants": [
+        "Houshmandzadeh",
+        "T. J. Houshmandzadeh"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "T.J. Houshmandzadeh",
+      "rag_generation_time_ms": 591.6521170001943,
+      "no_rag_prediction": "",
+      "no_rag_generation_time_ms": 67.24576099986734
+    },
+    {
+      "sample_id": 35,
+      "question": "The football manager who recruited David Beckham managed Manchester United during what timeframe?",
+      "context": "Joshua Parlby (born 1855 in Longton, Staffordshire) was an English football manager who managed Manchester City in the 1890s.",
+      "context_length_tokens": 36,
+      "ground_truth": "from 1986 to 2013",
+      "ground_truth_variants": [
+        "from 1986 to 2013"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Sir Alex Ferguson",
+      "rag_generation_time_ms": 322.4319800001467,
+      "no_rag_prediction": "2. Let u(b) = -5*b**3 + 410*b**2 - 896*b. Determine u(83).",
+      "no_rag_generation_time_ms": 916.1170449997371
+    },
+    {
+      "sample_id": 36,
+      "question": "Who entered Italy soon after the Byzantine Empire?",
+      "context": "Soon after the Normans began to enter Italy, they entered the Byzantine Empire and then Armenia, fighting against the Pechenegs, the Bulgars, and especially the Seljuk Turks. Norman mercenaries were first encouraged to come to the south by the Lombards to act against the Byzantines, but they soon fought in Byzantine service in Sicily. They were prominent alongside Varangian and Lombard contingents in the Sicilian campaign of George Maniaces in 1038\u201340. There is debate whether the Normans in Greek service actually were from Norman Italy, and it now seems likely only a few came from there. It is also unknown how many of the \"Franks\", as the Byzantines called them, were Normans and not other Frenchmen.",
+      "context_length_tokens": 175,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans, also known as the Franks, entered Italy soon after the Byzantine Empire.",
+      "rag_generation_time_ms": 701.3140179997208,
+      "no_rag_prediction": "15115115161516151615161516151615161516151615161516151615161516151615161516151615161516151615161516151615161516151615161516151615",
+      "no_rag_generation_time_ms": 2483.1140370006324
+    },
+    {
+      "sample_id": 37,
+      "question": "Aside from the Apple Remote, what other device can control the program Apple Remote was originally designed to interact with?",
+      "context": "A universal remote is a remote control that can be programmed to operate various brands of one or more types of consumer electronics devices.  Low-end universal remotes can only control a set number of devices determined by their manufacturer, while mid- and high-end universal remotes allow the user to program in new control codes to the remote.  Many remotes sold with various electronic include universal remote capabilities for other types of devices, which allow the remote to control other devices beyond the device it came with.  For example, a VCR remote may be programmed to operate various brands of televisions.",
+      "context_length_tokens": 123,
+      "ground_truth": "keyboard function keys",
+      "ground_truth_variants": [
+        "keyboard function keys"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The Apple Remote was originally designed to interact with the Apple Macintosh computer.",
+      "rag_generation_time_ms": 583.8506499994764,
+      "no_rag_prediction": "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+      "no_rag_generation_time_ms": 2531.3634309995905
+    },
+    {
+      "sample_id": 38,
+      "question": "When was the French version of the word Norman first recorded?",
+      "context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "context_length_tokens": 98,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The French version of the word Norman was first recorded in the 10th century.",
+      "rag_generation_time_ms": 575.5887290006285,
+      "no_rag_prediction": "The French language has a word for \"Norman,\" which is \"normand\" or \"normande.",
+      "no_rag_generation_time_ms": 2486.1920359999203
+    },
+    {
+      "sample_id": 39,
+      "question": "What river originally bounded the Duchy",
+      "context": "In the course of the 10th century, the initially destructive incursions of Norse war bands into the rivers of France evolved into more permanent encampments that included local women and personal property. The Duchy of Normandy, which began in 911 as a fiefdom, was established by the treaty of Saint-Clair-sur-Epte between King Charles III of West Francia and the famed Viking ruler Rollo, and was situated in the former Frankish kingdom of Neustria. The treaty offered Rollo and his men the French lands between the river Epte and the Atlantic coast in exchange for their protection against further Viking incursions. The area corresponded to the northern part of present-day Upper Normandy down to the river Seine, but the Duchy would eventually extend west beyond the Seine. The territory was roughly equivalent to the old province of Rouen, and reproduced the Roman administrative structure of Gallia Lugdunensis II (part of the former Gallia Lugdunensis).",
+      "context_length_tokens": 222,
+      "ground_truth": "Seine",
+      "ground_truth_variants": [
+        "Seine",
+        "Epte",
+        "Seine"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The river Epte originally bounded the Duchy of Normandy.",
+      "rag_generation_time_ms": 573.434523999822,
+      "no_rag_prediction": "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+      "no_rag_generation_time_ms": 2468.2422699997915
+    },
+    {
+      "sample_id": 40,
+      "question": "Who was known by his stage name Aladin and helped organizations improve their performance as a consultant?",
+      "context": "James P. Comer (born James Pierpont Comer, September 25, 1934 in East Chicago, Indiana) is currently the Maurice Falk Professor of Child Psychiatry at the Yale Child Study Center and has been since 1976.  He is also an associate dean at the Yale School of Medicine.  As one of the world's leading child psychiatrists, he is best known for his efforts to improve the scholastic performance of children from lower-income and minority backgrounds which led to the founding of the Comer School Development Program in 1968.  His program has been used in more than 600 schools in eighty-two school districts.  He is the author of ten books, including the autobiographical \"Maggie\u2019s American Dream: The Life and Times of a Black Family\", 1988; \"Leave No Child Behind: Preparing Today's Youth for Tomorrow's World\", 2004; and his most recent book, \"What I Learned in School: Reflections on Race, Child Development, and School Reform\", 2009.  He has also written more than 150 articles for Parents (magazine) and more than 300 articles on children's health and development and race relations.  Dr. Comer has also served as a consultant to the Children's Television Workshop (Sesame Workshop) which produces Sesame Street and The Electric Company (1971 TV series).  He is a co-founder and past president of the Black Psychiatrists of America and has served on the board of several universities, foundations, and corporations.  He has also lectured and consulted widely not only across the United States at different universities, medical schools, and scientific associations, but also around the world in places such as London, Paris, Tokyo, Dakar, Senegal and Sydney, Australia.  For his work and scholarship, Dr. Comer has been awarded 47 honorary degrees and has been recognized by numerous organizations.",
+      "context_length_tokens": 449,
+      "ground_truth": "Eenasul Fateh",
+      "ground_truth_variants": [
+        "Eenasul Fateh"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Dr. Maurice Comer",
+      "rag_generation_time_ms": 567.0759300001009,
+      "no_rag_prediction": "There seems to be some confusion here.",
+      "no_rag_generation_time_ms": 1713.7047030000758
+    },
+    {
+      "sample_id": 41,
+      "question": "Who did the Normans team up with in Anatolia?",
+      "context": "Some Normans joined Turkish forces to aid in the destruction of the Armenians vassal-states of Sassoun and Taron in far eastern Anatolia. Later, many took up service with the Armenian state further south in Cilicia and the Taurus Mountains. A Norman named Oursel led a force of \"Franks\" into the upper Euphrates valley in northern Syria. From 1073 to 1074, 8,000 of the 20,000 troops of the Armenian general Philaretus Brachamius were Normans\u2014formerly of Oursel\u2014led by Raimbaud. They even lent their ethnicity to the name of their castle: Afranji, meaning \"Franks.\" The known trade between Amalfi and Antioch and between Bari and Tarsus may be related to the presence of Italo-Normans in those cities while Amalfi and Bari were under Norman rule in Italy.",
+      "context_length_tokens": 213,
+      "ground_truth": "Turkish forces",
+      "ground_truth_variants": [
+        "Turkish forces",
+        "Turkish forces",
+        "Turkish forces"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans in Anatolia teamed up with the Turks, who were then led by the Seljuk Sultanate.",
+      "rag_generation_time_ms": 2644.2895840000347,
+      "no_rag_prediction": "The Normans, also known as the Vikings, were a group of Scandinavian invaders who established themselves in Sicily and southern Italy during the 10th to 12th centuries.",
+      "no_rag_generation_time_ms": 1877.3019239997666
+    },
+    {
+      "sample_id": 42,
+      "question": "Are Local H and For Against both from the United States?",
+      "context": "Mendocino County, California, was the first jurisdiction in the United States to ban the cultivation, production or distribution of genetically modified organisms (GMOs).  The ordinance, entitled Measure H, was passed by referendum on March 2, 2004.  Initiated by the group \"GMO Free Mendocino\", the campaign was a highly publicized grassroots effort by local farmers and environmental groups who contend that the potential risks of GMOs to human health and the ecosystem have not yet been fully understood.  The measure was met with opposition by several interest groups representing the biotechnology industry, The California Plant Health Association (now the Western Plant Health Association) and CropLife America, a Washington-based consortium whose clients represent some of the largest food distributors in the nation, including Monsanto, DuPont and Dow Chemical.  Since the enactment of the ordinance, Mendocino County has been added to an international list of \"GMO free zones.\"  Pre-emptive statutes banning local municipalities from such ordinances have now become widespread with adoption in sixteen states.",
+      "context_length_tokens": 245,
+      "ground_truth": "yes",
+      "ground_truth_variants": [
+        "yes"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "No, they are specific to Mendocino County, California and were passed as ballot initiatives by the county's voters.",
+      "rag_generation_time_ms": 893.7494490000972,
+      "no_rag_prediction": "Yes, \"Local H\" and \"For\" are both from the United States, while \"Against\" is not.",
+      "no_rag_generation_time_ms": 1432.3788909996438
+    },
+    {
+      "sample_id": 43,
+      "question": "What is the name of the fight song of the university whose main campus is in Lawrence, Kansas and whose branch campuses are in the Kansas City metropolitan area?",
+      "context": "North Kansas City is a city in Clay County, Missouri, United States that despite the similarity in name to its larger counterpart, Kansas City, is an independent municipality part of the Kansas City metropolitan area.  The population was 4,208 at the 2010 census.  Originally a northern suburb across the Missouri River from Kansas City, Missouri, it is now almost completely surrounded by Kansas City, which has annexed far to the north of North Kansas City's northern city limits.  North Kansas City also adjoins the small municipality of Avondale.",
+      "context_length_tokens": 126,
+      "ground_truth": "Kansas Song",
+      "ground_truth_variants": [
+        "Kansas Song"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The name of the fight song of the university whose main campus is in Lawrence, Kansas and whose branch campuses are in the Kansas City metropolitan area is \"Rock Chalk Jayhawk.\"",
+      "rag_generation_time_ms": 1066.541758999847,
+      "no_rag_prediction": "This is------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "no_rag_generation_time_ms": 2633.053587000177
+    },
+    {
+      "sample_id": 44,
+      "question": "When did Herve serve as a Byzantine general?",
+      "context": "One of the first Norman mercenaries to serve as a Byzantine general was Herv\u00e9 in the 1050s. By then however, there were already Norman mercenaries serving as far away as Trebizond and Georgia. They were based at Malatya and Edessa, under the Byzantine duke of Antioch, Isaac Komnenos. In the 1060s, Robert Crispin led the Normans of Edessa against the Turks. Roussel de Bailleul even tried to carve out an independent state in Asia Minor with support from the local population, but he was stopped by the Byzantine general Alexius Komnenos.",
+      "context_length_tokens": 146,
+      "ground_truth": "1050s",
+      "ground_truth_variants": [
+        "1050s",
+        "in the 1050s",
+        "in the 1050s"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "Herve served as a Byzantine general in the 1050s.",
+      "rag_generation_time_ms": 634.8375139996278,
+      "no_rag_prediction": "5----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "no_rag_generation_time_ms": 2496.130221000385
+    },
+    {
+      "sample_id": 45,
+      "question": "How many touchdowns were scored in the game?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "4",
+      "ground_truth_variants": [
+        "4",
+        "4"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "There were four touchdowns scored in the game: two by the Raiders (one rushing and one passing) and two by the Texans (one rushing and one receiving).",
+      "rag_generation_time_ms": 1094.5450049994179,
+      "no_rag_prediction": "I'm sorry, I don't have information about a specific game. Can you please provide more details or context so that I can help you with your question?",
+      "no_rag_generation_time_ms": 702.5771850003366
+    },
+    {
+      "sample_id": 46,
+      "question": "How many yards was the longest touchdown of the game?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "80-yard punt return",
+      "ground_truth_variants": [
+        "80-yard punt return",
+        "80",
+        "80",
+        "80",
+        "80"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The longest touchdown of the game was 80 yards, scored by the Houston Texans' punter on a punt return.",
+      "rag_generation_time_ms": 890.2637809997032,
+      "no_rag_prediction": "I apologize, but I do not have access to real-time information about specific events or matches. Can you please provide me with more context or details so that I can assist you better?",
+      "no_rag_generation_time_ms": 807.4739169996974
+    },
+    {
+      "sample_id": 47,
+      "question": "Who threw the longest pass?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "JaMarcus Russell",
+      "ground_truth_variants": [
+        "JaMarcus Russell",
+        "29",
+        "Russell",
+        "JaMarcus Russell",
+        "Russell"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The Raiders' quarterback, JaMarcus Russell, completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens in the first quarter.",
+      "rag_generation_time_ms": 1153.4298110000236,
+      "no_rag_prediction": "11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+      "no_rag_generation_time_ms": 2459.4829630004824
+    },
+    {
+      "sample_id": 48,
+      "question": "What religion were the Normans",
+      "context": "The Norman dynasty had a major political, cultural and military impact on medieval Europe and even the Near East. The Normans were famed for their martial spirit and eventually for their Christian piety, becoming exponents of the Catholic orthodoxy into which they assimilated. They adopted the Gallo-Romance language of the Frankish land they settled, their dialect becoming known as Norman, Normaund or Norman French, an important literary language. The Duchy of Normandy, which they formed by treaty with the French crown, was a great fief of medieval France, and under Richard I of Normandy was forged into a cohesive and formidable principality in feudal tenure. The Normans are noted both for their culture, such as their unique Romanesque architecture and musical traditions, and for their significant military accomplishments and innovations. Norman adventurers founded the Kingdom of Sicily under Roger II after conquering southern Italy on the Saracens and Byzantines, and an expedition on behalf of their duke, William the Conqueror, led to the Norman conquest of England at the Battle of Hastings in 1066. Norman cultural and military influence spread from these new European centres to the Crusader states of the Near East, where their prince Bohemond I founded the Principality of Antioch in the Levant, to Scotland and Wales in Great Britain, to Ireland, and to the coasts of north Africa and the Canary Islands.",
+      "context_length_tokens": 317,
+      "ground_truth": "Catholic",
+      "ground_truth_variants": [
+        "Catholic",
+        "Catholic orthodoxy",
+        "Catholic"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans were predominantly Roman Catholic Christians, although they also incorporated certain pagan practices and beliefs from their Norse ancestors. This fusion of religions is known as Norman syncretism.",
+      "rag_generation_time_ms": 1199.113595000199,
+      "no_rag_prediction": "3. Suppose -2*h + 6 = -4*w, h + 18 = w - 0*w. Let s(c) = 5*c**2 - 5*c + 1. Calculate s(w).",
+      "no_rag_generation_time_ms": 1235.5079239996485
+    },
+    {
+      "sample_id": 49,
+      "question": "The director of the romantic comedy \"Big Stone Gap\" is based in what New York city?",
+      "context": "Just Another Romantic Wrestling Comedy is a 2006 film starring April Hunter and Joanie Laurer.  This Romantic comedy film was premiered at New Jersey and New York City on December 1, 2006 and was released on DVD in the United States and the United Kingdom on April 17, 2007.  After the film's DVD release \"Just Another Romantic Wrestling Comedy\" won an \"Honorable Mention\" award at the New Jersey International Festival awards.  The release is being handled by \"Victory Multimedia\".",
+      "context_length_tokens": 127,
+      "ground_truth": "Greenwich Village, New York City",
+      "ground_truth_variants": [
+        "Greenwich Village, New York City"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The director of the romantic comedy \"Big Stone Gap\" is based in Los Angeles, California.",
+      "rag_generation_time_ms": 665.6715600001917,
+      "no_rag_prediction": "The director of the romantic comedy \"Big Stone Gap\" is based in New York City.",
+      "no_rag_generation_time_ms": 465.29921399996965
+    },
+    {
+      "sample_id": 50,
+      "question": "Who did the Normans fight in Italy?",
+      "context": "Soon after the Normans began to enter Italy, they entered the Byzantine Empire and then Armenia, fighting against the Pechenegs, the Bulgars, and especially the Seljuk Turks. Norman mercenaries were first encouraged to come to the south by the Lombards to act against the Byzantines, but they soon fought in Byzantine service in Sicily. They were prominent alongside Varangian and Lombard contingents in the Sicilian campaign of George Maniaces in 1038\u201340. There is debate whether the Normans in Greek service actually were from Norman Italy, and it now seems likely only a few came from there. It is also unknown how many of the \"Franks\", as the Byzantines called them, were Normans and not other Frenchmen.",
+      "context_length_tokens": 175,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans fought against various enemies in Italy, including the Byzantines, the Pechenegs, the Bulgars, and the Seljuk Turks.",
+      "rag_generation_time_ms": 1005.5334979997497,
+      "no_rag_prediction": "The Normans fought the Lombards, who were a powerful Italian kingdom, during their conquest of Italy.",
+      "no_rag_generation_time_ms": 500.39990300047066
+    },
+    {
+      "sample_id": 51,
+      "question": "The Vermont Catamounts men's soccer team currently competes in a conference that was formerly known as what from 1988 to 1996?",
+      "context": "The 2010\u201311 Vermont Catamounts men's basketball team represented the University of Vermont in the 2010\u201311 NCAA Division I men's basketball season.  The Catamounts won their third consecutive America East Conference regular season Championship but lost in the semifinals of the conference tournament to Stony Brook.  The Catamounts got invited to the National Invitation Tournament but lost in the first round to Cleveland State, 63\u201360.",
+      "context_length_tokens": 107,
+      "ground_truth": "the North Atlantic Conference",
+      "ground_truth_variants": [
+        "the North Atlantic Conference"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The Vermont Catamounts men's soccer team competed in the Northeast Conference from 1988 to 1996.",
+      "rag_generation_time_ms": 858.7059189994761,
+      "no_rag_prediction": "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "no_rag_generation_time_ms": 2631.9610999998986
+    },
+    {
+      "sample_id": 52,
+      "question": "From which countries did the Norse originate?",
+      "context": "The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse (\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.",
+      "context_length_tokens": 178,
+      "ground_truth": "Denmark, Iceland and Norway",
+      "ground_truth_variants": [
+        "Denmark, Iceland and Norway",
+        "Denmark, Iceland and Norway",
+        "Denmark, Iceland and Norway",
+        "Denmark, Iceland and Norway"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Norse originated from several countries, including Denmark, Norway, and Iceland.",
+      "rag_generation_time_ms": 667.3029710000264,
+      "no_rag_prediction": "The original of \"Fight Song\" was written by John Philip Sousa in 1893.",
+      "no_rag_generation_time_ms": 1462.7050499993857
+    },
+    {
+      "sample_id": 53,
+      "question": "This singer of A Rather Blustery Day also voiced what hedgehog?",
+      "context": "\"Hip Hip Pooh-Ray!\"  is a song from the 1968 musical film featurette \"Winnie the Pooh and the Blustery Day\".  It is sung by the cast as a release from the dramatic tension of the story.  The song is also incorporated into (and used as the promotional tagline for) the 1977 musical film \"The Many Adventures of Winnie the Pooh\" which is an amalgamation of three Winnie-the-Pooh featurettes including \"Blustery Day\".  In the song, Pooh and Piglet are hailed as heroes (Pooh for saving Piglet's life, and Piglet for giving Owl his grand home in the beech tree).",
+      "context_length_tokens": 168,
+      "ground_truth": "Sonic",
+      "ground_truth_variants": [
+        "Sonic"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "This singer of A Rather Blustery Day also voiced Eeyore in Disney's animated adaptations of A.A. Milne's Winnie-the-Pooh stories.",
+      "rag_generation_time_ms": 1101.0139720001462,
+      "no_rag_prediction": "The singer of \"A Rather Blustery Day\" is not specified in the question. Could you please provide more context or clarify which song and artist you are referring to?",
+      "no_rag_generation_time_ms": 771.3963470005183
+    },
+    {
+      "sample_id": 54,
+      "question": "What was one of the Norman's major exports?",
+      "context": "The Normans thereafter adopted the growing feudal doctrines of the rest of France, and worked them into a functional hierarchical system in both Normandy and in England. The new Norman rulers were culturally and ethnically distinct from the old French aristocracy, most of whom traced their lineage to Franks of the Carolingian dynasty. Most Norman knights remained poor and land-hungry, and by 1066 Normandy had been exporting fighting horsemen for more than a generation. Many Normans of Italy, France and England eventually served as avid Crusaders under the Italo-Norman prince Bohemund I and the Anglo-Norman king Richard the Lion-Heart.",
+      "context_length_tokens": 157,
+      "ground_truth": "fighting horsemen",
+      "ground_truth_variants": [
+        "fighting horsemen",
+        "fighting horsemen",
+        "fighting horsemen"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Norman's major export was fighting horsemen.",
+      "rag_generation_time_ms": 496.9253089993799,
+      "no_rag_prediction": "One of the major exports of the Normans (also known as the Normans) was wool.",
+      "no_rag_generation_time_ms": 1505.8614579993446
+    },
+    {
+      "sample_id": 55,
+      "question": "Who is older, Annie Morton or Terry Richardson?",
+      "context": "Annie Morton (born October 8, 1970) is an American model born in Pennsylvania.  She has appeared on the covers of \"British Vogue\", \"ID\", \"Marie Claire\", and other magazines.  She has been photographed by Helmut Newton; Peter Lindbergh; Annie Leibovitz; Richard Avedon; Juergen Teller; Paul Jasmin, Mary Ellen Mark and Terry Richardson, and modeled for Donna Karan, Givenchy, Guerlain, Chanel, \"Harper's Bazaar\", \"Sports Illustrated\" and Victoria's Secret.  A long time vegetarian, an advocate for organic lifestyle choices and natural healthcare.  She co-founded Tsi-La Organics, a \"Green Luxury\" company that creates and sells vegan, organic perfume and skin care products.",
+      "context_length_tokens": 193,
+      "ground_truth": "Terry Richardson",
+      "ground_truth_variants": [
+        "Terry Richardson"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Annie Morton was born on October 8, 1970, while Terry Richardson was born on March 24, 1956. Therefore, Terry Richardson is older than Annie Morton by 34 years.",
+      "rag_generation_time_ms": 1322.9124319996117,
+      "no_rag_prediction": "Terry Richardson was born on July 12, 1953, and Annie Morton was born on October 6, 1958. Therefore, Terry Richardson is older than Annie Morton by 5 years.",
+      "no_rag_generation_time_ms": 1017.6517810004952
+    },
+    {
+      "sample_id": 56,
+      "question": "How many field goals did both teams kick in the first half?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "2",
+      "ground_truth_variants": [
+        "2",
+        "2",
+        "2",
+        "2",
+        "2"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The Raiders kicked three field goals (a 33-yard, a 30-yard, and a 24-yard) while the Texans kicked two field goals (a 53-yard and a 24-yard).",
+      "rag_generation_time_ms": 1458.0272200000763,
+      "no_rag_prediction": "I'm sorry, but I need more information to answer your question accurately. Can you please provide me with the names of the two teams and the specific league or competition they are playing in?",
+      "no_rag_generation_time_ms": 812.1720389999609
+    },
+    {
+      "sample_id": 57,
+      "question": "How many yards was the longest passing touchdown?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "29",
+      "ground_truth_variants": [
+        "29",
+        "29"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The longest passing touchdown was 29 yards.",
+      "rag_generation_time_ms": 553.9578950001669,
+      "no_rag_prediction": "1. Calculate -0.26 + -38.",
+      "no_rag_generation_time_ms": 512.5398969994421
+    },
+    {
+      "sample_id": 58,
+      "question": "Who was the leader when the Franks entered the Euphrates valley?",
+      "context": "Some Normans joined Turkish forces to aid in the destruction of the Armenians vassal-states of Sassoun and Taron in far eastern Anatolia. Later, many took up service with the Armenian state further south in Cilicia and the Taurus Mountains. A Norman named Oursel led a force of \"Franks\" into the upper Euphrates valley in northern Syria. From 1073 to 1074, 8,000 of the 20,000 troops of the Armenian general Philaretus Brachamius were Normans\u2014formerly of Oursel\u2014led by Raimbaud. They even lent their ethnicity to the name of their castle: Afranji, meaning \"Franks.\" The known trade between Amalfi and Antioch and between Bari and Tarsus may be related to the presence of Italo-Normans in those cities while Amalfi and Bari were under Norman rule in Italy.",
+      "context_length_tokens": 213,
+      "ground_truth": "Oursel",
+      "ground_truth_variants": [
+        "Oursel",
+        "Oursel",
+        "Oursel"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "Oursel led a force of \"Franks\" into the upper Euphrates valley in northern Syria.",
+      "rag_generation_time_ms": 754.2873610000242,
+      "no_rag_prediction": "The leader is the person who has the most authority.31",
+      "no_rag_generation_time_ms": 2499.382689000413
+    },
+    {
+      "sample_id": 59,
+      "question": "How many field goals did Sebastian Janikowski and Kris Brown both score each?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "2",
+      "ground_truth_variants": [
+        "2",
+        "5"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "Sebastian Janikowski scored two field goals for the Raiders, while Kris Brown scored four field goals for the Texans.",
+      "rag_generation_time_ms": 908.7908769997739,
+      "no_rag_prediction": "Sebastian Janikowski scored 340 field goals in his NFL career, while Kris Brown scored 165 in his.",
+      "no_rag_generation_time_ms": 619.4484919997194
+    },
+    {
+      "sample_id": 60,
+      "question": "What were the origins of the Raouliii family?",
+      "context": "Several families of Byzantine Greece were of Norman mercenary origin during the period of the Comnenian Restoration, when Byzantine emperors were seeking out western European warriors. The Raoulii were descended from an Italo-Norman named Raoul, the Petraliphae were descended from a Pierre d'Aulps, and that group of Albanian clans known as the Maniakates were descended from Normans who served under George Maniaces in the Sicilian expedition of 1038.",
+      "context_length_tokens": 117,
+      "ground_truth": "Norman mercenary",
+      "ground_truth_variants": [
+        "Norman mercenary",
+        "an Italo-Norman named Raoul",
+        "descended from an Italo-Norman named Raoul"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Raouliii family was of Norman mercenary origin during the period of the Comnenian Restoration in Byzantine Greece.",
+      "rag_generation_time_ms": 831.5616769996268,
+      "no_rag_prediction": "I'm sorry, I don't have access to specific information about families. Can you provide more context or details so I can help you better?",
+      "no_rag_generation_time_ms": 658.9186069995776
+    },
+    {
+      "sample_id": 61,
+      "question": "Who was the duke in the battle of Hastings?",
+      "context": "The Norman dynasty had a major political, cultural and military impact on medieval Europe and even the Near East. The Normans were famed for their martial spirit and eventually for their Christian piety, becoming exponents of the Catholic orthodoxy into which they assimilated. They adopted the Gallo-Romance language of the Frankish land they settled, their dialect becoming known as Norman, Normaund or Norman French, an important literary language. The Duchy of Normandy, which they formed by treaty with the French crown, was a great fief of medieval France, and under Richard I of Normandy was forged into a cohesive and formidable principality in feudal tenure. The Normans are noted both for their culture, such as their unique Romanesque architecture and musical traditions, and for their significant military accomplishments and innovations. Norman adventurers founded the Kingdom of Sicily under Roger II after conquering southern Italy on the Saracens and Byzantines, and an expedition on behalf of their duke, William the Conqueror, led to the Norman conquest of England at the Battle of Hastings in 1066. Norman cultural and military influence spread from these new European centres to the Crusader states of the Near East, where their prince Bohemond I founded the Principality of Antioch in the Levant, to Scotland and Wales in Great Britain, to Ireland, and to the coasts of north Africa and the Canary Islands.",
+      "context_length_tokens": 317,
+      "ground_truth": "William the Conqueror",
+      "ground_truth_variants": [
+        "William the Conqueror",
+        "William the Conqueror",
+        "William the Conqueror"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The duke in the Battle of Hastings was William II of Normandy, also known as William the Conqueror. He was the Duke of Normandy and later became the King of England in 1066 after defeating Harold Godwinson, the last Anglo-Saxon king of England, at the Battle of Hastings.",
+      "rag_generation_time_ms": 1941.77123100053,
+      "no_rag_prediction": "The Duke of Normandy, William the Conqueror, led the Norman army to victory at the Battle of Hastings in 1066.",
+      "no_rag_generation_time_ms": 680.5999540001721
+    },
+    {
+      "sample_id": 62,
+      "question": "Who ruled the duchy of Normandy",
+      "context": "The Norman dynasty had a major political, cultural and military impact on medieval Europe and even the Near East. The Normans were famed for their martial spirit and eventually for their Christian piety, becoming exponents of the Catholic orthodoxy into which they assimilated. They adopted the Gallo-Romance language of the Frankish land they settled, their dialect becoming known as Norman, Normaund or Norman French, an important literary language. The Duchy of Normandy, which they formed by treaty with the French crown, was a great fief of medieval France, and under Richard I of Normandy was forged into a cohesive and formidable principality in feudal tenure. The Normans are noted both for their culture, such as their unique Romanesque architecture and musical traditions, and for their significant military accomplishments and innovations. Norman adventurers founded the Kingdom of Sicily under Roger II after conquering southern Italy on the Saracens and Byzantines, and an expedition on behalf of their duke, William the Conqueror, led to the Norman conquest of England at the Battle of Hastings in 1066. Norman cultural and military influence spread from these new European centres to the Crusader states of the Near East, where their prince Bohemond I founded the Principality of Antioch in the Levant, to Scotland and Wales in Great Britain, to Ireland, and to the coasts of north Africa and the Canary Islands.",
+      "context_length_tokens": 317,
+      "ground_truth": "Richard I",
+      "ground_truth_variants": [
+        "Richard I",
+        "Richard I",
+        "Richard I"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Duchy of Normandy was a powerful state in northern France during the Middle Ages. It was ruled by several notable figures throughout its history:",
+      "rag_generation_time_ms": 3083.131461999983,
+      "no_rag_prediction": "The Duchy of Normandy was a feudal state in northern France that existed from the 9th to the 12th century. It was ruled by several powerful dukes, including:",
+      "no_rag_generation_time_ms": 2468.436372000724
+    },
+    {
+      "sample_id": 63,
+      "question": "How many of the touchdowns were passing touchdowns?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "2",
+      "ground_truth_variants": [
+        "2",
+        "2"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "Two of the touchdowns were passing touchdowns: one was a 20-yard touchdown pass from Russell to Schilens, and the other was a 29-yard touchdown pass from Russell to Higgins.",
+      "rag_generation_time_ms": 1286.3025289998404,
+      "no_rag_prediction": "I'm sorry, but I cannot provide a specific answer to this question without more context. Could you please clarify what you are looking for?",
+      "no_rag_generation_time_ms": 636.8811289994483
+    },
+    {
+      "sample_id": 64,
+      "question": "Who ruled the country of Normandy?",
+      "context": "The Norman dynasty had a major political, cultural and military impact on medieval Europe and even the Near East. The Normans were famed for their martial spirit and eventually for their Christian piety, becoming exponents of the Catholic orthodoxy into which they assimilated. They adopted the Gallo-Romance language of the Frankish land they settled, their dialect becoming known as Norman, Normaund or Norman French, an important literary language. The Duchy of Normandy, which they formed by treaty with the French crown, was a great fief of medieval France, and under Richard I of Normandy was forged into a cohesive and formidable principality in feudal tenure. The Normans are noted both for their culture, such as their unique Romanesque architecture and musical traditions, and for their significant military accomplishments and innovations. Norman adventurers founded the Kingdom of Sicily under Roger II after conquering southern Italy on the Saracens and Byzantines, and an expedition on behalf of their duke, William the Conqueror, led to the Norman conquest of England at the Battle of Hastings in 1066. Norman cultural and military influence spread from these new European centres to the Crusader states of the Near East, where their prince Bohemond I founded the Principality of Antioch in the Levant, to Scotland and Wales in Great Britain, to Ireland, and to the coasts of north Africa and the Canary Islands.",
+      "context_length_tokens": 317,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Norman state was initially ruled by the Duke of Normandy, who was also the Count of Maine.",
+      "rag_generation_time_ms": 2559.5637569995233,
+      "no_rag_prediction": "Normandy was a region in northwestern France that was invaded and conquered by the Vikings (also known as Norsemen) in the 9th century.",
+      "no_rag_generation_time_ms": 1794.2355600007431
+    },
+    {
+      "sample_id": 65,
+      "question": "When did Robert Crispin go up against the Turks?",
+      "context": "One of the first Norman mercenaries to serve as a Byzantine general was Herv\u00e9 in the 1050s. By then however, there were already Norman mercenaries serving as far away as Trebizond and Georgia. They were based at Malatya and Edessa, under the Byzantine duke of Antioch, Isaac Komnenos. In the 1060s, Robert Crispin led the Normans of Edessa against the Turks. Roussel de Bailleul even tried to carve out an independent state in Asia Minor with support from the local population, but he was stopped by the Byzantine general Alexius Komnenos.",
+      "context_length_tokens": 146,
+      "ground_truth": "1060s",
+      "ground_truth_variants": [
+        "1060s",
+        "In the 1060s",
+        "In the 1060s"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "Robert Crispin, also known as Robert Crispin or Robert Crippin, served as a Byzantine general in the 1060s.",
+      "rag_generation_time_ms": 2342.3280050001267,
+      "no_rag_prediction": "9.11.19",
+      "no_rag_generation_time_ms": 2171.3379000002533
+    },
+    {
+      "sample_id": 66,
+      "question": "What type of major impact did the Norman dynasty have on modern Europe?",
+      "context": "The Norman dynasty had a major political, cultural and military impact on medieval Europe and even the Near East. The Normans were famed for their martial spirit and eventually for their Christian piety, becoming exponents of the Catholic orthodoxy into which they assimilated. They adopted the Gallo-Romance language of the Frankish land they settled, their dialect becoming known as Norman, Normaund or Norman French, an important literary language. The Duchy of Normandy, which they formed by treaty with the French crown, was a great fief of medieval France, and under Richard I of Normandy was forged into a cohesive and formidable principality in feudal tenure. The Normans are noted both for their culture, such as their unique Romanesque architecture and musical traditions, and for their significant military accomplishments and innovations. Norman adventurers founded the Kingdom of Sicily under Roger II after conquering southern Italy on the Saracens and Byzantines, and an expedition on behalf of their duke, William the Conqueror, led to the Norman conquest of England at the Battle of Hastings in 1066. Norman cultural and military influence spread from these new European centres to the Crusader states of the Near East, where their prince Bohemond I founded the Principality of Antioch in the Levant, to Scotland and Wales in Great Britain, to Ireland, and to the coasts of north Africa and the Canary Islands.",
+      "context_length_tokens": 317,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Norman dynasty had a profound impact on modern Europe, particularly in the areas of politics, culture, and religion.",
+      "rag_generation_time_ms": 3083.973632999914,
+      "no_rag_prediction": "The Norman dynasty, also known as the Normans or Normandy, had a significant impact on modern Europe in several ways. Here are some major effects:",
+      "no_rag_generation_time_ms": 2495.015659999808
+    },
+    {
+      "sample_id": 67,
+      "question": "Are Random House Tower and 888 7th Avenue both used for real estate?",
+      "context": "Real estate benchmarking is the standard of measurement used to analyze the financial characteristics of a real estate investment property.  In the general sense, real estate benchmarking refers to the comparison of potential real estate investment properties against a predetermined framework of measurement.  In a narrow sense, the term real estate benchmarking refers to the specific real estate indicators used to measure the real estate properties.",
+      "context_length_tokens": 83,
+      "ground_truth": "no",
+      "ground_truth_variants": [
+        "no"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Yes, both Random House Tower and 888 7th Avenue are used for real estate purposes.",
+      "rag_generation_time_ms": 1775.2818790004312,
+      "no_rag_prediction": "Yes, both the Random House Tower and 888 7th Avenue are primarily used for real estate purposes. The Random House Tower is a commercial building that houses various offices, while 888 7th Avenue is a residential condominium with multiple units and amenities.",
+      "no_rag_generation_time_ms": 1210.4031939998094
+    },
+    {
+      "sample_id": 68,
+      "question": "When did Rollo begin to arrive in Normandy?",
+      "context": "Before Rollo's arrival, its populations did not differ from Picardy or the \u00cele-de-France, which were considered \"Frankish\". Earlier Viking settlers had begun arriving in the 880s, but were divided between colonies in the east (Roumois and Pays de Caux) around the low Seine valley and in the west in the Cotentin Peninsula, and were separated by traditional pagii, where the population remained about the same with almost no foreign settlers. Rollo's contingents who raided and ultimately settled Normandy and parts of the Atlantic coast included Danes, Norwegians, Norse\u2013Gaels, Orkney Vikings, possibly Swedes, and Anglo-Danes from the English Danelaw under Norse control.",
+      "context_length_tokens": 169,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "Rollo began to arrive in Normandy in 911, and his forces gradually established a foothold on the Norman coast and expanded their territory over time. The Normans eventually became dominant in the region and established the Kingdom of Normandy, which would later become the Duchy of Normandy in 1066.",
+      "rag_generation_time_ms": 1655.466042999251,
+      "no_rag_prediction": "Rollo, also known as Charles the Simple, was a Viking leader who later became the Duke of Normandy.",
+      "no_rag_generation_time_ms": 2189.449544999661
+    },
+    {
+      "sample_id": 69,
+      "question": "Who ruined Roussel de Bailleul's plans for an independent state?",
+      "context": "One of the first Norman mercenaries to serve as a Byzantine general was Herv\u00e9 in the 1050s. By then however, there were already Norman mercenaries serving as far away as Trebizond and Georgia. They were based at Malatya and Edessa, under the Byzantine duke of Antioch, Isaac Komnenos. In the 1060s, Robert Crispin led the Normans of Edessa against the Turks. Roussel de Bailleul even tried to carve out an independent state in Asia Minor with support from the local population, but he was stopped by the Byzantine general Alexius Komnenos.",
+      "context_length_tokens": 146,
+      "ground_truth": "Alexius Komnenos",
+      "ground_truth_variants": [
+        "Alexius Komnenos",
+        "Alexius Komnenos",
+        "Alexius Komnenos"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Byzantine general Alexius Komnenos stopped Roussel de Bailleul's plans for an independent state in Asia Minor.",
+      "rag_generation_time_ms": 844.5883809999941,
+      "no_rag_prediction": "Louis XIV, the King of France, ultimately destroyed Roussel de Bailleul's plans for an independent state in the 17th century.",
+      "no_rag_generation_time_ms": 693.34624000021
+    },
+    {
+      "sample_id": 70,
+      "question": "In what country is Normandy located?",
+      "context": "The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse (\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.",
+      "context_length_tokens": 178,
+      "ground_truth": "France",
+      "ground_truth_variants": [
+        "France",
+        "France",
+        "France",
+        "France"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "Normandy is located in the northwestern part of France. It was a historic Duchy in France that was ruled by the Normans from the 10th to the 12th centuries. Today, Normandy is considered a region of France, and it is known for its unique culture, cuisine, and history.",
+      "rag_generation_time_ms": 1644.758100999752,
+      "no_rag_prediction": "In  of604c8f139d3b2c4a7e05188454a1aa084f43f2b1, -4.331262373661764E-15.",
+      "no_rag_generation_time_ms": 1394.6678840002278
+    },
+    {
+      "sample_id": 71,
+      "question": "Who adopted the fuedel doctrines of the Normans?",
+      "context": "The Normans thereafter adopted the growing feudal doctrines of the rest of France, and worked them into a functional hierarchical system in both Normandy and in England. The new Norman rulers were culturally and ethnically distinct from the old French aristocracy, most of whom traced their lineage to Franks of the Carolingian dynasty. Most Norman knights remained poor and land-hungry, and by 1066 Normandy had been exporting fighting horsemen for more than a generation. Many Normans of Italy, France and England eventually served as avid Crusaders under the Italo-Norman prince Bohemund I and the Anglo-Norman king Richard the Lion-Heart.",
+      "context_length_tokens": 157,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans adopted the growing feudal doctrines of the rest of France and worked them into a functional hierarchical system in both Normandy and in England.",
+      "rag_generation_time_ms": 965.2157479995367,
+      "no_rag_prediction": "The feudal system was not a doctrine or belief, but rather a political and social structure that emerged in medieval Europe. It was based on the idea of loyalty and service between lords and vassals, with land being held in exchange for military service.",
+      "no_rag_generation_time_ms": 2489.213161000407
+    },
+    {
+      "sample_id": 72,
+      "question": "Which team won the game?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "Raiders",
+      "ground_truth_variants": [
+        "Raiders",
+        "Raiders",
+        "Raiders",
+        "the Raiders",
+        "the Raiders"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The Oakland Raiders won the game against the Houston Texans with a final score of 20-13.",
+      "rag_generation_time_ms": 874.3048039996211,
+      "no_rag_prediction": "If a team won a game,",
+      "no_rag_generation_time_ms": 390.377959000034
+    },
+    {
+      "sample_id": 73,
+      "question": "What did maternal Old Norse traditions merge with?",
+      "context": "The descendants of Rollo's Vikings and their Frankish wives would replace the Norse religion and Old Norse language with Catholicism (Christianity) and the Gallo-Romance language of the local people, blending their maternal Frankish heritage with Old Norse traditions and customs to synthesize a unique \"Norman\" culture in the north of France. The Norman language was forged by the adoption of the indigenous langue d'o\u00efl branch of Romance by a Norse-speaking ruling class, and it developed into the regional language that survives today.",
+      "context_length_tokens": 125,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "Maternal Old Norse traditions merged with the indigenous langue d'o\u00efl branch of Romance. This fusion of Old Norse and Romance languages resulted in the development of the Norman language, which eventually evolved into the regional language that is spoken in northern France today.",
+      "rag_generation_time_ms": 1403.1197180001982,
+      "no_rag_prediction": "Maternal Old Norse traditions merged with other cultures and religions through various means of contact, conquest, trade, and migration. Some examples include:",
+      "no_rag_generation_time_ms": 2478.9060379998773
+    },
+    {
+      "sample_id": 74,
+      "question": "Which performance act has a higher instrument to person ratio, Badly Drawn Boy or Wolf Alice?",
+      "context": "Wolf Alice are a four-piece alternative rock band from North London, formed initially as a two-person band in 2010.  Its members since 2012 are Ellie Rowsell (vocals, guitar), Joff Oddie (guitars, vocals), Theo Ellis (bass), and Joel Amey (drums, vocals).",
+      "context_length_tokens": 82,
+      "ground_truth": "Badly Drawn Boy",
+      "ground_truth_variants": [
+        "Badly Drawn Boy"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "Badly Drawn Boy is a solo artist, so it only has one person playing all the instruments. Wolf Alice, on the other hand, has four people playing various instruments, including vocals. Therefore, Wolf Alice has a higher instrument to person ratio than Badly Drawn Boy.",
+      "rag_generation_time_ms": 1325.4935200002365,
+      "no_rag_prediction": "Badly Drawn Boy is a solo artist and does not have any other band members. Therefore, they do not have any other instruments besides their own voice. As such, the instrument-to-person ratio for Badly Drawn Boy is 1:0.",
+      "no_rag_generation_time_ms": 2516.5849009999874
+    },
+    {
+      "sample_id": 75,
+      "question": "What did the French promises to protect Rollo and his men from?",
+      "context": "In the course of the 10th century, the initially destructive incursions of Norse war bands into the rivers of France evolved into more permanent encampments that included local women and personal property. The Duchy of Normandy, which began in 911 as a fiefdom, was established by the treaty of Saint-Clair-sur-Epte between King Charles III of West Francia and the famed Viking ruler Rollo, and was situated in the former Frankish kingdom of Neustria. The treaty offered Rollo and his men the French lands between the river Epte and the Atlantic coast in exchange for their protection against further Viking incursions. The area corresponded to the northern part of present-day Upper Normandy down to the river Seine, but the Duchy would eventually extend west beyond the Seine. The territory was roughly equivalent to the old province of Rouen, and reproduced the Roman administrative structure of Gallia Lugdunensis II (part of the former Gallia Lugdunensis).",
+      "context_length_tokens": 222,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The French promised to protect Rollo and his men from further Viking incursions.",
+      "rag_generation_time_ms": 2088.093420000405,
+      "no_rag_prediction": "The French promised to protect Rollo and his men from any attack by the English or other enemies.",
+      "no_rag_generation_time_ms": 1889.255150000281
+    },
+    {
+      "sample_id": 76,
+      "question": "What was the name of the count of Apulia",
+      "context": "Robert Guiscard, an other Norman adventurer previously elevated to the dignity of count of Apulia as the result of his military successes, ultimately drove the Byzantines out of southern Italy. Having obtained the consent of pope Gregory VII and acting as his vassal, Robert continued his campaign conquering the Balkan peninsula as a foothold for western feudal lords and the Catholic Church. After allying himself with Croatia and the Catholic cities of Dalmatia, in 1081 he led an army of 30,000 men in 300 ships landing on the southern shores of Albania, capturing Valona, Kanina, Jericho (Orikumi), and reaching Butrint after numerous pillages. They joined the fleet that had previously conquered Corfu and attacked Dyrrachium from land and sea, devastating everything along the way. Under these harsh circumstances, the locals accepted the call of emperor Alexius I Comnenus to join forces with the Byzantines against the Normans. The Albanian forces could not take part in the ensuing battle because it had started before their arrival. Immediately before the battle, the Venetian fleet had secured a victory in the coast surrounding the city. Forced to retreat, Alexius ceded the command to a high Albanian official named Comiscortes in the service of Byzantium. The city's garrison resisted until February 1082, when Dyrrachium was betrayed to the Normans by the Venetian and Amalfitan merchants who had settled there. The Normans were now free to penetrate into the hinterland; they took Ioannina and some minor cities in southwestern Macedonia and Thessaly before appearing at the gates of Thessalonica. Dissension among the high ranks coerced the Normans to retreat to Italy. They lost Dyrrachium, Valona, and Butrint in 1085, after the death of Robert.",
+      "context_length_tokens": 442,
+      "ground_truth": "Robert Guiscard",
+      "ground_truth_variants": [
+        "Robert Guiscard",
+        "Robert Guiscard",
+        "Robert Guiscard"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The name of the count of Apulia during this period is not mentioned in historical records.",
+      "rag_generation_time_ms": 859.1243579994625,
+      "no_rag_prediction": "The count of Apulia is also known as the Duke of Apulia.",
+      "no_rag_generation_time_ms": 1502.2450440001194
+    },
+    {
+      "sample_id": 77,
+      "question": "How many yards was the longest field goal in the game?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "53",
+      "ground_truth_variants": [
+        "53",
+        "53"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The longest field goal in the game was 53 yards.",
+      "rag_generation_time_ms": 618.0122670002675,
+      "no_rag_prediction": "The longest field goal I can find is 57 yards by Justin Tucker of the Baltimore Ravens in a game against the Chicago Bears on September 29, 2019.",
+      "no_rag_generation_time_ms": 844.9431159997403
+    },
+    {
+      "sample_id": 78,
+      "question": "What name comes from the English words Normans/Normanz?",
+      "context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "context_length_tokens": 98,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "rag_generation_time_ms": 2136.1041479995038,
+      "no_rag_prediction": "The name that comes from the English words Normans/Normanz is Norman.",
+      "no_rag_generation_time_ms": 381.8387229994187
+    },
+    {
+      "sample_id": 79,
+      "question": "Who did King Charles III swear fealty to?",
+      "context": "The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse (\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.",
+      "context_length_tokens": 178,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "King Charles III of West Francia swore fealty to Rollo, Duke of Normandy, in 924 AD.",
+      "rag_generation_time_ms": 821.1828630001037,
+      "no_rag_prediction": "As a symbolic gesture, King Charles III of England and Scotland was crowned by the Archbishop of Canterbury and swore fealty to him in the traditional coronation ceremony.",
+      "no_rag_generation_time_ms": 1615.7547590000831
+    },
+    {
+      "sample_id": 80,
+      "question": "How many yards difference is there between Kris Brown's longest and shortest field goals?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "29",
+      "ground_truth_variants": [
+        "29",
+        "29",
+        "29",
+        "29"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "There is no information provided about the yardage of Kris Brown's field goals.",
+      "rag_generation_time_ms": 720.4118529998595,
+      "no_rag_prediction": "Kris Brown's longest field goal was 52 yards, and his shortest field goal was 40 yards. Therefore, the difference in yardage is 12 yards (52 - 40).",
+      "no_rag_generation_time_ms": 960.2925699991829
+    },
+    {
+      "sample_id": 81,
+      "question": "Who was Robert's son?",
+      "context": "A few years after the First Crusade, in 1107, the Normans under the command of Bohemond, Robert's son, landed in Valona and besieged Dyrrachium using the most sophisticated military equipment of the time, but to no avail. Meanwhile, they occupied Petrela, the citadel of Mili at the banks of the river Deabolis, Gllavenica (Ballsh), Kanina and Jericho. This time, the Albanians sided with the Normans, dissatisfied by the heavy taxes the Byzantines had imposed upon them. With their help, the Normans secured the Arbanon passes and opened their way to Dibra. The lack of supplies, disease and Byzantine resistance forced Bohemond to retreat from his campaign and sign a peace treaty with the Byzantines in the city of Deabolis.",
+      "context_length_tokens": 193,
+      "ground_truth": "Bohemond",
+      "ground_truth_variants": [
+        "Bohemond",
+        "Bohemond",
+        "Bohemond"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "Robert's son was Bohemond I, also known as Bohemond of Taranto.",
+      "rag_generation_time_ms": 684.5462009996481,
+      "no_rag_prediction": "The answer is  \"17\".",
+      "no_rag_generation_time_ms": 216.75521199995273
+    },
+    {
+      "sample_id": 82,
+      "question": "How many men were in Robert's army?",
+      "context": "Robert Guiscard, an other Norman adventurer previously elevated to the dignity of count of Apulia as the result of his military successes, ultimately drove the Byzantines out of southern Italy. Having obtained the consent of pope Gregory VII and acting as his vassal, Robert continued his campaign conquering the Balkan peninsula as a foothold for western feudal lords and the Catholic Church. After allying himself with Croatia and the Catholic cities of Dalmatia, in 1081 he led an army of 30,000 men in 300 ships landing on the southern shores of Albania, capturing Valona, Kanina, Jericho (Orikumi), and reaching Butrint after numerous pillages. They joined the fleet that had previously conquered Corfu and attacked Dyrrachium from land and sea, devastating everything along the way. Under these harsh circumstances, the locals accepted the call of emperor Alexius I Comnenus to join forces with the Byzantines against the Normans. The Albanian forces could not take part in the ensuing battle because it had started before their arrival. Immediately before the battle, the Venetian fleet had secured a victory in the coast surrounding the city. Forced to retreat, Alexius ceded the command to a high Albanian official named Comiscortes in the service of Byzantium. The city's garrison resisted until February 1082, when Dyrrachium was betrayed to the Normans by the Venetian and Amalfitan merchants who had settled there. The Normans were now free to penetrate into the hinterland; they took Ioannina and some minor cities in southwestern Macedonia and Thessaly before appearing at the gates of Thessalonica. Dissension among the high ranks coerced the Normans to retreat to Italy. They lost Dyrrachium, Valona, and Butrint in 1085, after the death of Robert.",
+      "context_length_tokens": 442,
+      "ground_truth": "30,000",
+      "ground_truth_variants": [
+        "30,000",
+        "30,000",
+        "30,000"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "Robert Guiscard led an army of 30,000 men in 1081.",
+      "rag_generation_time_ms": 947.2444670000186,
+      "no_rag_prediction": "During the American Civil War, Robert E.",
+      "no_rag_generation_time_ms": 1513.078553000014
+    },
+    {
+      "sample_id": 83,
+      "question": "Who established a treaty with King Charles the third of France?",
+      "context": "In the course of the 10th century, the initially destructive incursions of Norse war bands into the rivers of France evolved into more permanent encampments that included local women and personal property. The Duchy of Normandy, which began in 911 as a fiefdom, was established by the treaty of Saint-Clair-sur-Epte between King Charles III of West Francia and the famed Viking ruler Rollo, and was situated in the former Frankish kingdom of Neustria. The treaty offered Rollo and his men the French lands between the river Epte and the Atlantic coast in exchange for their protection against further Viking incursions. The area corresponded to the northern part of present-day Upper Normandy down to the river Seine, but the Duchy would eventually extend west beyond the Seine. The territory was roughly equivalent to the old province of Rouen, and reproduced the Roman administrative structure of Gallia Lugdunensis II (part of the former Gallia Lugdunensis).",
+      "context_length_tokens": 222,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "Who established a treaty with King Charles the third of France?",
+      "rag_generation_time_ms": 556.1546039998575,
+      "no_rag_prediction": "King Charles the Third of France established multiple treaties during his reign from 1760 to 1789. Some of these treaties included:",
+      "no_rag_generation_time_ms": 2487.154353999358
+    },
+    {
+      "sample_id": 84,
+      "question": "Who's arristocracy eventually served as avid Crusaders?",
+      "context": "The Normans thereafter adopted the growing feudal doctrines of the rest of France, and worked them into a functional hierarchical system in both Normandy and in England. The new Norman rulers were culturally and ethnically distinct from the old French aristocracy, most of whom traced their lineage to Franks of the Carolingian dynasty. Most Norman knights remained poor and land-hungry, and by 1066 Normandy had been exporting fighting horsemen for more than a generation. Many Normans of Italy, France and England eventually served as avid Crusaders under the Italo-Norman prince Bohemund I and the Anglo-Norman king Richard the Lion-Heart.",
+      "context_length_tokens": 157,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The arristocracy of Italy, France, and England eventually served as avid Crusaders under the Italo-Norman prince Bohemund I and the Anglo-Norman king Richard the Lion-Heart.",
+      "rag_generation_time_ms": 1215.3164179999294,
+      "no_rag_prediction": "The answer is  \"The CEO of the company.\" It seems that you have a question or problem related to your job as a CEO, and you want someone to help you with it. Is there anything specific you would like me to assist you with?",
+      "no_rag_generation_time_ms": 1049.0779380006643
+    },
+    {
+      "sample_id": 85,
+      "question": "What century did the Normans first gain their separate identity?",
+      "context": "The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse (\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.",
+      "context_length_tokens": 178,
+      "ground_truth": "10th century",
+      "ground_truth_variants": [
+        "10th century",
+        "the first half of the 10th century",
+        "10th",
+        "10th"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans first gained their separate identity in the first half of the 10th century.",
+      "rag_generation_time_ms": 685.2145520006161,
+      "no_rag_prediction": "1555----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "no_rag_generation_time_ms": 2484.461239999291
+    },
+    {
+      "sample_id": 86,
+      "question": "What was the father of Kasper Schmeichel voted to be by the IFFHS in 1992?",
+      "context": "Kasper Gus Ntjalka Williams OAM, known as Gus Williams (20 June 1937 \u2013 13 September 2010) was a country singer from Hermannsburg in Central Australia.  He was an Arrernte man, who was born in Alice Springs.  He was the father of country star Warren H Williams.",
+      "context_length_tokens": 78,
+      "ground_truth": "World's Best Goalkeeper",
+      "ground_truth_variants": [
+        "World's Best Goalkeeper"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The father of Kasper Schmeichel, Hans-J\u00fcrgen Schmeichel, was selected as the best goalkeeper of the last century by the International Federation of Football History and Statistics (IFFHS) in 1992.",
+      "rag_generation_time_ms": 1230.0941889998285,
+      "no_rag_prediction": "The father of Kasper Schmeicvel was named as Jozef Schmeicvel by the IFFHS in 1992.",
+      "no_rag_generation_time_ms": 706.8165789996783
+    },
+    {
+      "sample_id": 87,
+      "question": "Who gave their name to Normandy in the 1000's and 1100's",
+      "context": "The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse (\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.",
+      "context_length_tokens": 178,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans, also known as the Normands or Nourmands, gave their name to Normandy in the 10th and 11th centuries.",
+      "rag_generation_time_ms": 2089.396293000391,
+      "no_rag_prediction": "The name of the person who--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+      "no_rag_generation_time_ms": 2537.9047060005178
+    },
+    {
+      "sample_id": 88,
+      "question": "Who did Rollo sign the treaty of Saint-Clair-sur-Epte with?",
+      "context": "In the course of the 10th century, the initially destructive incursions of Norse war bands into the rivers of France evolved into more permanent encampments that included local women and personal property. The Duchy of Normandy, which began in 911 as a fiefdom, was established by the treaty of Saint-Clair-sur-Epte between King Charles III of West Francia and the famed Viking ruler Rollo, and was situated in the former Frankish kingdom of Neustria. The treaty offered Rollo and his men the French lands between the river Epte and the Atlantic coast in exchange for their protection against further Viking incursions. The area corresponded to the northern part of present-day Upper Normandy down to the river Seine, but the Duchy would eventually extend west beyond the Seine. The territory was roughly equivalent to the old province of Rouen, and reproduced the Roman administrative structure of Gallia Lugdunensis II (part of the former Gallia Lugdunensis).",
+      "context_length_tokens": 222,
+      "ground_truth": "King Charles III",
+      "ground_truth_variants": [
+        "King Charles III",
+        "King Charles III",
+        "King Charles III"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "Rollo signed the treaty of Saint-Clair-sur-Epte with King Charles III of West Francia, also known as Charles the Simple or Charles the Bald.",
+      "rag_generation_time_ms": 1007.475756000531,
+      "no_rag_prediction": "Rollo, also known as Charles the Simple, signed the Treaty of Saint-Clair-sur-Epte with King Henry I of England in 1066. The treaty was a significant event in the Norman Conquest of England and established peace between the two kingdoms after many years of conflict.",
+      "no_rag_generation_time_ms": 1327.5393080002686
+    },
+    {
+      "sample_id": 89,
+      "question": "How many yards longer was the longest passing touchdown than the shortest?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 246,
+      "ground_truth": "9",
+      "ground_truth_variants": [
+        "9",
+        "9"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "The longest passing touchdown was 29 yards, while the shortest was 1 yard. Therefore, the difference is 28 yards.",
+      "rag_generation_time_ms": 952.215743999659,
+      "no_rag_prediction": "3",
+      "no_rag_generation_time_ms": 120.30644199967355
+    },
+    {
+      "sample_id": 90,
+      "question": "when did Nors encampments ivolve into destructive incursions?",
+      "context": "In the course of the 10th century, the initially destructive incursions of Norse war bands into the rivers of France evolved into more permanent encampments that included local women and personal property. The Duchy of Normandy, which began in 911 as a fiefdom, was established by the treaty of Saint-Clair-sur-Epte between King Charles III of West Francia and the famed Viking ruler Rollo, and was situated in the former Frankish kingdom of Neustria. The treaty offered Rollo and his men the French lands between the river Epte and the Atlantic coast in exchange for their protection against further Viking incursions. The area corresponded to the northern part of present-day Upper Normandy down to the river Seine, but the Duchy would eventually extend west beyond the Seine. The territory was roughly equivalent to the old province of Rouen, and reproduced the Roman administrative structure of Gallia Lugdunensis II (part of the former Gallia Lugdunensis).",
+      "context_length_tokens": 222,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "It is difficult to pinpoint when the initial Viking incursions in the 9th century evolved into more permanent encampments with local women and personal property.",
+      "rag_generation_time_ms": 1576.9987599996966,
+      "no_rag_prediction": "It is difficult to pinpoint a specific time or event that caused Norse encampments to transform into destructive invasions. However, there were several factors that contributed to this shift:",
+      "no_rag_generation_time_ms": 2505.949471999884
+    },
+    {
+      "sample_id": 91,
+      "question": "Who upon arriving gave the original viking settlers a common identity?",
+      "context": "Before Rollo's arrival, its populations did not differ from Picardy or the \u00cele-de-France, which were considered \"Frankish\". Earlier Viking settlers had begun arriving in the 880s, but were divided between colonies in the east (Roumois and Pays de Caux) around the low Seine valley and in the west in the Cotentin Peninsula, and were separated by traditional pagii, where the population remained about the same with almost no foreign settlers. Rollo's contingents who raided and ultimately settled Normandy and parts of the Atlantic coast included Danes, Norwegians, Norse\u2013Gaels, Orkney Vikings, possibly Swedes, and Anglo-Danes from the English Danelaw under Norse control.",
+      "context_length_tokens": 169,
+      "ground_truth": "Rollo",
+      "ground_truth_variants": [
+        "Rollo",
+        "Rollo",
+        "Rollo"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The original Viking settlers in Normandy and parts of the Atlantic coast before Rollo's arrival were not given a common identity as a distinct group.",
+      "rag_generation_time_ms": 1692.952005000734,
+      "no_rag_prediction": "1. In base 8, what is -140 + -253?",
+      "no_rag_generation_time_ms": 591.3947589997406
+    },
+    {
+      "sample_id": 92,
+      "question": "Who was the Normans' main enemy in Italy, the Byzantine Empire and Armenia?",
+      "context": "Soon after the Normans began to enter Italy, they entered the Byzantine Empire and then Armenia, fighting against the Pechenegs, the Bulgars, and especially the Seljuk Turks. Norman mercenaries were first encouraged to come to the south by the Lombards to act against the Byzantines, but they soon fought in Byzantine service in Sicily. They were prominent alongside Varangian and Lombard contingents in the Sicilian campaign of George Maniaces in 1038\u201340. There is debate whether the Normans in Greek service actually were from Norman Italy, and it now seems likely only a few came from there. It is also unknown how many of the \"Franks\", as the Byzantines called them, were Normans and not other Frenchmen.",
+      "context_length_tokens": 175,
+      "ground_truth": "Seljuk Turks",
+      "ground_truth_variants": [
+        "Seljuk Turks",
+        "the Pechenegs, the Bulgars, and especially the Seljuk Turks",
+        "the Seljuk Turks"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans' main enemies in Italy were the Byzantine Empire and the Pechenegs, who were invading Byzantine territory through Bulgaria and into the Black Sea. The Normans fought alongside Varangian and Lombard contingents in the Sicilian campaign of George Maniaces in 1038-40.",
+      "rag_generation_time_ms": 1752.8466660005506,
+      "no_rag_prediction": "The Normans' main enemies in Italy were the Byzantine Empire and the Arab forces. In the early years of their conquest, they also faced opposition from various Italian city-states and the Holy Roman Empire. Later on, they also encountered resistance from the papacy and other Catholic powers.",
+      "no_rag_generation_time_ms": 1238.0747050001446
+    },
+    {
+      "sample_id": 93,
+      "question": "Where did the Normans and Byzantines sign the peace treaty?",
+      "context": "A few years after the First Crusade, in 1107, the Normans under the command of Bohemond, Robert's son, landed in Valona and besieged Dyrrachium using the most sophisticated military equipment of the time, but to no avail. Meanwhile, they occupied Petrela, the citadel of Mili at the banks of the river Deabolis, Gllavenica (Ballsh), Kanina and Jericho. This time, the Albanians sided with the Normans, dissatisfied by the heavy taxes the Byzantines had imposed upon them. With their help, the Normans secured the Arbanon passes and opened their way to Dibra. The lack of supplies, disease and Byzantine resistance forced Bohemond to retreat from his campaign and sign a peace treaty with the Byzantines in the city of Deabolis.",
+      "context_length_tokens": 193,
+      "ground_truth": "Deabolis",
+      "ground_truth_variants": [
+        "Deabolis",
+        "Deabolis",
+        "Deabolis"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Normans and Byzantines signed the peace treaty in the city of Deabolis.",
+      "rag_generation_time_ms": 715.9522419997302,
+      "no_rag_prediction": "The Normans and Byzantines signed the peace treaty in Constantinople (present-day Istanbul, Turkey).",
+      "no_rag_generation_time_ms": 600.6558000008226
+    },
+    {
+      "sample_id": 94,
+      "question": "What government position was held by the woman who portrayed Corliss Archer in the film Kiss and Tell?",
+      "context": "Meet Corliss Archer, a program from radio's Golden Age, ran from January 7, 1943 to September 30, 1956.  Although it was CBS's answer to NBC's popular \"A Date with Judy\", it was also broadcast by NBC in 1948 as a summer replacement for \"The Bob Hope Show\".  From October 3, 1952 to June 26, 1953, it aired on ABC, finally returning to CBS.  Despite the program's long run, fewer than 24 episodes are known to exist.",
+      "context_length_tokens": 136,
+      "ground_truth": "Chief of Protocol",
+      "ground_truth_variants": [
+        "Chief of Protocol"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The woman who portrayed Corliss Archer in the film Kiss and Tell was a well-known actress named Judy Holliday. She was best known for her roles in classic films such as Born Yesterday (1950), Lady Eve (1944), and Gentlemen Prefer Blondes (1953).",
+      "rag_generation_time_ms": 1711.3748219999252,
+      "no_rag_prediction": "The actress who played Corliss Archer in the film Kiss and Tell is not known to have held any government positions. Corliss Archer is a fictional character in the film, and her role does not involve any real-life government positions or duties.",
+      "no_rag_generation_time_ms": 1137.5611189996562
+    },
+    {
+      "sample_id": 95,
+      "question": "2014 S/S is the debut album of a South Korean boy group that was formed by who?",
+      "context": "South Korean boy group Shinee have received several awards and nominations for their music work.  The group was formed by S.M. Entertainment in 2008 and released their first full-length album, \"The Shinee World\", on August 28, 2008, which won the Newcomer Album of the Year at the 23rd Golden Disk Awards.  The first single released from the album was \"Sanso Gateun Neo (Love Like Oxygen)\" and won first place on \"M Countdown\" on September 18, 2008 making it the group's first win on Korean music shows since debut.  Their second album \"Lucifer\" (2010) produced two singles, \"Lucifer\" and \"Hello\".  For their outstanding choreography the group was nominated for the Best Dance Performance Award at the Mnet Asian Music Awards in 2010. \" Lucifer\" also won the Disk Bonsang Award at the 25th Golden Disk Awards as well as the Popularity Award.  On March 21, 2012 the group released their fourth EP \"Sherlock\" for which the group was awarded another Disk Bonsang Award at the 27th Golden Disc Awards and the Bonsang Award at the 22nd Seoul Music Award.  Also following the success of the lead single it was also nominated for Song of the Year at the 2012 Mnet Asian Music Awards.",
+      "context_length_tokens": 325,
+      "ground_truth": "YG Entertainment",
+      "ground_truth_variants": [
+        "YG Entertainment"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "2014 S/S is the debut album of a South Korean boy group that was formed by SM Entertainment.",
+      "rag_generation_time_ms": 919.5630539998092,
+      "no_rag_prediction": "2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 2014 20",
+      "no_rag_generation_time_ms": 2546.452909000436
+    },
+    {
+      "sample_id": 96,
+      "question": "What language replaced the Gallo-Romance language?",
+      "context": "The descendants of Rollo's Vikings and their Frankish wives would replace the Norse religion and Old Norse language with Catholicism (Christianity) and the Gallo-Romance language of the local people, blending their maternal Frankish heritage with Old Norse traditions and customs to synthesize a unique \"Norman\" culture in the north of France. The Norman language was forged by the adoption of the indigenous langue d'o\u00efl branch of Romance by a Norse-speaking ruling class, and it developed into the regional language that survives today.",
+      "context_length_tokens": 125,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The regional language that survives today is Norman French, which developed from the indigenous langue d'o\u00efl branch of Romance adopted by the Norse-speaking ruling class in Normandy.",
+      "rag_generation_time_ms": 1958.1096360006995,
+      "no_rag_prediction": "The Gallo-Romance language, also known as Romance languages, was not replaced by any single language. Instead, it evolved and spread throughout Europe, giving rise to various regional languages such as French, Spanish, Italian, Portuguese, and Romanian. These languages continue to be spoken today in different parts of the world.",
+      "no_rag_generation_time_ms": 1322.6939420001145
+    },
+    {
+      "sample_id": 97,
+      "question": "Who was the Norse leader?",
+      "context": "The Normans (Norman: Nourmands; French: Normands; Latin: Normanni) were the people who in the 10th and 11th centuries gave their name to Normandy, a region in France. They were descended from Norse (\"Norman\" comes from \"Norseman\") raiders and pirates from Denmark, Iceland and Norway who, under their leader Rollo, agreed to swear fealty to King Charles III of West Francia. Through generations of assimilation and mixing with the native Frankish and Roman-Gaulish populations, their descendants would gradually merge with the Carolingian-based cultures of West Francia. The distinct cultural and ethnic identity of the Normans emerged initially in the first half of the 10th century, and it continued to evolve over the succeeding centuries.",
+      "context_length_tokens": 178,
+      "ground_truth": "Rollo",
+      "ground_truth_variants": [
+        "Rollo",
+        "Rollo",
+        "Rollo",
+        "Rollo"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "Rollo, also known as Rollo Duke of Normandy, was the Norse leader who led his people to invade Normandy in the 9th century.",
+      "rag_generation_time_ms": 2881.9255929993233,
+      "no_rag_prediction": "51111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+      "no_rag_generation_time_ms": 2486.0368259996903
+    },
+    {
+      "sample_id": 98,
+      "question": "What was the Norman religion?",
+      "context": "The descendants of Rollo's Vikings and their Frankish wives would replace the Norse religion and Old Norse language with Catholicism (Christianity) and the Gallo-Romance language of the local people, blending their maternal Frankish heritage with Old Norse traditions and customs to synthesize a unique \"Norman\" culture in the north of France. The Norman language was forged by the adoption of the indigenous langue d'o\u00efl branch of Romance by a Norse-speaking ruling class, and it developed into the regional language that survives today.",
+      "context_length_tokens": 125,
+      "ground_truth": "Catholicism",
+      "ground_truth_variants": [
+        "Catholicism",
+        "Catholicism",
+        "Catholicism"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "The Norman religion was the Catholic Church, which had been adopted by the Norse-speaking ruling class in Normandy, France. This adoption of Christianity by the Normans helped to integrate them into French society and allowed them to establish a distinct cultural identity within the broader Christian world.",
+      "rag_generation_time_ms": 1410.79539599923,
+      "no_rag_prediction": "50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "no_rag_generation_time_ms": 2482.0437850003145
+    },
+    {
+      "sample_id": 99,
+      "question": "Who assimilted the Roman language?",
+      "context": "The Norman dynasty had a major political, cultural and military impact on medieval Europe and even the Near East. The Normans were famed for their martial spirit and eventually for their Christian piety, becoming exponents of the Catholic orthodoxy into which they assimilated. They adopted the Gallo-Romance language of the Frankish land they settled, their dialect becoming known as Norman, Normaund or Norman French, an important literary language. The Duchy of Normandy, which they formed by treaty with the French crown, was a great fief of medieval France, and under Richard I of Normandy was forged into a cohesive and formidable principality in feudal tenure. The Normans are noted both for their culture, such as their unique Romanesque architecture and musical traditions, and for their significant military accomplishments and innovations. Norman adventurers founded the Kingdom of Sicily under Roger II after conquering southern Italy on the Saracens and Byzantines, and an expedition on behalf of their duke, William the Conqueror, led to the Norman conquest of England at the Battle of Hastings in 1066. Norman cultural and military influence spread from these new European centres to the Crusader states of the Near East, where their prince Bohemond I founded the Principality of Antioch in the Levant, to Scotland and Wales in Great Britain, to Ireland, and to the coasts of north Africa and the Canary Islands.",
+      "context_length_tokens": 317,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The assimilation of the Roman language occurred throughout the Mediterranean world, including in North Africa, Spain, and Italy, during the period of the Roman Empire.",
+      "rag_generation_time_ms": 2877.6991089998774,
+      "no_rag_prediction": "1. What is the value of -2 + (5 - (-4 + 0))?",
+      "no_rag_generation_time_ms": 561.9430319993626
+    }
+  ],
+  "count": 100,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 16:46:23",
+    "run_id": "qrag_gen_20251228_154901",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}

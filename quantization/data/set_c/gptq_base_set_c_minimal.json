@@ -1,0 +1,75 @@
+{
+  "model_config": {
+    "name": "TheBloke/Mistral-7B-v0.1-GPTQ",
+    "quantization": "gptq",
+    "variant": "base"
+  },
+  "set_name": "set_c",
+  "samples": [
+    {
+      "sample_id": 0,
+      "run_id": 0,
+      "question": "When was the Latin version of the word Norman first recorded?",
+      "context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "ground_truth": "9th century",
+      "ground_truth_variants": [
+        "9th century",
+        "9th century",
+        "9th century"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "It was first recorded in Medieval Latin during the ninth century. Q: What does the term Northmen refer to? A: In its original form it referred to a Scandinavian pirate who raided and settled along the coasts of northwestern Europe between c800-1250 AD."
+    },
+    {
+      "sample_id": 10,
+      "run_id": 0,
+      "question": "What year did Guns N Roses perform a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective?",
+      "context": "Arnold Schwarzenegger is an actor who has appeared in over 30 films, and has also ventured into directing and producing.  He began his acting career primarily with small roles in film and television.  For his first film role, he was credited as \"Arnold Strong\", but was credited with his birth name thereafter.  He has appeared mainly in action, and comedy films.  In addition to films and television, he has appeared in music videos for AC/DC, Bon Jovi, and Guns N' Roses.",
+      "ground_truth": "1999",
+      "ground_truth_variants": [
+        "1999"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "The video was released on the album Use Your Illusion II (1992)."
+    },
+    {
+      "sample_id": 20,
+      "run_id": 0,
+      "question": "How many yards longer was the 80-yard punt than the touchdown pass from Russell to Johnnie Lee Higgins?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "ground_truth": "51",
+      "ground_truth_variants": [
+        "51",
+        "51",
+        "51",
+        "51"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "Eighty (80) yards"
+    },
+    {
+      "sample_id": 30,
+      "run_id": 0,
+      "question": "What Viking groups were conquered by Rollo?",
+      "context": "Before Rollo's arrival, its populations did not differ from Picardy or the \u00cele-de-France, which were considered \"Frankish\". Earlier Viking settlers had begun arriving in the 880s, but were divided between colonies in the east (Roumois and Pays de Caux) around the low Seine valley and in the west in the Cotentin Peninsula, and were separated by traditional pagii, where the population remained about the same with almost no foreign settlers. Rollo's contingents who raided and ultimately settled Normandy and parts of the Atlantic coast included Danes, Norwegians, Norse\u2013Gaels, Orkney Vikings, possibly Swedes, and Anglo-Danes from the English Danelaw under Norse control.",
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The first group was led by Hasting, a Dane; then came Olaf Tryggvason, King of Norway, followed by his brother Sigurd Syr, Earl of Northumbria; finally arrived Jarl Haakon, son of Harald Fairhair, king of Norway."
+    }
+  ],
+  "count": 4,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 16:17:11",
+    "run_id": "qrag_gen_20251228_154901",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}

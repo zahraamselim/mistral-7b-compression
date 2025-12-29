@@ -1,0 +1,138 @@
+{
+  "fp16": {
+    "timing": {
+      "ms_per_token": {
+        "mean": 63.445887300781315,
+        "std": 0.20337527113176074,
+        "median": 63.39138114843745,
+        "min": 63.26049007812529,
+        "max": 64.0267945703119,
+        "p95": 63.78002758164052,
+        "p99": 63.97744117257763
+      },
+      "tokens_per_sec": {
+        "mean": 15.761623737411659,
+        "std": 0.05017015317882618,
+        "median": 15.775015384869711
+      },
+      "ttft_ms": 71.18858900003033,
+      "num_runs": 10
+    },
+    "memory": {
+      "allocated_mb": 6914.375,
+      "reserved_mb": 6934.0,
+      "peak_mb": 6925.484375,
+      "kv_cache_512": 256.0,
+      "kv_cache_2048": 1024.0
+    },
+    "model_size": {
+      "size_gb": 13.48877739906311,
+      "total_params": 7241732096,
+      "bits_per_param": 16.0
+    },
+    "backend": "huggingface",
+    "quantization": "none"
+  },
+  "gptq": {
+    "timing": {
+      "ms_per_token": {
+        "mean": 19.36189213046866,
+        "std": 0.13876898682059424,
+        "median": 19.308574148436897,
+        "min": 19.207155726562064,
+        "max": 19.70432561718738,
+        "p95": 19.59766436367154,
+        "p99": 19.68299336648421
+      },
+      "tokens_per_sec": {
+        "mean": 51.65047371202682,
+        "std": 0.36681249713227854,
+        "median": 51.79046351809558
+      },
+      "ttft_ms": 43.017960000042876,
+      "num_runs": 10
+    },
+    "memory": {
+      "allocated_mb": 8096.2578125,
+      "reserved_mb": 8406.0,
+      "peak_mb": 8677.1328125,
+      "kv_cache_512": 256.0,
+      "kv_cache_2048": 1024.0
+    },
+    "model_size": {
+      "size_gb": 3.1220703125,
+      "total_params": 6704594944,
+      "bits_per_param": 4.0
+    },
+    "backend": "exllamav2",
+    "quantization": "GPTQ"
+  },
+  "awq": {
+    "timing": {
+      "ms_per_token": {
+        "mean": 102.9565304007809,
+        "std": 1.1269915119610943,
+        "median": 102.6969817812491,
+        "min": 101.60198732031134,
+        "max": 104.72571941406272,
+        "p95": 104.66704143554661,
+        "p99": 104.71398381835951
+      },
+      "tokens_per_sec": {
+        "mean": 9.713996066374422,
+        "std": 0.10588770004865336,
+        "median": 9.737535936036824
+      },
+      "ttft_ms": 114.3133890000172,
+      "num_runs": 10
+    },
+    "memory": {
+      "allocated_mb": 1779.34375,
+      "reserved_mb": 1850.0,
+      "peak_mb": 2029.5625,
+      "kv_cache_512": 256.0,
+      "kv_cache_2048": 1024.0
+    },
+    "model_size": {
+      "size_gb": 3.1220703125,
+      "total_params": 6704594944,
+      "bits_per_param": 4.0
+    },
+    "backend": "autoawq",
+    "quantization": "AWQ"
+  },
+  "nf4": {
+    "timing": {
+      "ms_per_token": {
+        "mean": 81.37109092444572,
+        "std": 0.954242446047282,
+        "median": 81.18554836718772,
+        "min": 80.6164677890635,
+        "max": 84.13097332258106,
+        "p95": 82.93619727429507,
+        "p99": 83.89201811292386
+      },
+      "tokens_per_sec": {
+        "mean": 12.291022629950701,
+        "std": 0.14034857823360247,
+        "median": 12.317464164722987
+      },
+      "ttft_ms": 178.09395800009042,
+      "num_runs": 10
+    },
+    "memory": {
+      "allocated_mb": 1661.5419921875,
+      "reserved_mb": 1876.0,
+      "peak_mb": 2845.3515625,
+      "kv_cache_512": 256.0,
+      "kv_cache_2048": 1024.0
+    },
+    "model_size": {
+      "size_gb": 3.1220703125,
+      "total_params": 6704594944,
+      "bits_per_param": 4.0
+    },
+    "backend": "bitsandbytes",
+    "quantization": "NF4"
+  }
+}

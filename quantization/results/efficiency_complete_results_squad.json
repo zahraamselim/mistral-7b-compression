@@ -1,0 +1,684 @@
+{
+  "comparison_table": [
+    {
+      "config": "awq_base",
+      "quantization": "awq",
+      "variant": "base",
+      "mean_ms": 6838.3247896220455,
+      "median_ms": 5146.207515500009,
+      "p95_ms": 14414.093765699976,
+      "tokens_per_sec": 9.359017298670496,
+      "f1_score": 0.11097434539258788,
+      "exact_match": 0.05,
+      "model_gb": 3.3713877201080322,
+      "bits_per_param": 4.0,
+      "total_memory_mb": 4245.26123046875,
+      "kv_cache_mb": 102.5
+    },
+    {
+      "config": "awq_instruct",
+      "quantization": "awq",
+      "variant": "instruct",
+      "mean_ms": 6489.486946810177,
+      "median_ms": 4879.961342499882,
+      "p95_ms": 15673.97845610004,
+      "tokens_per_sec": 9.862104743343133,
+      "f1_score": 0.10900762799292212,
+      "exact_match": 0.05,
+      "model_gb": 3.3713877201080322,
+      "bits_per_param": 4.0,
+      "total_memory_mb": 4245.26123046875,
+      "kv_cache_mb": 102.5
+    },
+    {
+      "config": "fp16_base",
+      "quantization": "fp16",
+      "variant": "base",
+      "mean_ms": 3841.15978745593,
+      "median_ms": 2738.6393709999766,
+      "p95_ms": 8235.07762594998,
+      "tokens_per_sec": 16.661634386834077,
+      "f1_score": 0.09427674113899848,
+      "exact_match": 0.03,
+      "model_gb": 13.485550880432129,
+      "bits_per_param": 16.0,
+      "total_memory_mb": 16673.544921875,
+      "kv_cache_mb": 102.5
+    },
+    {
+      "config": "fp16_instruct",
+      "quantization": "fp16",
+      "variant": "instruct",
+      "mean_ms": 3719.004849055932,
+      "median_ms": 2509.944029500275,
+      "p95_ms": 10679.093142450196,
+      "tokens_per_sec": 17.208904692943968,
+      "f1_score": 0.11301297900918394,
+      "exact_match": 0.04,
+      "model_gb": 13.485550880432129,
+      "bits_per_param": 16.0,
+      "total_memory_mb": 16673.544921875,
+      "kv_cache_mb": 102.5
+    },
+    {
+      "config": "gptq_base",
+      "quantization": "gptq",
+      "variant": "base",
+      "mean_ms": 2686.6600952118706,
+      "median_ms": 2742.0930714997667,
+      "p95_ms": 5100.828714900009,
+      "tokens_per_sec": 23.82139821634301,
+      "f1_score": 0.04931867045537643,
+      "exact_match": 0.01,
+      "model_gb": 3.3713877201080322,
+      "bits_per_param": 4.0,
+      "total_memory_mb": 4244.76123046875,
+      "kv_cache_mb": 102.0
+    },
+    {
+      "config": "gptq_instruct",
+      "quantization": "gptq",
+      "variant": "instruct",
+      "mean_ms": 2185.9150779339066,
+      "median_ms": 1462.2908104997805,
+      "p95_ms": 6237.236819150339,
+      "tokens_per_sec": 29.278356074331956,
+      "f1_score": 0.050967400725120474,
+      "exact_match": 0.0,
+      "model_gb": 3.3713877201080322,
+      "bits_per_param": 4.0,
+      "total_memory_mb": 4244.76123046875,
+      "kv_cache_mb": 102.0
+    },
+    {
+      "config": "nf4_base",
+      "quantization": "nf4",
+      "variant": "base",
+      "mean_ms": 5235.823222213544,
+      "median_ms": 4313.243822999993,
+      "p95_ms": 10657.617214649894,
+      "tokens_per_sec": 12.223483735752023,
+      "f1_score": 0.08698129321658733,
+      "exact_match": 0.03,
+      "model_gb": 3.3713877201080322,
+      "bits_per_param": 4.0,
+      "total_memory_mb": 4245.26123046875,
+      "kv_cache_mb": 102.5
+    },
+    {
+      "config": "nf4_instruct",
+      "quantization": "nf4",
+      "variant": "instruct",
+      "mean_ms": 4464.822898869496,
+      "median_ms": 3249.5987564996085,
+      "p95_ms": 11022.034240049936,
+      "tokens_per_sec": 14.334275166032889,
+      "f1_score": 0.09716097171948566,
+      "exact_match": 0.03,
+      "model_gb": 3.3713877201080322,
+      "bits_per_param": 4.0,
+      "total_memory_mb": 4245.26123046875,
+      "kv_cache_mb": 102.5
+    }
+  ],
+  "quantization_comparison": [
+    {
+      "quantization": "awq",
+      "avg_latency_ms": 6663.905868216111,
+      "avg_tokens_per_sec": 9.610561021006815,
+      "avg_f1": 0.109990986692755,
+      "avg_em": 0.05,
+      "model_size_gb": 3.3713877201080322,
+      "avg_memory_mb": 4245.26123046875
+    },
+    {
+      "quantization": "fp16",
+      "avg_latency_ms": 3780.082318255931,
+      "avg_tokens_per_sec": 16.93526953988902,
+      "avg_f1": 0.10364486007409121,
+      "avg_em": 0.035,
+      "model_size_gb": 13.485550880432129,
+      "avg_memory_mb": 16673.544921875
+    },
+    {
+      "quantization": "gptq",
+      "avg_latency_ms": 2436.2875865728884,
+      "avg_tokens_per_sec": 26.549877145337483,
+      "avg_f1": 0.05014303559024845,
+      "avg_em": 0.005,
+      "model_size_gb": 3.3713877201080322,
+      "avg_memory_mb": 4244.76123046875
+    },
+    {
+      "quantization": "nf4",
+      "avg_latency_ms": 4850.32306054152,
+      "avg_tokens_per_sec": 13.278879450892456,
+      "avg_f1": 0.0920711324680365,
+      "avg_em": 0.03,
+      "model_size_gb": 3.3713877201080322,
+      "avg_memory_mb": 4245.26123046875
+    }
+  ],
+  "rankings": {
+    "speed": [
+      [
+        "gptq_instruct",
+        29.278356074331956
+      ],
+      [
+        "gptq_base",
+        23.82139821634301
+      ],
+      [
+        "fp16_instruct",
+        17.208904692943968
+      ],
+      [
+        "fp16_base",
+        16.661634386834077
+      ],
+      [
+        "nf4_instruct",
+        14.334275166032889
+      ],
+      [
+        "nf4_base",
+        12.223483735752023
+      ],
+      [
+        "awq_instruct",
+        9.862104743343133
+      ],
+      [
+        "awq_base",
+        9.359017298670496
+      ]
+    ],
+    "memory": [
+      [
+        "gptq_base",
+        4244.76123046875
+      ],
+      [
+        "gptq_instruct",
+        4244.76123046875
+      ],
+      [
+        "awq_base",
+        4245.26123046875
+      ],
+      [
+        "awq_instruct",
+        4245.26123046875
+      ],
+      [
+        "nf4_base",
+        4245.26123046875
+      ],
+      [
+        "nf4_instruct",
+        4245.26123046875
+      ],
+      [
+        "fp16_base",
+        16673.544921875
+      ],
+      [
+        "fp16_instruct",
+        16673.544921875
+      ]
+    ],
+    "size": [
+      [
+        "awq_base",
+        3.3713877201080322
+      ],
+      [
+        "awq_instruct",
+        3.3713877201080322
+      ],
+      [
+        "nf4_base",
+        3.3713877201080322
+      ],
+      [
+        "nf4_instruct",
+        3.3713877201080322
+      ],
+      [
+        "gptq_base",
+        3.3713877201080322
+      ],
+      [
+        "gptq_instruct",
+        3.3713877201080322
+      ],
+      [
+        "fp16_base",
+        13.485550880432129
+      ],
+      [
+        "fp16_instruct",
+        13.485550880432129
+      ]
+    ],
+    "quality": [
+      [
+        "fp16_instruct",
+        0.11301297900918394
+      ],
+      [
+        "awq_base",
+        0.11097434539258788
+      ],
+      [
+        "awq_instruct",
+        0.10900762799292212
+      ],
+      [
+        "nf4_instruct",
+        0.09716097171948566
+      ],
+      [
+        "fp16_base",
+        0.09427674113899848
+      ],
+      [
+        "nf4_base",
+        0.08698129321658733
+      ],
+      [
+        "gptq_instruct",
+        0.050967400725120474
+      ],
+      [
+        "gptq_base",
+        0.04931867045537643
+      ]
+    ]
+  },
+  "relative_metrics": [
+    {
+      "config": "awq_base",
+      "quantization": "awq",
+      "speedup": 0.5526346821127611,
+      "memory_reduction_pct": 74.5389402771864,
+      "compression_ratio": 4.0,
+      "f1_score": 0.11097434539258788
+    },
+    {
+      "config": "awq_instruct",
+      "quantization": "awq",
+      "speedup": 0.5823411738510635,
+      "memory_reduction_pct": 74.5389402771864,
+      "compression_ratio": 4.0,
+      "f1_score": 0.10900762799292212
+    },
+    {
+      "config": "gptq_base",
+      "quantization": "gptq",
+      "speedup": 1.4066146488093696,
+      "memory_reduction_pct": 74.5419390396112,
+      "compression_ratio": 4.0,
+      "f1_score": 0.04931867045537643
+    },
+    {
+      "config": "gptq_instruct",
+      "quantization": "gptq",
+      "speedup": 1.7288390955555952,
+      "memory_reduction_pct": 74.5419390396112,
+      "compression_ratio": 4.0,
+      "f1_score": 0.050967400725120474
+    },
+    {
+      "config": "nf4_base",
+      "quantization": "nf4",
+      "speedup": 0.7217767456822022,
+      "memory_reduction_pct": 74.5389402771864,
+      "compression_ratio": 4.0,
+      "f1_score": 0.08698129321658733
+    },
+    {
+      "config": "nf4_instruct",
+      "quantization": "nf4",
+      "speedup": 0.8464155313424567,
+      "memory_reduction_pct": 74.5389402771864,
+      "compression_ratio": 4.0,
+      "f1_score": 0.09716097171948566
+    }
+  ],
+  "efficiency_scores": [
+    {
+      "config": "gptq_instruct",
+      "speed": 29.278356074331956,
+      "quality": 0.050967400725120474,
+      "efficiency_score": 0.01492241706613242,
+      "memory_efficiency": 0.012007130191276302
+    },
+    {
+      "config": "nf4_instruct",
+      "speed": 14.334275166032889,
+      "quality": 0.09716097171948566,
+      "efficiency_score": 0.013927321040262472,
+      "memory_efficiency": 0.022886924136057796
+    },
+    {
+      "config": "gptq_base",
+      "speed": 23.82139821634301,
+      "quality": 0.04931867045537643,
+      "efficiency_score": 0.011748396884181129,
+      "memory_efficiency": 0.011618714876438447
+    },
+    {
+      "config": "awq_instruct",
+      "speed": 9.862104743343133,
+      "quality": 0.10900762799292212,
+      "efficiency_score": 0.010750446450895809,
+      "memory_efficiency": 0.02567748415823301
+    },
+    {
+      "config": "nf4_base",
+      "speed": 12.223483735752023,
+      "quality": 0.08698129321658733,
+      "efficiency_score": 0.01063214422947633,
+      "memory_efficiency": 0.02048903200404068
+    },
+    {
+      "config": "awq_base",
+      "speed": 9.359017298670496,
+      "quality": 0.11097434539258788,
+      "efficiency_score": 0.010386108182378645,
+      "memory_efficiency": 0.026140757745627446
+    }
+  ],
+  "summary": {
+    "total_configs": 8,
+    "quantization_methods": 4,
+    "speed_range_tps": {
+      "min": 9.359017298670496,
+      "max": 29.278356074331956,
+      "range": 19.91933877566146
+    },
+    "memory_range_mb": {
+      "min": 4244.76123046875,
+      "max": 16673.544921875,
+      "range": 12428.78369140625
+    },
+    "size_range_gb": {
+      "min": 3.3713877201080322,
+      "max": 13.485550880432129,
+      "compression": 4.0
+    },
+    "quality_range_f1": {
+      "min": 0.04931867045537643,
+      "max": 0.11301297900918394,
+      "range": 0.0636943085538075
+    }
+  },
+  "full_analysis": {
+    "fp16_base": {
+      "config_name": "fp16_base",
+      "quantization": "fp16",
+      "variant": "base",
+      "timing": {
+        "mean_ms": 3841.15978745593,
+        "median_ms": 2738.6393709999766,
+        "std_ms": 3118.6002409068083,
+        "min_ms": 194.90236599995114,
+        "max_ms": 15463.822720999815,
+        "p95_ms": 8235.07762594998,
+        "p99_ms": 9163.721099340037,
+        "count": 590
+      },
+      "tokens_per_sec": 16.661634386834077,
+      "quality": {
+        "f1_mean": 0.09427674113899848,
+        "f1_std": 0.21924840422933473,
+        "em_mean": 0.03,
+        "count": 100
+      },
+      "model_size": {
+        "size_gb": 13.485550880432129,
+        "params": 7240000000,
+        "bits_per_param": 16.0
+      },
+      "memory": {
+        "model_mb": 13809.2041015625,
+        "kv_cache_mb": 102.5,
+        "activation_mb": 2761.8408203125,
+        "total_mb": 16673.544921875
+      }
+    },
+    "fp16_instruct": {
+      "config_name": "fp16_instruct",
+      "quantization": "fp16",
+      "variant": "instruct",
+      "timing": {
+        "mean_ms": 3719.004849055932,
+        "median_ms": 2509.944029500275,
+        "std_ms": 3370.331766228217,
+        "min_ms": 158.73789200031752,
+        "max_ms": 15516.100252000797,
+        "p95_ms": 10679.093142450196,
+        "p99_ms": 15467.017083060155,
+        "count": 590
+      },
+      "tokens_per_sec": 17.208904692943968,
+      "quality": {
+        "f1_mean": 0.11301297900918394,
+        "f1_std": 0.23427354811640014,
+        "em_mean": 0.04,
+        "count": 100
+      },
+      "model_size": {
+        "size_gb": 13.485550880432129,
+        "params": 7240000000,
+        "bits_per_param": 16.0
+      },
+      "memory": {
+        "model_mb": 13809.2041015625,
+        "kv_cache_mb": 102.5,
+        "activation_mb": 2761.8408203125,
+        "total_mb": 16673.544921875
+      }
+    },
+    "awq_base": {
+      "config_name": "awq_base",
+      "quantization": "awq",
+      "variant": "base",
+      "timing": {
+        "mean_ms": 6838.3247896220455,
+        "median_ms": 5146.207515500009,
+        "std_ms": 4947.058489318022,
+        "min_ms": 338.18159700001615,
+        "max_ms": 17659.313293000196,
+        "p95_ms": 14414.093765699976,
+        "p99_ms": 16401.596010119883,
+        "count": 590
+      },
+      "tokens_per_sec": 9.359017298670496,
+      "quality": {
+        "f1_mean": 0.11097434539258788,
+        "f1_std": 0.25409773713816564,
+        "em_mean": 0.05,
+        "count": 100
+      },
+      "model_size": {
+        "size_gb": 3.3713877201080322,
+        "params": 7240000000,
+        "bits_per_param": 4.0
+      },
+      "memory": {
+        "model_mb": 3452.301025390625,
+        "kv_cache_mb": 102.5,
+        "activation_mb": 690.460205078125,
+        "total_mb": 4245.26123046875
+      }
+    },
+    "awq_instruct": {
+      "config_name": "awq_instruct",
+      "quantization": "awq",
+      "variant": "instruct",
+      "timing": {
+        "mean_ms": 6489.486946810177,
+        "median_ms": 4879.961342499882,
+        "std_ms": 4786.316215524126,
+        "min_ms": 695.1922150001337,
+        "max_ms": 22939.54024599998,
+        "p95_ms": 15673.97845610004,
+        "p99_ms": 22767.510660170075,
+        "count": 590
+      },
+      "tokens_per_sec": 9.862104743343133,
+      "quality": {
+        "f1_mean": 0.10900762799292212,
+        "f1_std": 0.2413052715078691,
+        "em_mean": 0.05,
+        "count": 100
+      },
+      "model_size": {
+        "size_gb": 3.3713877201080322,
+        "params": 7240000000,
+        "bits_per_param": 4.0
+      },
+      "memory": {
+        "model_mb": 3452.301025390625,
+        "kv_cache_mb": 102.5,
+        "activation_mb": 690.460205078125,
+        "total_mb": 4245.26123046875
+      }
+    },
+    "nf4_base": {
+      "config_name": "nf4_base",
+      "quantization": "nf4",
+      "variant": "base",
+      "timing": {
+        "mean_ms": 5235.823222213544,
+        "median_ms": 4313.243822999993,
+        "std_ms": 3828.0207880464027,
+        "min_ms": 368.6734420000448,
+        "max_ms": 15207.138141000087,
+        "p95_ms": 10657.617214649894,
+        "p99_ms": 10899.787790799852,
+        "count": 590
+      },
+      "tokens_per_sec": 12.223483735752023,
+      "quality": {
+        "f1_mean": 0.08698129321658733,
+        "f1_std": 0.21287823707986342,
+        "em_mean": 0.03,
+        "count": 100
+      },
+      "model_size": {
+        "size_gb": 3.3713877201080322,
+        "params": 7240000000,
+        "bits_per_param": 4.0
+      },
+      "memory": {
+        "model_mb": 3452.301025390625,
+        "kv_cache_mb": 102.5,
+        "activation_mb": 690.460205078125,
+        "total_mb": 4245.26123046875
+      }
+    },
+    "nf4_instruct": {
+      "config_name": "nf4_instruct",
+      "quantization": "nf4",
+      "variant": "instruct",
+      "timing": {
+        "mean_ms": 4464.822898869496,
+        "median_ms": 3249.5987564996085,
+        "std_ms": 3502.2590755621186,
+        "min_ms": 282.7011009994749,
+        "max_ms": 15279.023271999904,
+        "p95_ms": 11022.034240049936,
+        "p99_ms": 15111.022048709956,
+        "count": 590
+      },
+      "tokens_per_sec": 14.334275166032889,
+      "quality": {
+        "f1_mean": 0.09716097171948566,
+        "f1_std": 0.21300779536916412,
+        "em_mean": 0.03,
+        "count": 100
+      },
+      "model_size": {
+        "size_gb": 3.3713877201080322,
+        "params": 7240000000,
+        "bits_per_param": 4.0
+      },
+      "memory": {
+        "model_mb": 3452.301025390625,
+        "kv_cache_mb": 102.5,
+        "activation_mb": 690.460205078125,
+        "total_mb": 4245.26123046875
+      }
+    },
+    "gptq_base": {
+      "config_name": "gptq_base",
+      "quantization": "gptq",
+      "variant": "base",
+      "timing": {
+        "mean_ms": 2686.6600952118706,
+        "median_ms": 2742.0930714997667,
+        "std_ms": 1505.9987696199878,
+        "min_ms": 111.12779599989153,
+        "max_ms": 9961.82847099999,
+        "p95_ms": 5100.828714900009,
+        "p99_ms": 6156.975820109656,
+        "count": 590
+      },
+      "tokens_per_sec": 23.82139821634301,
+      "quality": {
+        "f1_mean": 0.04931867045537643,
+        "f1_std": 0.14515301806209094,
+        "em_mean": 0.01,
+        "count": 100
+      },
+      "model_size": {
+        "size_gb": 3.3713877201080322,
+        "params": 7240000000,
+        "bits_per_param": 4.0
+      },
+      "memory": {
+        "model_mb": 3452.301025390625,
+        "kv_cache_mb": 102.0,
+        "activation_mb": 690.460205078125,
+        "total_mb": 4244.76123046875
+      }
+    },
+    "gptq_instruct": {
+      "config_name": "gptq_instruct",
+      "quantization": "gptq",
+      "variant": "instruct",
+      "timing": {
+        "mean_ms": 2185.9150779339066,
+        "median_ms": 1462.2908104997805,
+        "std_ms": 1973.1525724000396,
+        "min_ms": 67.24576099986734,
+        "max_ms": 9925.177011000414,
+        "p95_ms": 6237.236819150339,
+        "p99_ms": 9814.945712899482,
+        "count": 590
+      },
+      "tokens_per_sec": 29.278356074331956,
+      "quality": {
+        "f1_mean": 0.050967400725120474,
+        "f1_std": 0.09954927388786734,
+        "em_mean": 0.0,
+        "count": 100
+      },
+      "model_size": {
+        "size_gb": 3.3713877201080322,
+        "params": 7240000000,
+        "bits_per_param": 4.0
+      },
+      "memory": {
+        "model_mb": 3452.301025390625,
+        "kv_cache_mb": 102.0,
+        "activation_mb": 690.460205078125,
+        "total_mb": 4244.76123046875
+      }
+    }
+  }
+}

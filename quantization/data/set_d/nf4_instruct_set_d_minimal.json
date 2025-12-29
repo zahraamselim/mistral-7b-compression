@@ -1,0 +1,37 @@
+{
+  "model_config": {
+    "name": "mistralai/Mistral-7B-Instruct-v0.1",
+    "quantization": "nf4",
+    "variant": "instruct"
+  },
+  "set_name": "set_d",
+  "samples": [
+    {
+      "sample_id": 0,
+      "question": "What is the original meaning of the word Norman?",
+      "clean_context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "distracted_context": "Weary of constantly being asked for her primary genre , Clarkson had long @-@ desired to record a Christmas album as a means to defy genre limitations . She commissioned Kurstin , who had studied jazz The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"N According to literary scholar Peter Anthony <unk> , the two important components of machismo are aggressive behaviour and hyper @-@ sexuality . Aggressive behaviour is exhibited by displays of power a orthman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\". Nathan had a strong season , as he was selected as an All @-@ Star for the 2009 MLB All Star Game , and he finished the year with 2 @.@ 10 ERA with 47 saves in 52 opportunities , which was a franchise",
+      "ground_truth": "Viking",
+      "ground_truth_variants": [
+        "Viking",
+        "Norseman, Viking",
+        "Norseman, Viking"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The original meaning of the word Norman is a Northman or Viking. It comes from Old Norse Nor\u00f0ma\u00f0r and was later Latinized as Nortmannus, Normannus, or Nordmannus.",
+      "clean_generation_time_ms": 3901.7244340002435,
+      "distracted_prediction": "The original meaning of the word Norman is \"Norseman\" or \"Viking.\"",
+      "distracted_generation_time_ms": 1854.7437300003367
+    }
+  ],
+  "count": 1,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 13:21:27",
+    "run_id": "qrag_gen_20251228_115849",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "model_config": {
+    "name": "mistralai/Mistral-7B-v0.1",
+    "quantization": "nf4",
+    "variant": "base"
+  },
+  "set_name": "set_c",
+  "samples": [
+    {
+      "sample_id": 0,
+      "run_id": 0,
+      "question": "When was the Latin version of the word Norman first recorded?",
+      "context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "ground_truth": "9th century",
+      "ground_truth_variants": [
+        "9th century",
+        "9th century",
+        "9th century"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "In a letter written by Pope John VIII on July 12, 876. He wrote that he had received news about how King Alfred and his people were being attacked by Northmen who came down the Thames River."
+    },
+    {
+      "sample_id": 10,
+      "run_id": 0,
+      "question": "What year did Guns N Roses perform a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective?",
+      "context": "Arnold Schwarzenegger is an actor who has appeared in over 30 films, and has also ventured into directing and producing.  He began his acting career primarily with small roles in film and television.  For his first film role, he was credited as \"Arnold Strong\", but was credited with his birth name thereafter.  He has appeared mainly in action, and comedy films.  In addition to films and television, he has appeared in music videos for AC/DC, Bon Jovi, and Guns N' Roses.",
+      "ground_truth": "1999",
+      "ground_truth_variants": [
+        "1999"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "1987"
+    },
+    {
+      "sample_id": 20,
+      "run_id": 0,
+      "question": "How many yards longer was the 80-yard punt than the touchdown pass from Russell to Johnnie Lee Higgins?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "ground_truth": "51",
+      "ground_truth_variants": [
+        "51",
+        "51",
+        "51",
+        "51"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "7 yards (Higgins TD reception - 80; Punt Return - 73)"
+    },
+    {
+      "sample_id": 30,
+      "run_id": 0,
+      "question": "What Viking groups were conquered by Rollo?",
+      "context": "Before Rollo's arrival, its populations did not differ from Picardy or the \u00cele-de-France, which were considered \"Frankish\". Earlier Viking settlers had begun arriving in the 880s, but were divided between colonies in the east (Roumois and Pays de Caux) around the low Seine valley and in the west in the Cotentin Peninsula, and were separated by traditional pagii, where the population remained about the same with almost no foreign settlers. Rollo's contingents who raided and ultimately settled Normandy and parts of the Atlantic coast included Danes, Norwegians, Norse\u2013Gaels, Orkney Vikings, possibly Swedes, and Anglo-Danes from the English Danelaw under Norse control.",
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The Northmen that came to France after Charlemagne\u2019s death consisted mainly of three different types of people; those coming directly from Scandinavia, those coming through England, and a third group consisting mostly of men from Ireland and Scotland known as \u201cNorse Gaels\u201d."
+    }
+  ],
+  "count": 4,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 12:50:49",
+    "run_id": "qrag_gen_20251228_115849",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}

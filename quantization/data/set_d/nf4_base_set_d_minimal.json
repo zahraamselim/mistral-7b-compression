@@ -1,0 +1,37 @@
+{
+  "model_config": {
+    "name": "mistralai/Mistral-7B-v0.1",
+    "quantization": "nf4",
+    "variant": "base"
+  },
+  "set_name": "set_d",
+  "samples": [
+    {
+      "sample_id": 0,
+      "question": "What is the original meaning of the word Norman?",
+      "clean_context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "distracted_context": "Several species coined in genera other than Allosaurus are also now thought to be synonymous with A. fragilis . Labrosaurus ferox was named in 1884 by Marsh for an oddly formed partial lower jaw , wit The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"N Family relationships are a common type of connection between gods . Deities often form male and female pairs , reflecting the importance of procreation in Egyptian religious thought . Families of thre orthman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\". In 1894 the Little Rock \u00c6sthetic Club , one of the oldest women 's societies west of the Mississippi River , moved into the Tower Building . This was prompted due to increased membership and a need fo",
+      "ground_truth": "Viking",
+      "ground_truth_variants": [
+        "Viking",
+        "Norseman, Viking",
+        "Norseman, Viking"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "A person who came originally from Norway.",
+      "clean_generation_time_ms": 10685.19282300008,
+      "distracted_prediction": "From Longman Dictionary of Contemporary Englishnoun [countable] someone who lives in France but speaks the language of England originally used this term to refer to people living in northern France whose ancestors were Vikings.",
+      "distracted_generation_time_ms": 5867.477374000146
+    }
+  ],
+  "count": 1,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 12:50:49",
+    "run_id": "qrag_gen_20251228_115849",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}

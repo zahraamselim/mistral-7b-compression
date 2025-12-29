@@ -1,0 +1,87 @@
+{
+  "model_config": {
+    "name": "TheBloke/Mistral-7B-v0.1-AWQ",
+    "quantization": "awq",
+    "variant": "base"
+  },
+  "set_name": "set_a",
+  "samples": [
+    {
+      "sample_id": 0,
+      "question": "What year did Guns N Roses perform a promo for a movie starring Arnold Schwarzenegger as a former New York Police detective?",
+      "context": "Arnold Schwarzenegger is an actor who has appeared in over 30 films, and has also ventured into directing and producing.  He began his acting career primarily with small roles in film and television.  For his first film role, he was credited as \"Arnold Strong\", but was credited with his birth name thereafter.  He has appeared mainly in action, and comedy films.  In addition to films and television, he has appeared in music videos for AC/DC, Bon Jovi, and Guns N' Roses.",
+      "context_length_tokens": 118,
+      "ground_truth": "1999",
+      "ground_truth_variants": [
+        "1999"
+      ],
+      "category": "multihop",
+      "source": "hotpot_qa",
+      "rag_prediction": "1987",
+      "rag_generation_time_ms": 5719.703210000034,
+      "no_rag_prediction": "1987. The song was \u201cWelcome to the Jungle\u201d and it appeared in Predator, which also featured Carl Weathers (Rocky), Jesse Ventura (\u201cThe Body\u201d) and Bill Duke (\u201cMacGruder & Loud\u201d, TV\u2019s \u201cCommander In Chief\u201d.). It is one of my favorite movies!",
+      "no_rag_generation_time_ms": 12715.19388799993
+    },
+    {
+      "sample_id": 2,
+      "question": "What Viking groups were conquered by Rollo?",
+      "context": "Before Rollo's arrival, its populations did not differ from Picardy or the \u00cele-de-France, which were considered \"Frankish\". Earlier Viking settlers had begun arriving in the 880s, but were divided between colonies in the east (Roumois and Pays de Caux) around the low Seine valley and in the west in the Cotentin Peninsula, and were separated by traditional pagii, where the population remained about the same with almost no foreign settlers. Rollo's contingents who raided and ultimately settled Normandy and parts of the Atlantic coast included Danes, Norwegians, Norse\u2013Gaels, Orkney Vikings, possibly Swedes, and Anglo-Danes from the English Danelaw under Norse control.",
+      "context_length_tokens": 170,
+      "ground_truth": "",
+      "ground_truth_variants": [],
+      "category": "unanswerable",
+      "source": "squad_v2",
+      "rag_prediction": "The first wave was led by Ragnar Lodbrok\u2019s sons Ivarr the Boneless and Halfdan Ragnarson. They invaded England in AD 865 to avenge their father\u2019s death at King Aella\u2019s hands. In 871 they defeated an army sent against them by Alfred the Great, then sacked York before returning home.",
+      "rag_generation_time_ms": 9085.17051299998,
+      "no_rag_prediction": "The Danes, the Swedes and the Norwegians.",
+      "no_rag_generation_time_ms": 13068.007628000032
+    },
+    {
+      "sample_id": 3,
+      "question": "When was the Latin version of the word Norman first recorded?",
+      "context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "context_length_tokens": 99,
+      "ground_truth": "9th century",
+      "ground_truth_variants": [
+        "9th century",
+        "9th century",
+        "9th century"
+      ],
+      "category": "factual",
+      "source": "squad_v2",
+      "rag_prediction": "In a letter dated 834 AD. It's not clear if this refers to people living on the coast of France at that time who were descended from Vikings and had adopted Christianity; it could also refer to Scandinavians still raiding the area.",
+      "rag_generation_time_ms": 6435.779357000001,
+      "no_rag_prediction": "The earliest known use is from 1857. It\u2019s a back-formation, formed by dropping -ian (the suffix for \u201cperson\u201d) off normanus (\u201cof or pertaining to Normandy\u201d). In English it appears in print as early as 1904.",
+      "no_rag_generation_time_ms": 13304.408502999991
+    },
+    {
+      "sample_id": 4,
+      "question": "How many yards longer was the 80-yard punt than the touchdown pass from Russell to Johnnie Lee Higgins?",
+      "context": "Hoping to rebound from their loss to the Patriots, the Raiders stayed at home for a Week 16 duel with the Houston Texans.  Oakland would get the early lead in the first quarter as quarterback JaMarcus Russell completed a 20-yard touchdown pass to rookie wide receiver Chaz Schilens.  The Texans would respond with fullback Vonta Leach getting a 1-yard touchdown run, yet the Raiders would answer with kicker Sebastian Janikowski getting a 33-yard and a 30-yard field goal.  Houston would tie the game in the second quarter with kicker Kris Brown getting a 53-yard and a 24-yard field goal. Oakland would take the lead in the third quarter with wide receiver Johnnie Lee Higgins catching a 29-yard touchdown pass from Russell, followed up by an 80-yard punt return for a touchdown.  The Texans tried to rally in the fourth quarter as Brown nailed a 40-yard field goal, yet the Raiders' defense would shut down any possible attempt.",
+      "context_length_tokens": 247,
+      "ground_truth": "51",
+      "ground_truth_variants": [
+        "51",
+        "51",
+        "51",
+        "51"
+      ],
+      "category": "numerical",
+      "source": "drop",
+      "rag_prediction": "7 yards (Higgins TD = 87; Punt Return = 94)",
+      "rag_generation_time_ms": 3576.5026919999627,
+      "no_rag_prediction": "The distance of a football field is exactly 120 yards.",
+      "no_rag_generation_time_ms": 13548.082766999982
+    }
+  ],
+  "count": 4,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 10:42:15",
+    "run_id": "qrag_gen_20251228_104032",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "model_config": {
+    "name": "TheBloke/Mistral-7B-Instruct-v0.1-GPTQ",
+    "quantization": "gptq",
+    "variant": "instruct"
+  },
+  "set_name": "set_d",
+  "samples": [
+    {
+      "sample_id": 0,
+      "question": "What is the original meaning of the word Norman?",
+      "clean_context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "distracted_context": "In the off @-@ season the Blue Jackets ' approach to building their team changed , moving from a team of young developing players into one with established players . The first deal General Manager Sco The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"N AML which arises from a pre @-@ existing myelodysplastic syndrome ( MDS ) or myeloproliferative disease ( so @-@ called secondary AML ) has a worse prognosis , as does treatment @-@ related AML arisin orthman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\". 2012 : What Gandhi Says About Nonviolence , Resistance and Courage , OR Books , New York : 2012 , ISBN 978 @-@ 1 @-@ 935928 @-@ 79 @-@ 9",
+      "ground_truth": "Viking",
+      "ground_truth_variants": [
+        "Viking",
+        "Norseman, Viking",
+        "Norseman, Viking"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The original meaning of the word Norman is \"Norseman, Viking\". The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r.",
+      "clean_generation_time_ms": 1670.6356039994716,
+      "distracted_prediction": "The word Norman comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"N AML which arises from a pre @-@ existing myelodysplastic syndrome ( MDS ) or myeloproliferative disease ( so @-@ called secondary AML ) has a worse prognosis , as does treatment @-@ related AML arisin orthman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or.",
+      "distracted_generation_time_ms": 3013.6196769999515
+    }
+  ],
+  "count": 1,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 16:46:23",
+    "run_id": "qrag_gen_20251228_154901",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}

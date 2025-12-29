@@ -1,0 +1,37 @@
+{
+  "model_config": {
+    "name": "mistralai/Mistral-7B-Instruct-v0.1",
+    "quantization": "fp16",
+    "variant": "instruct"
+  },
+  "set_name": "set_d",
+  "samples": [
+    {
+      "sample_id": 0,
+      "question": "What is the original meaning of the word Norman?",
+      "clean_context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "distracted_context": "Abse , Tobias . Finkelstein 's Follies : The Dangers of Vulgar Anti @-@ Zionism ( review of The Holocaust Industry ) , <unk> ; accessed November 1 , 2015 The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"N Jordan 's athletic leaping ability , highlighted in his back @-@ to @-@ back slam dunk contest championships in 1987 and 1988 , is credited by many with having influenced a generation of young players orthman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\". Nathan throws a mix of four pitches . His main pitch , a four @-@ seam fastball was once thrown in the mid @-@ to @-@ upper 90s , but now settles between 91 and 94 mph . His main breaking ball is a ha",
+      "ground_truth": "Viking",
+      "ground_truth_variants": [
+        "Viking",
+        "Norseman, Viking",
+        "Norseman, Viking"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "The original meaning of the word Norman is a Northman or Viking.",
+      "clean_generation_time_ms": 1051.7776790002245,
+      "distracted_prediction": "The original meaning of the word Norman is \"from the Northmen.\" It refers to people from Norway or Denmark.",
+      "distracted_generation_time_ms": 1715.081048000684
+    }
+  ],
+  "count": 1,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 11:12:08",
+    "run_id": "qrag_gen_20251228_102231",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}

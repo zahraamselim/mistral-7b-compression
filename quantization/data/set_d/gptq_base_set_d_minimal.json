@@ -1,0 +1,37 @@
+{
+  "model_config": {
+    "name": "TheBloke/Mistral-7B-v0.1-GPTQ",
+    "quantization": "gptq",
+    "variant": "base"
+  },
+  "set_name": "set_d",
+  "samples": [
+    {
+      "sample_id": 0,
+      "question": "What is the original meaning of the word Norman?",
+      "clean_context": "The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"Northman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\".",
+      "distracted_context": "Barker worked principally in watercolor with pen @-@ and @-@ ink , but she was equally competent in black @-@ and @-@ white , in oils , and in pastels . She carried a sketchbook with her for capturing The English name \"Normans\" comes from the French words Normans/Normanz, plural of Normant, modern French normand, which is itself borrowed from Old Low Franconian Nortmann \"N On Tuesday 27 February 2007 , Saprang led a 13 @-@ member delegation to Europe , on what was claimed to be a week @-@ long trip to study safety and security measures at major European airports . Many  orthman\" or directly from Old Norse Nor\u00f0ma\u00f0r, Latinized variously as Nortmannus, Normannus, or Nordmannus (recorded in Medieval Latin, 9th century) to mean \"Norseman, Viking\". Anderson frequently collaborates with many actors and crew , carrying them over from film to film . Anderson has referred to his regular actors as \" my little rep company \" that has included John C. R",
+      "ground_truth": "Viking",
+      "ground_truth_variants": [
+        "Viking",
+        "Norseman, Viking",
+        "Norseman, Viking"
+      ],
+      "source": "squad_v2",
+      "clean_prediction": "In its earliest use, it meant a North Man. It was used by Anglo-Saxons and other Germanic peoples living south of Scandinavia who were raided and settled there during the period known as the Viking Age or the Great Heathen Army.",
+      "clean_generation_time_ms": 1326.5469110001504,
+      "distracted_prediction": "A Norman is an inhabitant of Normandy, France, who speaks Norman, a Romance language descended from Gallo-Romance spoken by Roman settlers after Julius Caesar's conquest of Gaul during the first half of the 1st millennium BC.",
+      "distracted_generation_time_ms": 2754.19262899959
+    }
+  ],
+  "count": 1,
+  "generation_metadata": {
+    "timestamp": "2025-12-28 16:17:11",
+    "run_id": "qrag_gen_20251228_154901",
+    "max_new_tokens": 128,
+    "temperature": 0.7,
+    "top_k": 50,
+    "top_p": 0.9,
+    "random_seed": 42
+  }
+}
